@@ -1,1 +1,21 @@
 series_id,name,vendor,family,metric,geography,period,value,basis,verification
+amazon-trainium-units,Amazon Trainium chips deployed,amazon,trainium2,units_k,global,2025-12,1000,stated,verified
+amazon-trainium-units,Amazon Trainium chips deployed,amazon,trainium2,units_k,global,2026-04,1000,stated,verified
+amd-data-center-revenue,"AMD Data Center segment revenue (EPYC plus Instinct), quarterly",amd,unspecified,revenue_usd_m,global,2025-Q3,4341,stated,verified
+amd-data-center-revenue,"AMD Data Center segment revenue (EPYC plus Instinct), quarterly",amd,unspecified,revenue_usd_m,global,2026-Q2,6718,stated,verified
+amd-data-center-revenue,"AMD Data Center segment revenue (EPYC plus Instinct), quarterly",amd,unspecified,revenue_usd_m,global,2026-Q3,8546,stated,verified
+amd-data-center-revenue,"AMD Data Center segment revenue (EPYC plus Instinct), quarterly",amd,unspecified,revenue_usd_m,global,2026-Q4,12800,estimated,verified
+broadcom-ai-semiconductor-revenue,"Broadcom AI semiconductor revenue (custom XPUs plus AI networking), fiscal periods",broadcom,custom_xpu,revenue_usd_m,global,2026-Q3,16700,stated,verified
+broadcom-ai-semiconductor-revenue,"Broadcom AI semiconductor revenue (custom XPUs plus AI networking), fiscal periods",broadcom,custom_xpu,revenue_usd_m,global,2026-Q4,21700,stated,verified
+broadcom-ai-semiconductor-revenue,"Broadcom AI semiconductor revenue (custom XPUs plus AI networking), fiscal periods",broadcom,custom_xpu,revenue_usd_m,global,2026,58000,stated,verified
+broadcom-ai-semiconductor-revenue,"Broadcom AI semiconductor revenue (custom XPUs plus AI networking), fiscal periods",broadcom,custom_xpu,revenue_usd_m,global,2027,115000,stated,verified
+broadcom-ai-semiconductor-revenue,"Broadcom AI semiconductor revenue (custom XPUs plus AI networking), fiscal periods",broadcom,custom_xpu,revenue_usd_m,global,2028,230000,stated,verified
+broadcom-custom-xpu-gw,"Broadcom-built custom accelerator deployments by year (GW), named customers only",broadcom,custom_xpu,gw_equivalent,global,2026,1.0,stated,verified
+broadcom-custom-xpu-gw,"Broadcom-built custom accelerator deployments by year (GW), named customers only",broadcom,custom_xpu,gw_equivalent,global,2027,6.3,estimated,verified
+broadcom-custom-xpu-gw,"Broadcom-built custom accelerator deployments by year (GW), named customers only",broadcom,custom_xpu,gw_equivalent,global,2028,15.0,estimated,verified
+marvell-custom-xpu-revenue,"Marvell custom AI XPU revenue, fiscal years (end Jan/Feb)",other,unspecified,revenue_usd_m,global,2026,1500,stated,verified
+marvell-custom-xpu-revenue,"Marvell custom AI XPU revenue, fiscal years (end Jan/Feb)",other,unspecified,revenue_usd_m,global,2027,1800,estimated,verified
+microsoft-maia-units,Microsoft Maia 300 manufacturing capacity sought for 2027 delivery,microsoft,maia300,units_k,global,2027,300,stated,verified
+nvidia-blackwell-rubin-bookings,Nvidia stated Blackwell plus Rubin order visibility through calendar 2027,nvidia,unspecified,revenue_usd_m,global,2027,1000000,stated,verified
+nvidia-data-center-revenue,Nvidia Data Center revenue by fiscal quarter (labelled by quarter-end month),nvidia,unspecified,revenue_usd_m,global,2026-07,89000,stated,verified
+nvidia-vera-rubin-revenue-share,Vera Rubin share of Nvidia Data Center revenue,nvidia,rubin,capacity_share_pct,global,2026-10,20,stated,verified

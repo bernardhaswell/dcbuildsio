@@ -6,6 +6,7 @@ company, accelerator, region and US state, by year and by quarter. Every figure 
 - **Site:** served by GitHub Pages from this repository (`index.html`).
 - **Data:** [`data/dc-tracker.xlsx`](data/dc-tracker.xlsx), or CSV: [`phases`](data/phases.csv),
   [`deployment`](data/deployment.csv), [`deals`](data/deals.csv), [`sources`](data/sources.csv).
+  Annual and quarterly GW by chip vendor, company, region, US state and status are in [`data/pivots/`](data/pivots).
 
 ## How to read it
 
