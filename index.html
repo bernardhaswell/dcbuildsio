@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Datacenter Build-out Tracker</title>
+<meta name="description" content="AI datacenter capacity by site, company, accelerator, region and US state, 2024 to 2030 and beyond. Every figure links to a public source.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Open dataset</p>
+    <h1>AI datacenter build-out tracker</h1>
+    <p class="lede">Gigawatts of AI datacenter capacity by site phase, company, accelerator, region and US state, from 2024 to 2030 and beyond. Every figure links to a public source.</p>
+    <p class="meta"><span id="stamp">Loading data</span> · <a href="data/dc-tracker.xlsx" download>Download spreadsheet (.xlsx)</a> · <a href="data/phases.csv" download>Sites CSV</a> · <a href="data/deployment.csv" download>Deployment CSV</a> · <a href="data/deals.csv" download>Deals CSV</a> · <a href="data/sources.csv" download>Sources CSV</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="filters" aria-label="Filters">
+    <label>Region <select id="f-region"></select></label>
+    <label>US state <select id="f-state"></select></label>
+    <label>Status <select id="f-status"></select></label>
+    <label>Chip vendor <select id="f-chip"></select></label>
+    <label>Company means <select id="f-role">
+      <option value="operator">Operator</option><option value="end_customer">End customer</option>
+      <option value="tenant">Tenant</option><option value="owner">Owner</option><option value="developer">Developer</option>
+    </select></label>
+    <label>Measure <select id="f-measure"><option value="facility_mw">Facility GW</option><option value="it_mw">IT GW</option></select></label>
+    <label class="grow">Search <input id="f-q" type="search" placeholder="Site, company, city"></label>
+    <button id="f-reset" type="button">Reset</button>
+  </section>
+
+  <section class="tiles" id="tiles" aria-label="Headline figures"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Capacity energizing by period</h2>
+        <p class="sub" id="c1-sub"></p>
+      </div>
+      <div class="seg" role="group" aria-label="Chart options">
+        <label>Period <select id="c-period"><option value="year">Annual</option><option value="quarter">Quarterly</option></select></label>
+        <label>Split by <select id="c-group">
+          <option value="chip_vendor">Chip vendor</option><option value="chip_family">Chip family</option>
+          <option value="company">Company</option><option value="region">Region</option>
+          <option value="us_state">US state</option><option value="status">Status</option>
+        </select></label>
+      </div>
+    </div>
+    <div id="chart-time" class="chart"></div>
+    <div id="legend-time" class="legend"></div>
+  </section>
+
+  <div class="two">
+    <section class="card">
+      <div class="card-head"><div><h2>By US state</h2><p class="sub">All tracked phases in the current filter, dated or not.</p></div></div>
+      <div id="chart-state" class="chart"></div>
+    </section>
+    <section class="card">
+      <div class="card-head"><div><h2 id="c3-title">By company</h2><p class="sub">Uses the role chosen in "Company means". Joint roles are shown together.</p></div></div>
+      <div id="chart-company" class="chart"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Site phases</h2><p class="sub" id="t-sub"></p></div>
+    </div>
+    <div class="table-scroll"><table id="t-phases"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Capacity deals and commitments</h2>
+      <p class="sub">Chip supply and cloud capacity agreements that are not tied to one site. They are listed for reference and are not added to the site totals above, because the sites that deliver them are counted there.</p></div>
+    </div>
+    <div class="table-scroll"><table id="t-deals"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card method">
+    <h2>How to read this</h2>
+    <div class="cols">
+      <div>
+        <h3>One site phase, counted once</h3>
+        <p>The same building often appears in a chip vendor's announcement, a cloud provider's and a developer's. Each row here is one tranche of capacity at one place, and companies are roles on that row, so nothing is counted twice.</p>
+        <h3>Three kinds of megawatt</h3>
+        <p>IT load is what the chips draw. Facility load adds cooling and losses and is what most announcements quote. Grid load is the utility connection. Each row keeps the figure as its source states it; where only one is given, the other is derived at a PUE of 1.3 and marked as derived.</p>
+      </div>
+      <div>
+        <h3>Timing</h3>
+        <p>Capacity is placed in the period it energizes, following a staged ramp where sources give one. Half-years are shown in Q2 and Q4. Year-only dates appear in the annual view and in a "quarter not given" column in the quarterly view. Capacity with no date is reported as undated and left out of the chart.</p>
+        <h3>Sources and status</h3>
+        <p>Every row links to at least one public source: a company release, filing, earnings call, utility or permit document, or press report. "Verified" rows have a supporting quote on file; "Sourced" rows have a matching public source and are awaiting a full read. Estimates are labelled.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <p>Data compiled from public sources. Figures are announcements and estimates, not guarantees, and change often. Corrections are welcome through the repository's issue tracker.</p>
+</footer>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="assets/app.js"></script>
+</body>
+</html>
