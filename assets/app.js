@@ -41,6 +41,7 @@
   const entName = (id) => (DS.entities[id] && DS.entities[id].name) || id;
   const roleLabel = (p, role) => (p.roles[role] || []).map(entName).join(' + ') || 'Not disclosed';
   const mwOf = (p, measure) => (measure === 'it_mw' ? p.derived.it_mw : p.derived.facility_mw);
+  const counted = (p) => p.counted !== false;
 
   function passPhase(p) {
     if (state.region && p.region !== state.region) return false;
@@ -199,18 +200,38 @@
     host.append(root);
   }
 
+  // ---------------------------------------------------------------- pivot table
+  function drawPivot() {
+    const m = state.measure, g = state.group, quarterly = state.period === 'quarter';
+    const rows = rowsNow().filter((d) => d[m] != null);
+    const pk = (d) => (d.year == null ? 'Undated' : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
+    const order = (k) => { if (k === 'Undated') return 1e9; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
+    const cols = [...new Set(rows.map(pk))].sort((a, b) => order(a) - order(b));
+    const cell = new Map(), tot = new Map();
+    rows.forEach((d) => { const k = groupKey(d, g), c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]); });
+    const keys = [...tot.keys()].sort((a, b) => tot.get(b) - tot.get(a));
+    const thead = $('#t-pivot thead'), tbody = $('#t-pivot tbody');
+    const label = $('#c-group').selectedOptions[0].text;
+    $('#pv-sub').textContent = `${m === 'it_mw' ? 'IT' : 'Facility'} GW energizing in each ${quarterly ? 'quarter' : 'year'}, by ${label.toLowerCase()}. Uses the period and split chosen above and the current filters.`;
+    thead.replaceChildren(el('tr', {}, [el('th', { text: label, scope: 'col', style: 'cursor:default' }), ...cols.map((c) => el('th', { text: c, class: 'num', scope: 'col', style: 'cursor:default' })), el('th', { text: 'Total', class: 'num', scope: 'col', style: 'cursor:default' })]));
+    tbody.replaceChildren();
+    if (!keys.length) { tbody.append(el('tr', {}, el('td', { colspan: cols.length + 2, class: 'empty', text: 'Nothing matches these filters.' }))); return; }
+    const f = (v) => (v ? (v / 1000).toFixed(v < 100 ? 3 : 2) : '');
+    for (const k of keys) tbody.append(el('tr', {}, [el('td', { text: k }), ...cols.map((c) => el('td', { class: 'num', text: f(cell.get(k + '|' + c)) })), el('td', { class: 'num', text: f(tot.get(k)) })]));
+    tbody.append(el('tr', { class: 'total' }, [el('td', { text: 'Total' }), ...cols.map((c) => el('td', { class: 'num', text: f(keys.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0)) })), el('td', { class: 'num', text: f([...tot.values()].reduce((a, b) => a + b, 0)) })]));
+  }
+
   // ---------------------------------------------------------------- tiles
   function drawTiles() {
-    const m = state.measure, ps = DS.phases.filter(passPhase);
+    const m = state.measure, ps = DS.phases.filter(passPhase).filter(counted);
     const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
     const all = sum(() => true), live = sum((p) => p.status === 'live' || p.status === 'partially_live'), uc = sum((p) => p.status === 'under_construction' || p.status === 'permitted');
-    const dealMW = DS.deals.reduce((s, d) => s + (d.capacity_mw || 0), 0);
     const tiles = [
-      ['Capacity tracked', gw(all) + ' GW', `${ps.length} phases at ${new Set(ps.map((p) => p.site_id)).size} sites`],
+      ['Capacity tracked', gw(all) + ' GW', `${ps.length} phases at ${new Set(ps.map((p) => p.site_id)).size} sites. Cancelled projects, options and power-supply figures are listed but not counted`],
       ['Live or partly live', gw(live) + ' GW', 'Full phase size, including parts still ramping'],
       ['Under construction or permitted', gw(uc) + ' GW', ''],
       ['Announced, not started', gw(sum((p) => p.status === 'announced' || p.status === 'rumoured')) + ' GW', ''],
-      ['Deals not tied to a site', gw(dealMW) + ' GW', `${DS.deals.length} agreements, listed separately`],
+      ['Deals and commitments', String(DS.deals.length), 'Chip and cloud agreements, listed separately. They overlap each other and the sites, so they are not summed'],
     ];
     $('#tiles').replaceChildren(...tiles.map(([k, v, n]) => el('div', { class: 'tile' }, [el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v }), el('div', { class: 'n', text: n })])));
   }
@@ -251,7 +272,7 @@
         el('td', {}, [el('div', { class: 'site', text: p.site_name }), p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null]),
         el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
         el('td', { text: roleLabel(p, state.role) }),
-        el('td', {}, el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)])),
+        el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
         el('td', { text: when(p) || 'Not dated' }),
         el('td', { text: chipText(p.chips) || 'Not disclosed' }),
@@ -280,6 +301,8 @@
     add('Power', [(pw.sources || []).join(', ').replace(/_/g, ' '), pw.behind_the_meter ? 'behind the meter' : '', p.grid_region, p.utility].filter(Boolean).join(' · '));
     add('Money', [mo.capex_usd_m ? `Capex $${(mo.capex_usd_m / 1000).toLocaleString('en-US')}bn` : '', mo.contract_value_usd_m ? `Contract $${(mo.contract_value_usd_m / 1000).toLocaleString('en-US')}bn` : ''].filter(Boolean).join(' · '));
     add('Estimates', Object.entries(p.estimated || {}).map(([k, v]) => `${k}: ${v}`).join(' · '));
+    add('Not counted', counted(p) ? null : p.count_note);
+    add('Reconciliation', p.resolution);
     add('Confidence', `${p.confidence || 'n/a'} · ${lab(p.verification)} · updated ${p.updated}`);
     add('Notes', p.notes);
     add('Sources', p.sources.map((s) => el('div', {}, [srcLink(s), ` ${s.title ? '· ' + s.title : ''} (${s.date || 'n.d.'}, ${String(s.type || '').replace(/_/g, ' ')})`, s.quote ? el('blockquote', { text: s.quote }) : null])));
@@ -307,7 +330,7 @@
 
   // ---------------------------------------------------------------- wiring
   function render() {
-    drawTiles(); drawTime();
+    drawTiles(); drawTime(); drawPivot();
     drawBars('#chart-state', (d) => phaseById[d.id].us_state || null, 'No US capacity matches these filters.');
     $('#c3-title').textContent = `By company (${$('#f-role').selectedOptions[0].text.toLowerCase()})`;
     drawBars('#chart-company', (d) => roleLabel(phaseById[d.id], state.role), 'Nothing matches these filters.');

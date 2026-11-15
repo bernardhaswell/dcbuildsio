@@ -53,6 +53,11 @@
     <div id="legend-time" class="legend"></div>
   </section>
 
+  <section class="card">
+    <div class="card-head"><div><h2>Capacity table</h2><p class="sub" id="pv-sub"></p></div></div>
+    <div class="table-scroll"><table id="t-pivot" class="pivot"><thead></thead><tbody></tbody></table></div>
+  </section>
+
   <div class="two">
     <section class="card">
       <div class="card-head"><div><h2>By US state</h2><p class="sub">All tracked phases in the current filter, dated or not.</p></div></div>
@@ -91,6 +96,8 @@
       <div>
         <h3>Timing</h3>
         <p>Capacity is placed in the period it energizes, following a staged ramp where sources give one. Half-years are shown in Q2 and Q4. Year-only dates appear in the annual view and in a "quarter not given" column in the quarterly view. Capacity with no date is reported as undated and left out of the chart.</p>
+        <h3>What is not counted</h3>
+        <p>Cancelled projects, options to expand, and figures that describe power supply (a power plant, fuel cells or a supply contract) and not datacenter load stay in the table, marked "Not counted", and add nothing to the totals. Where a grid connection is the only published figure, it is counted as an upper bound and labelled.</p>
         <h3>Sources and status</h3>
         <p>Every row links to at least one public source: a company release, filing, earnings call, utility or permit document, or press report. "Verified" rows have a supporting quote on file; "Sourced" rows have a matching public source and are awaiting a full read. Estimates are labelled.</p>
       </div>
