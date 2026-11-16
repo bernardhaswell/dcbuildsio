@@ -284,18 +284,11 @@
     const filtered = FILTER_SELS.some(([, k]) => state[k]);
     const host = $('#summary');
     if (!ps.length || all <= 0) { host.replaceChildren(el('p', { class: 'hero-line', text: 'Nothing in the tracker matches these filters. Reset to see everything.' })); return; }
-    const by = (fn) => { const t = new Map(); rowsNow().forEach((d) => { if (d[m] == null) return; const k = fn(d); if (!k) return; t.set(k, (t.get(k) || 0) + d[m]); }); return [...t.entries()].sort((x, y) => y[1] - x[1])[0]; };
-    const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' && !estBasis(d.chip_basis) ? lab(d.chip_vendor) : null));
-    const endU = by((d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length && !endEstimated(p) ? r.map(entName).join(' + ') : null; });
-    const real = sum((p) => ['operating', 'construction'].includes(stageOf(p)));
     // Apple-style two-tone copy: the facts in white, the connective words in grey. Three short lines.
     const w = (t) => el('b', { text: t });
     const line = (...kids) => el('p', { class: 'hl' }, kids.flat().filter((k) => k != null));
     host.replaceChildren(
-      line(filtered ? 'In this view, ' : '', w(`${gw(all)} GW`), ' announced in total', dealMW > 0 ? [': ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named sites`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [', across ', w(`${nSites} named sites`), '.']),
-      line(w(`${gw(real)} GW`), ' is real today, running or under construction.'),
-      chip ? line(tk('chip', chip[0]), ' is the most-named chip.') : null,
-      endU ? line(tk('co', endU[0]), ' is the largest named end user.') : null,
+      line(filtered ? 'In this view: ' : '', w(`${gw(all)} GW`), ' announced', dealMW > 0 ? [', ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named sites`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [' at ', w(`${nSites} named sites`), '.']),
     );
   }
 
