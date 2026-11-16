@@ -25,7 +25,7 @@
     huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
     verified: 'Verified', sourced: 'Sourced',
   };
-  const lab = (k) => LABEL[k] || k;
+  const lab = (k) => LABEL[k] || (typeof k === 'string' && /^[a-z0-9_]+$/.test(k) ? k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : k);
   // Tables show years up to LAST_YEAR, then one column for everything later.
   const LAST_YEAR = 2032, LATER = `${LAST_YEAR + 1}+`;
   const CHIP_ORDER = ['nvidia', 'amd', 'google', 'amazon', 'huawei', 'openai', 'meta', 'alibaba', 'microsoft', 'broadcom'];
