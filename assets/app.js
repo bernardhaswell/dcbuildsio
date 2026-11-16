@@ -26,6 +26,8 @@
     verified: 'Verified', sourced: 'Sourced',
   };
   const lab = (k) => LABEL[k] || k;
+  // Tables show years up to LAST_YEAR, then one column for everything later.
+  const LAST_YEAR = 2032, LATER = `${LAST_YEAR + 1}+`;
   const CHIP_ORDER = ['nvidia', 'amd', 'google', 'amazon', 'microsoft', 'meta', 'openai', 'broadcom'];
   const STATUS_ORDER = ['live', 'partially_live', 'under_construction', 'permitted', 'announced', 'delayed', 'paused', 'cancelled'];
   const gw = (mw) => {
@@ -222,8 +224,8 @@
   function drawPivot() {
     const m = state.measure, g = state.group, quarterly = state.period === 'quarter';
     const rows = rowsNow().filter((d) => d[m] != null);
-    const pk = (d) => (d.year == null ? 'Undated' : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
-    const order = (k) => { if (k === 'Undated') return 1e9; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
+    const pk = (d) => (d.year == null ? 'Undated' : d.year > LAST_YEAR ? LATER : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
+    const order = (k) => { if (k === 'Undated') return 1e9; if (k === LATER) return 1e8; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
     const cols = [...new Set(rows.map(pk))].sort((a, b) => order(a) - order(b));
     const cell = new Map(), tot = new Map();
     rows.forEach((d) => { const k = groupKey(d, g), c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]); });
@@ -374,10 +376,10 @@
   function drawYearTable(id) {
     const def = YT_DEF[id], host = $('#yt-' + id), m = state.measure, quarterly = YT.period === 'quarter';
     const rows = rowsNow().filter((d) => d[m] != null);
-    const pk = (d) => (d.year == null ? 'Undated' : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
-    const order = (k) => { if (k === 'Undated') return 1e9; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
+    const pk = (d) => (d.year == null ? 'Undated' : d.year > LAST_YEAR ? LATER : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
+    const order = (k) => { if (k === 'Undated') return 1e9; if (k === LATER) return 1e8; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
     let cols = [...new Set(rows.map(pk))].sort((a, b) => order(a) - order(b));
-    if (!quarterly) { const ys = cols.filter((c) => c !== 'Undated').map(Number); if (ys.length) { const full = []; for (let y = Math.min(...ys); y <= Math.max(...ys); y++) full.push(String(y)); cols = cols.includes('Undated') ? full.concat('Undated') : full; } }
+    if (!quarterly) { const ys = cols.filter((c) => c !== 'Undated' && c !== LATER).map(Number); if (ys.length) { const full = []; for (let y = Math.min(...ys); y <= Math.max(...ys); y++) full.push(String(y)); cols = full.concat(cols.filter((c) => c === LATER || c === 'Undated')); } }
     const cell = new Map(), tot = new Map();
     const NONE = def.none;
     rows.forEach((d) => { const k = def.key(d) || NONE, c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]); });
