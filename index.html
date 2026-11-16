@@ -138,6 +138,18 @@
     <div class="card-head">
       <div><p class="kicker">Register</p><h2>Sites and agreements with no site</h2><p class="sub" id="t-sub"></p></div>
     </div>
+    <div class="tbar">
+      <input id="t-q" type="search" placeholder="Filter rows: site, company, chip, place" aria-label="Filter the register">
+      <div class="chipset" id="t-stage" role="group" aria-label="Stage, for this table"></div>
+      <label class="tsort">Sort <select id="t-sort" aria-label="Sort the register">
+        <option value="mw:-1">Largest first</option><option value="mw:1">Smallest first</option>
+        <option value="when:1">Energizes soonest</option><option value="when:-1">Energizes latest</option>
+        <option value="site:1">Site, A to Z</option><option value="loc:1">Location, A to Z</option>
+        <option value="company:1">Company, A to Z</option><option value="status:1">Most advanced first</option>
+        <option value="src:-1">Newest source first</option>
+      </select></label>
+      <button type="button" class="ghost sm" id="t-csv">Export rows</button>
+    </div>
     <div class="table-scroll tall"><table id="t-phases"><thead></thead><tbody></tbody></table></div>
   </section>
 
