@@ -79,7 +79,7 @@
     });
     root.append(sv('text', { x: x0 - 8, y: 14, 'text-anchor': 'end', class: 'lk-ax' }, 'GW'));
     host_.replaceChildren(root);
-    $('#lk-legend').replaceChildren(el('span', {}, [el('i', { class: 'lk-sw solid' }), 'At named sites in the tracker']), el('span', {}, [el('i', { class: 'lk-sw hatch' }), 'Estimate: capacity not yet at a named site']), el('span', { class: 'dim' }, 'Click a bar to see the sites counted that year'));
+    $('#lk-legend').replaceChildren(el('span', {}, [el('i', { class: 'lk-sw solid' }), 'Named sites: permitted, announced or company plan']), el('span', {}, [el('i', { class: 'lk-sw hatch' }), 'Estimate: capacity not yet at a named site']), el('span', { class: 'dim' }, 'Click a bar to see the sites counted that year'));
   }
 
   const head = (first, extra = []) => el('tr', {}, [el('th', { scope: 'col', text: first }), ...D.years.map((y) => el('th', { class: 'num', scope: 'col', text: String(y) })), el('th', { class: 'num tot', scope: 'col', text: '2025–30' }), ...extra.map((t) => el('th', { class: 'num', scope: 'col', text: t }))]);
@@ -105,7 +105,7 @@
       $('#lk-tsub').textContent = 'IT GW. Each year is capacity switching on in that year, not a running total. Click a figure to see the sites behind it.';
       th.replaceChildren(head(''));
       tb.append(line('Likely energized', s.total, 'total'), line('United States', s.us, 'sub'), line('Outside the US', s.outside_us, 'sub'),
-        line('At named sites in the tracker', s.at_sites, '', [], openSet('Named sites counted', 'Likely energized', () => true)),
+        line('Named sites and company plans', s.at_sites, '', [], openSet('Named sites counted', 'Likely energized', () => true)),
         line('Estimate: not yet at a named site', s.estimate, 'est'),
         sep('Named sites counted, by strength of evidence'),
         ...D.tiers.map((r) => { const n = (r.tier.match(/^Tier (\d+)/) || [])[1]; return line(r.tier.replace(/^Tier \d+: /, ''), r.it_gw, 'sub', [], openSet(r.tier.replace(/^Tier \d+: /, ''), 'Likely energized', (o) => String(o.tier) === n)); }),
@@ -158,7 +158,7 @@
   function init(d) {
     D = d; F.rows = d.rows.map(R);
     $('#lk-sub').textContent = `What is likely to be energized each year, as opposed to everything announced. IT GW, worldwide excluding China. Our estimate, updated ${d.generated}; figures may be revised.`;
-    $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer. Whatever named sites cannot cover is an Estimate of capacity not yet announced. Every site is marked in, partly in or not in, with the reason. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
+    $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer, then dated company plans for capacity with no site named yet. Whatever named sites cannot cover is an Estimate of capacity not yet announced. Every site is marked in, partly in or not in, with the reason. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
     $('#lk-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; tab = b.dataset.v; all = false; $('#lk-q').value = ''; for (const x of $('#lk-tabs').children) x.setAttribute('aria-checked', String(x === b)); drawTable(); });
     $('#lk-more').addEventListener('click', () => { all = !all; drawTable(); });
     let qt; $('#lk-q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(drawTable, 120); });
