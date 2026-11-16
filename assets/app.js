@@ -236,12 +236,13 @@
 
   // ---------------------------------------------------------------- tiles
   function drawTiles() {
-    const m = state.measure, ps = DS.phases.filter(passPhase).filter(counted);
+    const showCancelled = state.stage === 'cancelled';
+    const m = state.measure, ps = DS.phases.filter(passPhase).filter((p) => counted(p) || (showCancelled && p.status === 'cancelled'));
     const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
     const all = sum(() => true), live = sum((p) => p.status === 'live' || p.status === 'partially_live'), uc = sum((p) => p.status === 'under_construction' || p.status === 'permitted');
     const sites = ps.filter((p) => !isDeal(p)), dealMW = sum(isDeal), guessMW = sum(guessed);
     const tiles = [
-      ['Capacity tracked', gw(all) + ' GW', `${gw(all - dealMW)} GW at ${new Set(sites.map((p) => p.site_id)).size} named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
+      [showCancelled ? 'Cancelled capacity (not in totals)' : 'Capacity tracked', gw(all) + ' GW', `${gw(all - dealMW)} GW at ${new Set(sites.map((p) => p.site_id)).size} named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
       ['Agreements with no site', gw(dealMW) + ' GW', `Only the part not already at a named site. ${gw(guessMW)} GW of it has a guessed location; the rest has a stated country`],
       ['Operating', gw(live) + ' GW', 'Live or partly live. Full phase size, including parts still ramping'],
       ['Under construction', gw(sum((p) => stageOf(p) === 'construction')) + ' GW', `Plus ${gw(sum((p) => stageOf(p) === 'permitted'))} GW permitted and not started`],
@@ -337,7 +338,7 @@
         el('td', { text: (pt.buyer || []).map(entName).join(', ') }), el('td', { text: (pt.seller || []).map(entName).join(', ') }),
         el('td', { class: 'num', text: d.capacity_mw ? gw(d.capacity_mw) : 'n/a' }),
         el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (lo.basis === 'guessed' ? 'guess' : 'stated'), title: lo.why || '', text: lo.basis === 'guessed' ? 'Guessed' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
-        el('td', {}, [lo.unsited_mw >= 1 ? el('b', { text: gw(lo.unsited_mw) + ' GW added' }) : el('span', { text: 'Nothing added' }), el('div', { class: 'dim', text: lo.unsited_mw >= 1 ? (lo.deductions || []).join('; ') : String(lo.treatment_text || '').replace(/^Not added: /, '').replace(/^Counted: .*/, 'All of it is already at named sites or in other agreements') })]),
+        el('td', {}, [lo.unsited_mw >= 1 ? el('b', { text: gw(lo.unsited_mw) + ' GW added' }) : el('span', { text: lo.treatment === 'count' ? 'Counted at sites' : lo.treatment === 'dropped' ? 'Dropped or superseded' : 'Nothing added' }), el('div', { class: 'dim', text: lo.treatment === 'count' ? ((lo.unsited_mw >= 1 ? 'Already counted: ' : 'All of it is already counted: ') + ((lo.deductions || []).join('; ') || 'at named sites')) : String(lo.treatment_text || '').replace(/^Not added: /, '') }), lo.note ? el('div', { class: 'dim', text: lo.note }) : null, lo.dropped_source ? el('div', {}, ['Source: ', el('a', { href: lo.dropped_source.url, target: '_blank', rel: 'noopener', text: `${lo.dropped_source.publisher}, ${lo.dropped_source.date}` })]) : null]),
         el('td', { text: chipText(d.chips) }),
         el('td', { text: (d.schedule || []).filter((x) => x.cumulative_mw > 0).map((x) => `${x.period}: ${gw(x.cumulative_mw)} GW`).join(' · ') || 'Not given' }),
         el('td', { text: d.announced || '' }),
