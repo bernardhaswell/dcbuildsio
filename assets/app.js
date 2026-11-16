@@ -47,6 +47,8 @@
   const isDeal = (p) => p.kind === 'deal';
   const EST = new Set(['guessed', 'estimated', 'assumed']);
   const estBasis = (b) => EST.has(b);
+  // Mainland China, keyed off the region field (country as a fallback), so new Chinese rows are caught automatically.
+  const isChina = (p) => p.region === 'china' || p.country === 'CN';
   const guessed = (p) => isDeal(p) && estBasis(p.location_basis);
   // End user inferred by the compiler (e.g. a hyperscaler running its own site with no named tenant).
   const endEstimated = (p) => estBasis(p.end_customer_basis) || !!(p.estimated && p.estimated.end_customer) || estBasis((p.roles_basis || {}).end_customer);
@@ -61,7 +63,7 @@
 
   function passPhase(p) {
     if (state.kind && ((state.kind === 'estimated' || state.kind === 'guessed') ? !guessed(p) : (state.kind === 'deal') !== isDeal(p))) return false;
-    if (state.region && p.region !== state.region) return false;
+    if (state.region === 'ex_china' ? isChina(p) : state.region && p.region !== state.region) return false;
     if (state.us_state && p.us_state !== state.us_state) return false;
     if (!passStage(p)) return false;
     if (state.chip && !(p.chips || []).some((c) => c.vendor === state.chip)) return false;
@@ -571,6 +573,7 @@
     buildColors();
     const uniq = (f) => [...new Set(ds.phases.map(f).filter(Boolean))].sort();
     fill('#f-region', uniq((p) => p.region), 'All regions');
+    $('#f-region').options[0].after(el('option', { value: 'ex_china', text: 'Everywhere except China' }));
     fill('#f-state', uniq((p) => p.us_state), 'All states');
     fill('#f-chip', [...new Set(ds.phases.flatMap((p) => (p.chips || []).map((c) => c.vendor)))].sort(), 'All vendors');
     const bind = (sel, key, ev = 'change') => $(sel).addEventListener(ev, (e) => { state[key] = e.target.value; if (key === 'us_state' && e.target.value) { state.region = 'us'; $('#f-region').value = 'us'; } render(); });
