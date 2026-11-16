@@ -30,7 +30,7 @@
   const STATUS_ORDER = ['live', 'partially_live', 'under_construction', 'permitted', 'announced', 'delayed', 'paused', 'cancelled'];
   const gw = (mw) => {
     const g = mw / 1000;
-    return g >= 100 ? g.toFixed(0) : g >= 10 ? g.toFixed(1) : g.toFixed(2);
+    return g >= 1000 ? g.toFixed(0) : g >= 10 ? g.toFixed(1) : g.toFixed(2);
   };
   const fmtMW = (mw) => (mw == null ? '' : Math.round(mw).toLocaleString('en-US'));
 
@@ -43,17 +43,19 @@
   const mwOf = (p, measure) => (measure === 'it_mw' ? p.derived.it_mw : p.derived.facility_mw);
   const counted = (p) => p.counted !== false;
   const isDeal = (p) => p.kind === 'deal';
-  const estimated = (p) => isDeal(p) && p.location_basis === 'estimated';
+  const EST = new Set(['guessed', 'estimated', 'assumed']);
+  const estBasis = (b) => EST.has(b);
+  const guessed = (p) => isDeal(p) && estBasis(p.location_basis);
   const stageOf = (p) => (isDeal(p) ? 'agreement' : p.status === 'live' || p.status === 'partially_live' ? 'operating'
     : p.status === 'under_construction' ? 'construction' : p.status === 'permitted' ? 'permitted' : p.status === 'rumoured' ? 'rumoured'
     : p.status === 'cancelled' ? 'cancelled' : 'announced');
   const STAGE = { operating: 'Operating', construction: 'Under construction', permitted: 'Permitted, not started', announced: 'Paper: announced site',
     agreement: 'Paper: agreement with no site', rumoured: 'Paper: reported, unconfirmed', cancelled: 'Cancelled' };
   const passStage = (p) => { const s = stageOf(p), f = state.stage; return !f || (f === 'real' ? s === 'operating' || s === 'construction' : f === 'paper' ? s === 'announced' || s === 'agreement' || s === 'rumoured' : s === f); };
-  const kindLabel = (p) => (!isDeal(p) ? 'Named sites' : estimated(p) ? 'Agreements with no site, location estimated' : 'Agreements with no site, country stated');
+  const kindLabel = (p) => (!isDeal(p) ? 'Named sites' : guessed(p) ? 'Agreements with no site, location estimated' : 'Agreements with no site, country stated');
 
   function passPhase(p) {
-    if (state.kind && (state.kind === 'estimated' ? !estimated(p) : (state.kind === 'deal') !== isDeal(p))) return false;
+    if (state.kind && ((state.kind === 'estimated' || state.kind === 'guessed') ? !guessed(p) : (state.kind === 'deal') !== isDeal(p))) return false;
     if (state.region && p.region !== state.region) return false;
     if (state.us_state && p.us_state !== state.us_state) return false;
     if (!passStage(p)) return false;
@@ -234,22 +236,141 @@
     tbody.append(el('tr', { class: 'total' }, [el('td', { text: 'Total' }), ...cols.map((c) => el('td', { class: 'num', text: f(keys.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0)) })), el('td', { class: 'num', text: f([...tot.values()].reduce((a, b) => a + b, 0)) })]));
   }
 
-  // ---------------------------------------------------------------- tiles
+  // ---------------------------------------------------------------- tiles, summary sentence, stage bar
+  const tk = (cls, text) => el('span', { class: 'tk tk-' + cls, text });
+  const gwTok = (mw) => tk('num', gw(mw) + ' GW');
+  const tileVal = (mw) => el('div', { class: 'v' }, [gw(mw), el('small', { text: 'GW' })]);
+  const PAPER = ['announced', 'agreement', 'rumoured'];
+  const STAGE_GROUPS = [
+    ['operating', 'Operating', 'op', (s) => s === 'operating'],
+    ['construction', 'Under construction', 'uc', (s) => s === 'construction'],
+    ['permitted', 'Permitted, not started', 'pm', (s) => s === 'permitted'],
+    ['paper', 'Paper stage', 'pp', (s) => PAPER.includes(s)],
+  ];
+  const tilePhases = () => {
+    const showCancelled = state.stage === 'cancelled';
+    return DS.phases.filter(passPhase).filter((p) => counted(p) || (showCancelled && p.status === 'cancelled'));
+  };
   function drawTiles() {
     const showCancelled = state.stage === 'cancelled';
-    const m = state.measure, ps = DS.phases.filter(passPhase).filter((p) => counted(p) || (showCancelled && p.status === 'cancelled'));
+    const m = state.measure, ps = tilePhases();
     const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
-    const all = sum(() => true), live = sum((p) => p.status === 'live' || p.status === 'partially_live'), uc = sum((p) => p.status === 'under_construction' || p.status === 'permitted');
-    const sites = ps.filter((p) => !isDeal(p)), dealMW = sum(isDeal), estMW = sum(estimated);
+    const all = sum(() => true);
+    const sites = ps.filter((p) => !isDeal(p)), dealMW = sum(isDeal), guessMW = sum(guessed);
+    const nSites = new Set(sites.map((p) => p.site_id)).size;
+    const nStates = new Set(sites.map((p) => p.us_state).filter(Boolean)).size, nCountries = new Set(sites.map((p) => p.country).filter(Boolean)).size;
+    const dep = rowsNow().filter((d) => d[m] != null), depAll = dep.reduce((s, d) => s + d[m], 0);
+    const chipKnown = dep.filter((d) => d.chip_vendor && d.chip_vendor !== 'undisclosed').reduce((s, d) => s + d[m], 0);
+    const dated = dep.filter((d) => d.year != null).reduce((s, d) => s + d[m], 0);
+    const pct = (x, y) => (y ? Math.round((x / y) * 100) : 0) + '%';
     const tiles = [
-      [showCancelled ? 'Cancelled capacity (not in totals)' : 'Capacity tracked', gw(all) + ' GW', `${gw(all - dealMW)} GW at ${new Set(sites.map((p) => p.site_id)).size} named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
-      ['Agreements with no site', gw(dealMW) + ' GW', `Only the part not already at a named site. ${gw(estMW)} GW of it has an estimated location; the rest has a stated country`],
-      ['Operating', gw(live) + ' GW', 'Live or partly live. Full phase size, including parts still ramping'],
-      ['Under construction', gw(sum((p) => stageOf(p) === 'construction')) + ' GW', `Plus ${gw(sum((p) => stageOf(p) === 'permitted'))} GW permitted and not started`],
-      ['Paper stage', gw(sum((p) => ['announced', 'agreement', 'rumoured'].includes(stageOf(p)))) + ' GW', 'Announced sites not yet started, unconfirmed reports, and agreements with no site'],
+      [showCancelled ? 'Cancelled capacity (not in totals)' : 'Capacity tracked', all, `${gw(all - dealMW)} GW at named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
+      ['At named sites', all - dealMW, `${nSites} sites in ${nCountries} ${nCountries === 1 ? 'country' : 'countries'}${nStates ? `, ${nStates} US states` : ''}`],
+      ['Agreements with no site', dealMW, `Only the part not already at a named site. ${gw(guessMW)} GW has an estimated location`],
+      ['Chip disclosed', chipKnown, `${pct(chipKnown, depAll)} of capacity names its accelerator. ${pct(dated, depAll)} has an energization date`],
     ];
-    $('#tiles').replaceChildren(...tiles.map(([k, v, n]) => el('div', { class: 'tile' }, [el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v }), el('div', { class: 'n', text: n })])));
+    $('#tiles').replaceChildren(...tiles.map(([k, v, n]) => el('div', { class: 'tile' }, [el('div', { class: 'k', text: k }), tileVal(v), el('div', { class: 'n', text: n })])));
   }
+
+  const FILTER_SELS = [['#f-kind', 'kind'], ['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-stage', 'stage'], ['#f-chip', 'chip'], ['#f-q', 'q']];
+  function drawSummary() {
+    const m = state.measure, ps = tilePhases(), unit = m === 'it_mw' ? 'IT' : 'facility';
+    const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
+    const all = sum(() => true), dealMW = sum(isDeal);
+    const nSites = new Set(ps.filter((p) => !isDeal(p)).map((p) => p.site_id)).size;
+    const filtered = FILTER_SELS.some(([, k]) => state[k]);
+    const host = $('#summary');
+    if (!ps.length || all <= 0) { host.replaceChildren('Nothing in the tracker matches these filters. ', el('b', { text: 'Reset' }), ' to see everything.'); return; }
+    const by = (fn) => { const t = new Map(); rowsNow().forEach((d) => { if (d[m] == null) return; const k = fn(d); if (!k) return; t.set(k, (t.get(k) || 0) + d[m]); }); return [...t.entries()].sort((x, y) => y[1] - x[1])[0]; };
+    const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null));
+    const endU = by((d) => { const r = phaseById[d.id].roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; });
+    const real = sum((p) => ['operating', 'construction'].includes(stageOf(p)));
+    const kids = [
+      filtered ? 'In this view, ' : 'The tracker holds ', gwTok(all), ` of AI datacenter ${unit} capacity: `,
+      gwTok(all - dealMW), ' at ', tk('num', String(nSites)), ` named site${nSites === 1 ? '' : 's'}`,
+      dealMW > 0 ? [' and ', gwTok(dealMW), ' committed under agreements with no site yet. '] : '. ',
+      gwTok(real), ' of it is ', tk('st-op', 'operating'), ' or ', el('span', { class: 'nw' }, [tk('st-uc', 'under construction'), ';']), ' the rest is ', tk('st-pm', 'permitted'), ' or ', el('span', { class: 'nw' }, [tk('st-pp', 'on paper'), '.']),
+    ];
+    if (chip) kids.push(' Where the accelerator is named, ', tk('chip', chip[0]), ' leads with ', el('span', { class: 'nw' }, [gwTok(chip[1]), '.']));
+    if (endU) kids.push(' The largest named end user is ', el('span', { class: 'nw' }, [tk('co', endU[0]), '.']));
+    host.replaceChildren(...kids.flat());
+  }
+
+  function drawStagebar() {
+    const m = state.measure;
+    // Uses every filter except Stage, so the bar always shows the full split and the current choice.
+    const saved = state.stage; state.stage = '';
+    const ps = DS.phases.filter(passPhase).filter(counted);
+    state.stage = saved;
+    const vals = STAGE_GROUPS.map(([k, name, cls, f]) => [k, name, cls, ps.filter((p) => f(stageOf(p))).reduce((s, p) => s + (mwOf(p, m) || 0), 0)]);
+    const tot = vals.reduce((s, v) => s + v[3], 0) || 1;
+    const sel = state.stage === 'real' ? ['operating', 'construction'] : PAPER.includes(state.stage) ? ['paper'] : [state.stage];
+    const bar = $('#stagebar'), leg = $('#stagelegend');
+    bar.classList.toggle('has-sel', !!state.stage && state.stage !== 'cancelled');
+    const pick = (k) => { state.stage = state.stage === k ? '' : k; $('#f-stage').value = state.stage; render(); };
+    bar.replaceChildren(...vals.filter((v) => v[3] > 0).map(([k, name, cls, v]) => {
+      const b = el('button', { type: 'button', class: cls + (sel.includes(k) ? ' on' : ''), style: `--c:var(--st-${cls});flex:${v} 1 0`, 'aria-label': `${name}: ${gw(v)} GW, ${Math.round((v / tot) * 100)}%`, 'aria-pressed': String(sel.includes(k)) });
+      b.addEventListener('click', () => pick(k));
+      b.addEventListener('mousemove', (e) => showTip(e, name, [[null, 'Capacity', gw(v) + ' GW'], [null, 'Share', Math.round((v / tot) * 100) + '%']]));
+      b.addEventListener('mouseleave', hideTip);
+      return b;
+    }));
+    leg.replaceChildren(...vals.map(([k, name, cls, v]) => {
+      const b = el('button', { type: 'button', class: sel.includes(k) ? 'on' : '', 'aria-pressed': String(sel.includes(k)) }, [
+        el('i', { class: cls, style: `--c:var(--st-${cls})` }), el('span', { class: 'l', text: name }),
+        el('span', { class: 'v' }, [gw(v), el('small', { text: `GW · ${Math.round((v / tot) * 100)}%` })])]);
+      b.addEventListener('click', () => pick(k));
+      return b;
+    }));
+  }
+
+  // ---------------------------------------------------------------- the three year tables
+  const YT = { period: 'year', all: { chip: false, op: false, end: false } };
+  const YT_DEF = {
+    chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null), none: 'Not disclosed', label: 'Chip maker', swatch: true,
+      note: 'Capacity is split across chips where a site uses more than one. "Not disclosed" is capacity whose accelerator has not been published.' },
+    op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'Operator',
+      note: 'The company that runs the facility or the cloud inside it, as sources state. Joint operators share one row. Capacity with no named operator is in "Not disclosed".' },
+    end: { key: (d) => { const r = phaseById[d.id].roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'End user',
+      note: 'Whose workloads run there, as sources state. Capacity with no named end user, including speculative developer campuses, is in "Not disclosed".' },
+  };
+  function drawYearTable(id) {
+    const def = YT_DEF[id], host = $('#yt-' + id), m = state.measure, quarterly = YT.period === 'quarter';
+    const rows = rowsNow().filter((d) => d[m] != null);
+    const pk = (d) => (d.year == null ? 'Undated' : quarterly ? (d.quarter ? `${d.year} Q${d.quarter}` : `${d.year} Q?`) : String(d.year));
+    const order = (k) => { if (k === 'Undated') return 1e9; const [y, q] = k.split(' '); return +y * 10 + (q ? (q === 'Q?' ? 5 : +q[1]) : 0); };
+    let cols = [...new Set(rows.map(pk))].sort((a, b) => order(a) - order(b));
+    if (!quarterly) { const ys = cols.filter((c) => c !== 'Undated').map(Number); if (ys.length) { const full = []; for (let y = Math.min(...ys); y <= Math.max(...ys); y++) full.push(String(y)); cols = cols.includes('Undated') ? full.concat('Undated') : full; } }
+    const cell = new Map(), tot = new Map();
+    const NONE = def.none;
+    rows.forEach((d) => { const k = def.key(d) || NONE, c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]); });
+    let keys = [...tot.keys()].filter((k) => k !== NONE).sort((a, b) => tot.get(b) - tot.get(a));
+    const LIMIT = 12, more = host.querySelector('.more'), showAll = YT.all[id];
+    let other = [];
+    if (keys.length > LIMIT + 1 && !showAll) { other = keys.slice(LIMIT); keys = keys.slice(0, LIMIT); }
+    more.hidden = [...tot.keys()].filter((k) => k !== NONE).length <= LIMIT + 1;
+    more.textContent = showAll ? 'Show top 12' : `Show all ${[...tot.keys()].filter((k) => k !== NONE).length}`;
+    const grand = [...tot.values()].reduce((a, b) => a + b, 0);
+    const named = grand - (tot.get(NONE) || 0);
+    host.querySelector('.sub').textContent = `${def.note} ${m === 'it_mw' ? 'IT' : 'Facility'} GW. ${grand ? Math.round((named / grand) * 100) : 0}% of capacity in this view has a named ${def.label.toLowerCase()}.`;
+    const thead = host.querySelector('thead'), tbody = host.querySelector('tbody');
+    thead.replaceChildren(el('tr', {}, [el('th', { text: def.label, scope: 'col' }), ...cols.map((c) => el('th', { text: c, class: 'num', scope: 'col' })), el('th', { text: 'Total', class: 'num tot', scope: 'col' })]));
+    tbody.replaceChildren();
+    if (!tot.size) { tbody.append(el('tr', {}, el('td', { colspan: cols.length + 2, class: 'empty', text: 'Nothing matches these filters.' }))); return; }
+    const f = (v) => (v ? (v / 1000).toFixed(v < 100 ? 3 : 2) : '–');
+    // Shading: one hue, stronger with more GW, scaled to the largest single cell among named rows.
+    let peak = 0; for (const k of keys) for (const c of cols) if (c !== 'Undated') peak = Math.max(peak, cell.get(k + '|' + c) || 0);
+    const shade = (v, c) => (v && c !== 'Undated' && peak ? `--h:color-mix(in srgb, var(--s1) ${Math.round(8 + 46 * Math.sqrt(v / peak))}%, var(--surface));color:var(--text)` : '');
+    const rowOf = (label, get, cls = '', heat = true, sw = null) => el('tr', { class: cls }, [
+      el('td', { title: label }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label]),
+      ...cols.map((c) => { const v = get(c); return el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }); }),
+      el('td', { class: 'num tot', text: f(cols.reduce((s, c) => s + (get(c) || 0), 0)) })]);
+    for (const k of keys) tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, def.swatch ? colorOf('chip_vendor', k) : null));
+    if (other.length) tbody.append(rowOf(`${other.length} more`, (c) => other.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'quiet', false));
+    if (tot.has(NONE)) tbody.append(rowOf(NONE, (c) => cell.get(NONE + '|' + c) || 0, 'quiet', false, def.swatch ? 'var(--other)' : null));
+    tbody.append(rowOf('Total', (c) => [...tot.keys()].reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'total', false));
+  }
+  const drawYearTables = () => { for (const id of Object.keys(YT_DEF)) drawYearTable(id); };
 
   // ---------------------------------------------------------------- tables
   const chipText = (cs) => (cs || []).map((c) => `${lab(c.vendor)}${c.model && !lab(c.vendor).includes(c.model) ? ' ' + c.model : c.family && c.family !== 'unspecified' ? ' ' + c.family.replace(/_/g, ' ') : ''}`).join(', ');
@@ -285,12 +406,12 @@
       const derived = basis && /estimated|treated|used as/.test(basis);
       const tr = el('tr', { class: 'row', tabindex: 0, 'aria-expanded': state.open.has(p.id) }, [
         el('td', {}, [el('div', { class: 'site', text: p.site_name }), isDeal(p) ? el('span', { class: 'tag deal', text: 'Agreement, no site' }) : (p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null)]),
-        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (estimated(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: estimated(p) ? 'Estimate' : 'Stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
+        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
         el('td', { text: roleLabel(p, state.role) }),
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
         el('td', { text: when(p) || 'Not dated' }),
-        el('td', { text: chipText(p.chips) || 'Not disclosed' }),
+        el('td', {}, (p.chips || []).length ? el('div', { class: 'chips' }, chipText(p.chips).split(', ').map((c) => tk('chip', c))) : el('span', { class: 'dim', text: 'Not disclosed' })),
         el('td', {}, p.sources[0] ? [srcLink(p.sources[0]), el('div', { class: 'dim', text: `${p.sources[0].date || ''} · ${lab(p.verification)}` })] : ''),
       ]);
       const toggle = () => { state.open.has(p.id) ? state.open.delete(p.id) : state.open.add(p.id); drawPhases(); };
@@ -304,7 +425,7 @@
     const dl = el('dl');
     const add = (k, v) => { if (v != null && v !== '' && !(Array.isArray(v) && !v.length)) dl.append(el('dt', { text: k }), el('dd', {}, v)); };
     const c = p.capacity || {}, d = p.derived, t = p.timeline || {}, pw = p.power || {}, mo = p.money || {};
-    if (isDeal(p)) add(estimated(p) ? 'Location (estimated)' : 'Location (country stated)', p.location_why);
+    if (isDeal(p)) add(guessed(p) ? 'Location (estimated)' : 'Location (country stated)', p.location_why);
     add('Stated capacity', c.stated_mw != null ? `${fmtMW(c.stated_mw)} MW (${c.stated_basis || 'basis unspecified'})` : null);
     add('Facility / IT', d.facility_mw != null ? `${fmtMW(d.facility_mw)} MW facility (${d.facility_basis}); ${fmtMW(d.it_mw)} MW IT (${d.it_basis})` : null);
     add('Campus plan', p.campus_planned_mw ? `${fmtMW(p.campus_planned_mw)} MW at full build-out` : null);
@@ -337,7 +458,7 @@
         el('td', {}, [el('div', { class: 'site', text: d.name }), el('div', { class: 'dim', text: String(d.type || '').replace(/_/g, ' ') })]),
         el('td', { text: (pt.buyer || []).map(entName).join(', ') }), el('td', { text: (pt.seller || []).map(entName).join(', ') }),
         el('td', { class: 'num', text: d.capacity_mw ? gw(d.capacity_mw) : 'n/a' }),
-        el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (lo.basis === 'estimated' ? 'estimate' : 'stated'), title: lo.why || '', text: lo.basis === 'estimated' ? 'Estimate' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
+        el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (estBasis(lo.basis) ? 'estimate' : 'stated'), title: lo.why || '', text: estBasis(lo.basis) ? 'Estimate' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
         el('td', {}, [lo.unsited_mw >= 1 ? el('b', { text: gw(lo.unsited_mw) + ' GW added' }) : el('span', { text: lo.treatment === 'count' ? 'Counted at sites' : lo.treatment === 'dropped' ? 'Dropped or superseded' : 'Nothing added' }), el('div', { class: 'dim', text: lo.treatment === 'count' ? ((lo.unsited_mw >= 1 ? 'Already counted: ' : 'All of it is already counted: ') + ((lo.deductions || []).join('; ') || 'at named sites')) : String(lo.treatment_text || '').replace(/^Not added: /, '') }), lo.note ? el('div', { class: 'dim', text: lo.note }) : null, lo.dropped_source ? el('div', {}, ['Source: ', el('a', { href: lo.dropped_source.url, target: '_blank', rel: 'noopener', text: `${lo.dropped_source.publisher}, ${lo.dropped_source.date}` })]) : null]),
         el('td', { text: chipText(d.chips) }),
         el('td', { text: (d.schedule || []).filter((x) => x.cumulative_mw > 0).map((x) => `${x.period}: ${gw(x.cumulative_mw)} GW`).join(' · ') || 'Not given' }),
@@ -349,7 +470,8 @@
 
   // ---------------------------------------------------------------- wiring
   function render() {
-    drawTiles(); drawTime(); drawPivot();
+    for (const [sel, key] of FILTER_SELS) $(sel).classList.toggle('set', !!state[key]);
+    drawSummary(); drawStagebar(); drawTiles(); drawTime(); drawPivot(); drawYearTables();
     drawBars('#chart-state', (d) => phaseById[d.id].us_state || null, 'No US capacity matches these filters.');
     $('#c3-title').textContent = `By company (${$('#f-role').selectedOptions[0].text.toLowerCase()})`;
     drawBars('#chart-company', (d) => roleLabel(phaseById[d.id], state.role), 'Nothing matches these filters.');
@@ -375,6 +497,12 @@
       render();
     });
     $('#stamp').textContent = `Updated ${ds.generated.slice(0, 10)} · ${ds.phases.filter((p) => !isDeal(p)).length} sourced site phases, ${ds.deals.length} agreements`;
+    document.querySelectorAll('#yt-period button').forEach((b) => b.addEventListener('click', () => {
+      YT.period = b.dataset.v;
+      document.querySelectorAll('#yt-period button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+      drawYearTables();
+    }));
+    for (const id of Object.keys(YT_DEF)) $('#yt-' + id + ' .more').addEventListener('click', () => { YT.all[id] = !YT.all[id]; drawYearTable(id); });
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 120); });
     drawDeals(); render();
   }
