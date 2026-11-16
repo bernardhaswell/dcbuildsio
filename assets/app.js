@@ -22,7 +22,7 @@
     partially_live: 'Partially live', live: 'Live', delayed: 'Delayed', paused: 'Paused', cancelled: 'Cancelled',
     nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA',
     openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq',
-    huawei: 'Huawei', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
+    huawei: 'Huawei', alibaba: 'Alibaba T-Head', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
     verified: 'Verified', sourced: 'Sourced',
   };
   const lab = (k) => LABEL[k] || k;
