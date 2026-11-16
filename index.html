@@ -12,16 +12,26 @@
   <div class="wrap">
     <p class="eyebrow">Open dataset</p>
     <h1>AI datacenter build-out tracker</h1>
-    <p class="lede">Gigawatts of AI datacenter capacity by site phase, company, accelerator, region and US state, from 2024 to 2030 and beyond. Every figure links to a public source.</p>
+    <p class="lede">Gigawatts of AI datacenter capacity by site phase, company, accelerator, region and US state, from 2024 to 2030 and beyond. Every figure links to a public source. Capacity under agreements with no named site is included and labelled, and guessed locations are marked as guesses.</p>
     <p class="meta"><span id="stamp">Loading data</span> · <a href="data/dc-tracker.xlsx" download>Download spreadsheet (.xlsx)</a> · <a href="data/phases.csv" download>Sites CSV</a> · <a href="data/deployment.csv" download>Deployment CSV</a> · <a href="data/deals.csv" download>Deals CSV</a> · <a href="data/sources.csv" download>Sources CSV</a></p>
   </div>
 </header>
 
 <main class="wrap">
   <section class="filters" aria-label="Filters">
+    <label>Show <select id="f-kind">
+      <option value="">Sites and agreements</option><option value="site">Named sites only</option>
+      <option value="deal">Agreements with no site</option><option value="guessed">Guessed locations only</option>
+    </select></label>
+    <label>Stage <select id="f-stage">
+      <option value="">All stages</option><option value="real">Operating or under construction</option>
+      <option value="operating">Operating</option><option value="construction">Under construction</option>
+      <option value="permitted">Permitted, not started</option><option value="paper">Paper stage (all)</option>
+      <option value="announced">Paper: announced site</option><option value="agreement">Paper: agreement with no site</option>
+      <option value="rumoured">Paper: reported, unconfirmed</option>
+    </select></label>
     <label>Region <select id="f-region"></select></label>
     <label>US state <select id="f-state"></select></label>
-    <label>Status <select id="f-status"></select></label>
     <label>Chip vendor <select id="f-chip"></select></label>
     <label>Company means <select id="f-role">
       <option value="operator">Operator</option><option value="end_customer">End customer</option>
@@ -45,7 +55,8 @@
         <label>Split by <select id="c-group">
           <option value="chip_vendor">Chip vendor</option><option value="chip_family">Chip family</option>
           <option value="company">Company</option><option value="region">Region</option>
-          <option value="us_state">US state</option><option value="status">Status</option>
+          <option value="us_state">US state</option><option value="stage">Stage</option><option value="status">Status</option>
+          <option value="kind">Named site or agreement</option>
         </select></label>
       </div>
     </div>
@@ -71,7 +82,7 @@
 
   <section class="card">
     <div class="card-head">
-      <div><h2>Site phases</h2><p class="sub" id="t-sub"></p></div>
+      <div><h2>Sites and agreements with no site</h2><p class="sub" id="t-sub"></p></div>
     </div>
     <div class="table-scroll"><table id="t-phases"><thead></thead><tbody></tbody></table></div>
   </section>
@@ -79,7 +90,7 @@
   <section class="card">
     <div class="card-head">
       <div><h2>Capacity deals and commitments</h2>
-      <p class="sub">Chip supply and cloud capacity agreements that are not tied to one site. They are listed for reference and are not added to the site totals above, because the sites that deliver them are counted there.</p></div>
+      <p class="sub">Chip supply, cloud capacity and company-wide agreements. Each has a likely location, marked "Guessed" where no source states it. Only the part of an agreement that is not already at a named site is added to the totals, and agreements that describe the same capacity twice add nothing.</p></div>
     </div>
     <div class="table-scroll"><table id="t-deals"><thead></thead><tbody></tbody></table></div>
   </section>
@@ -96,8 +107,12 @@
       <div>
         <h3>Timing</h3>
         <p>Capacity is placed in the period it energizes, following a staged ramp where sources give one. Half-years are shown in Q2 and Q4. Year-only dates appear in the annual view and in a "quarter not given" column in the quarterly view. Capacity with no date is reported as undated and left out of the chart.</p>
+        <h3>Everything announced counts</h3>
+        <p>The totals include everything that has been announced or planned, from operating halls to letters of intent. Use "Stage" to narrow it: operating, under construction, permitted, or paper stage. Paper stage means announced but not started, reported but unconfirmed, or committed in an agreement with no site yet.</p>
+        <h3>Agreements with no site</h3>
+        <p>Some capacity is committed in an agreement before any site is named. That part is in the totals as its own row, labelled "Agreement, no site". We take the agreement's size, subtract what is already at named sites, and subtract capacity that another agreement already covers. Chip supply agreements are assumed to fill the buyer's named sites first. The location is given by country only: "Country stated" where a source says so, "Guessed location" where it is our inference from where that company builds. Guessed rows are low confidence, and some of this capacity may sit in a provider's datacenter that is already listed without a named customer. Use "Show" to see named sites only.</p>
         <h3>What is not counted</h3>
-        <p>Cancelled projects, options to expand, and figures that describe power supply (a power plant, fuel cells or a supply contract) and not datacenter load stay in the table, marked "Not counted", and add nothing to the totals. Where a grid connection is the only published figure, it is counted as an upper bound and labelled.</p>
+        <p>Cancelled projects, agreements replaced by a later one, and figures that describe power supply (a power plant, fuel cells or a supply contract) and not datacenter load stay in the table, marked "Not counted", and add nothing to the totals. Where a grid connection is the only published figure, it is counted as an upper bound and labelled.</p>
         <h3>Sources and status</h3>
         <p>Every row links to at least one public source: a company release, filing, earnings call, utility or permit document, or press report. "Verified" rows have a supporting quote on file; "Sourced" rows have a matching public source and are awaiting a full read. Estimates are labelled.</p>
       </div>
