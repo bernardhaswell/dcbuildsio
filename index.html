@@ -5,53 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Datacenter Build-out Tracker</title>
 <meta name="description" content="AI datacenter capacity by site, company, accelerator, region and US state, 2024 to 2030 and beyond. Every figure links to a public source.">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<header class="top">
+<nav class="nav" aria-label="Sections">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Build-out</a>
+    <div class="nav-links">
+      <a href="#timeline">Timeline</a><a href="#by-year">By year</a><a href="#sites">Sites</a><a href="#deals">Agreements</a><a href="#method">Method</a>
+    </div>
+    <a class="nav-cta" href="data/dc-tracker.xlsx" download>Download .xlsx</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
   <div class="wrap">
-    <p class="eyebrow">Open dataset</p>
-    <h1>AI datacenter build-out tracker</h1>
-    <p class="lede">Gigawatts of AI datacenter capacity by site phase, company, accelerator, region and US state, from 2024 to 2030 and beyond. Every figure links to a public source. Capacity under agreements with no named site is included and labelled, and guessed locations are marked as guesses.</p>
-    <p class="meta"><span id="stamp">Loading data</span> · <a href="data/dc-tracker.xlsx" download>Download spreadsheet (.xlsx)</a> · <a href="data/phases.csv" download>Sites CSV</a> · <a href="data/deployment.csv" download>Deployment CSV</a> · <a href="data/deals.csv" download>Deals CSV</a> · <a href="data/sources.csv" download>Sources CSV</a></p>
+    <p class="eyebrow"><span class="tk tk-kw">open dataset</span> <span id="stamp" class="dim">Loading data</span></p>
+    <h1>The AI build-out,<br><span class="h1-soft">site by site.</span></h1>
+    <p class="summary" id="summary" aria-live="polite">Gigawatts of AI datacenter capacity by site, company, accelerator, region and US state, from 2024 to 2030 and beyond.</p>
+    <div class="stagebar-wrap">
+      <div class="stagebar-head"><span>How real is it?</span><span class="dim">Select a stage to filter the whole page</span></div>
+      <div class="stagebar" id="stagebar" role="group" aria-label="Capacity by stage. Select a stage to filter."></div>
+      <div class="stagelegend" id="stagelegend"></div>
+    </div>
+    <p class="hero-note">Every figure links to a public source. Everything announced or planned counts, including agreements with no site yet; where no source states a location, the country is our estimate and is marked <span class="tag guess">Estimate</span>.</p>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="filters" aria-label="Filters">
-    <label>Show <select id="f-kind">
-      <option value="">Sites and agreements</option><option value="site">Named sites only</option>
-      <option value="deal">Agreements with no site</option><option value="guessed">Guessed locations only</option>
-    </select></label>
-    <label>Stage <select id="f-stage">
-      <option value="">All stages</option><option value="real">Operating or under construction</option>
-      <option value="operating">Operating</option><option value="construction">Under construction</option>
-      <option value="permitted">Permitted, not started</option><option value="paper">Paper stage (all)</option>
-      <option value="announced">Paper: announced site</option><option value="agreement">Paper: agreement with no site</option>
-      <option value="rumoured">Paper: reported, unconfirmed</option>
-      <option value="cancelled">Cancelled (kept on record)</option>
-    </select></label>
-    <label>Region <select id="f-region"></select></label>
-    <label>US state <select id="f-state"></select></label>
-    <label>Chip vendor <select id="f-chip"></select></label>
-    <label>Company means <select id="f-role">
-      <option value="operator">Operator</option><option value="end_customer">End customer</option>
-      <option value="tenant">Tenant</option><option value="owner">Owner</option><option value="developer">Developer</option>
-    </select></label>
-    <label>Measure <select id="f-measure"><option value="facility_mw">Facility GW</option><option value="it_mw">IT GW</option></select></label>
-    <label class="grow">Search <input id="f-q" type="search" placeholder="Site, company, city"></label>
-    <button id="f-reset" type="button">Reset</button>
-  </section>
+<section class="filters-shell" aria-label="Filters">
+  <div class="wrap">
+    <div class="filters">
+      <label>Show <select id="f-kind">
+        <option value="">Sites and agreements</option><option value="site">Named sites only</option>
+        <option value="deal">Agreements with no site</option><option value="guessed">Estimated locations only</option>
+      </select></label>
+      <label>Stage <select id="f-stage">
+        <option value="">All stages</option><option value="real">Operating or under construction</option>
+        <option value="operating">Operating</option><option value="construction">Under construction</option>
+        <option value="permitted">Permitted, not started</option><option value="paper">Paper stage (all)</option>
+        <option value="announced">Paper: announced site</option><option value="agreement">Paper: agreement with no site</option>
+        <option value="rumoured">Paper: reported, unconfirmed</option>
+        <option value="cancelled">Cancelled (kept on record)</option>
+      </select></label>
+      <label>Region <select id="f-region"></select></label>
+      <label>US state <select id="f-state"></select></label>
+      <label>Chip vendor <select id="f-chip"></select></label>
+      <label>Company means <select id="f-role">
+        <option value="operator">Operator</option><option value="end_customer">End customer</option>
+        <option value="tenant">Tenant</option><option value="owner">Owner</option><option value="developer">Developer</option>
+      </select></label>
+      <label>Measure <select id="f-measure"><option value="facility_mw">Facility GW</option><option value="it_mw">IT GW</option></select></label>
+      <label class="grow">Search <input id="f-q" type="search" placeholder="Site, company, city"></label>
+      <button id="f-reset" type="button" class="ghost">Reset</button>
+    </div>
+  </div>
+</section>
 
+<main class="wrap">
   <section class="tiles" id="tiles" aria-label="Headline figures"></section>
 
-  <section class="card">
+  <section class="card" id="timeline">
     <div class="card-head">
       <div>
+        <p class="kicker">Timeline</p>
         <h2>Capacity energizing by period</h2>
         <p class="sub" id="c1-sub"></p>
       </div>
-      <div class="seg" role="group" aria-label="Chart options">
+      <div class="seg">
         <label>Period <select id="c-period"><option value="year">Annual</option><option value="quarter">Quarterly</option></select></label>
         <label>Split by <select id="c-group">
           <option value="chip_vendor">Chip vendor</option><option value="chip_family">Chip family</option>
@@ -63,60 +87,103 @@
     </div>
     <div id="chart-time" class="chart"></div>
     <div id="legend-time" class="legend"></div>
+    <details class="as-table">
+      <summary>Show this chart as a table</summary>
+      <p class="sub" id="pv-sub"></p>
+      <div class="table-scroll"><table id="t-pivot" class="pivot"><thead></thead><tbody></tbody></table></div>
+    </details>
   </section>
 
-  <section class="card">
-    <div class="card-head"><div><h2>Capacity table</h2><p class="sub" id="pv-sub"></p></div></div>
-    <div class="table-scroll"><table id="t-pivot" class="pivot"><thead></thead><tbody></tbody></table></div>
+  <section id="by-year" class="years">
+    <div class="section-head">
+      <div>
+        <p class="kicker">By year</p>
+        <h2 class="h-lg">Who is building, and with what</h2>
+        <p class="sub" id="yt-sub">Gigawatts energizing each year, by chip maker, by operator and by end user. All three follow the filters above.</p>
+      </div>
+      <div class="segbtns" role="radiogroup" aria-label="Period for these tables" id="yt-period">
+        <button type="button" role="radio" aria-checked="true" data-v="year">Annual</button>
+        <button type="button" role="radio" aria-checked="false" data-v="quarter">Quarterly</button>
+      </div>
+    </div>
+    <section class="card ytable" id="yt-chip">
+      <div class="card-head"><div><h3 class="h-md">By chip maker</h3><p class="sub"></p></div><button type="button" class="ghost sm more" hidden></button></div>
+      <div class="table-scroll"><table class="pivot heat"><thead></thead><tbody></tbody></table></div>
+    </section>
+    <section class="card ytable" id="yt-op">
+      <div class="card-head"><div><h3 class="h-md">By operator</h3><p class="sub"></p></div><button type="button" class="ghost sm more" hidden></button></div>
+      <div class="table-scroll"><table class="pivot heat"><thead></thead><tbody></tbody></table></div>
+    </section>
+    <section class="card ytable" id="yt-end">
+      <div class="card-head"><div><h3 class="h-md">By end user</h3><p class="sub"></p></div><button type="button" class="ghost sm more" hidden></button></div>
+      <div class="table-scroll"><table class="pivot heat"><thead></thead><tbody></tbody></table></div>
+    </section>
   </section>
 
   <div class="two">
     <section class="card">
-      <div class="card-head"><div><h2>By US state</h2><p class="sub">All tracked phases in the current filter, dated or not.</p></div></div>
+      <div class="card-head"><div><p class="kicker">Geography</p><h2>By US state</h2><p class="sub">All tracked phases in the current filter, dated or not.</p></div></div>
       <div id="chart-state" class="chart"></div>
     </section>
     <section class="card">
-      <div class="card-head"><div><h2 id="c3-title">By company</h2><p class="sub">Uses the role chosen in "Company means". Joint roles are shown together.</p></div></div>
+      <div class="card-head"><div><p class="kicker">Companies</p><h2 id="c3-title">By company</h2><p class="sub">Uses the role chosen in "Company means". Joint roles are shown together.</p></div></div>
       <div id="chart-company" class="chart"></div>
     </section>
   </div>
 
-  <section class="card">
+  <section class="card" id="sites">
     <div class="card-head">
-      <div><h2>Sites and agreements with no site</h2><p class="sub" id="t-sub"></p></div>
+      <div><p class="kicker">Register</p><h2>Sites and agreements with no site</h2><p class="sub" id="t-sub"></p></div>
     </div>
-    <div class="table-scroll"><table id="t-phases"><thead></thead><tbody></tbody></table></div>
+    <div class="table-scroll tall"><table id="t-phases"><thead></thead><tbody></tbody></table></div>
   </section>
 
-  <section class="card">
+  <section class="card" id="deals">
     <div class="card-head">
-      <div><h2>Capacity deals and commitments</h2>
-      <p class="sub">Chip supply, cloud capacity and company-wide agreements. Each has a likely location, marked "Guessed" where no source states it. Only the part of an agreement that is not already at a named site is added to the totals, and agreements that describe the same capacity twice add nothing.</p></div>
+      <div><p class="kicker">Agreements</p><h2>Capacity deals and commitments</h2>
+      <p class="sub">Chip supply, cloud capacity and company-wide agreements. Each has a likely location, marked "Estimate" where no source states it. Only the part of an agreement that is not already at a named site is added to the totals, and agreements that describe the same capacity twice add nothing.</p></div>
     </div>
-    <div class="table-scroll"><table id="t-deals"><thead></thead><tbody></tbody></table></div>
+    <div class="table-scroll tall"><table id="t-deals"><thead></thead><tbody></tbody></table></div>
   </section>
 
-  <section class="card method">
-    <h2>How to read this</h2>
+  <section class="method" id="method">
+    <p class="kicker">Method</p>
+    <h2 class="h-lg">How to read this</h2>
     <div class="cols">
       <div>
         <h3>One site phase, counted once</h3>
-        <p>The same building often appears in a chip vendor's announcement, a cloud provider's and a developer's. Each row here is one tranche of capacity at one place, and companies are roles on that row, so nothing is counted twice.</p>
+        <p>The same building often appears in a <span class="tk tk-chip">chip vendor</span>'s announcement, a <span class="tk tk-co">cloud provider</span>'s and a <span class="tk tk-co">developer</span>'s. Each row here is one tranche of capacity at one place, and companies are roles on that row, so nothing is counted twice.</p>
         <h3>Three kinds of megawatt</h3>
-        <p>IT load is what the chips draw. Facility load adds cooling and losses and is what most announcements quote. Grid load is the utility connection. Each row keeps the figure as its source states it; where only one is given, the other is derived at a PUE of 1.3 and marked as derived.</p>
-      </div>
-      <div>
+        <p><span class="tk tk-kw">IT load</span> is what the chips draw. <span class="tk tk-kw">Facility load</span> adds cooling and losses and is what most announcements quote. <span class="tk tk-kw">Grid load</span> is the utility connection. Each row keeps the figure as its source states it; where only one is given, the other is derived at a PUE of <span class="tk tk-num">1.3</span> and marked as derived.</p>
         <h3>Timing</h3>
         <p>Capacity is placed in the period it energizes, following a staged ramp where sources give one. Half-years are shown in Q2 and Q4. Year-only dates appear in the annual view and in a "quarter not given" column in the quarterly view. Capacity with no date is reported as undated and left out of the chart.</p>
+      </div>
+      <div>
         <h3>Everything announced counts</h3>
-        <p>The totals include everything that has been announced or planned, from operating halls to letters of intent. Use "Stage" to narrow it: operating, under construction, permitted, or paper stage. Paper stage means announced but not started, reported but unconfirmed, or committed in an agreement with no site yet.</p>
+        <p>The totals include everything that has been announced or planned, from operating halls to letters of intent. Use "Stage" to narrow it: <span class="tk tk-st-op">operating</span>, <span class="tk tk-st-uc">under construction</span>, <span class="tk tk-st-pm">permitted</span>, or <span class="tk tk-st-pp">paper stage</span>. Paper stage means announced but not started, reported but unconfirmed, or committed in an agreement with no site yet.</p>
         <h3>Agreements with no site</h3>
-        <p>Some capacity is committed in an agreement before any site is named. That part is in the totals as its own row, labelled "Agreement, no site". We take the agreement's size, subtract what is already at named sites, and subtract capacity that another agreement already covers. Chip supply agreements are assumed to fill the buyer's named sites first. The location is given by country only: "Country stated" where a source says so, "Guessed location" where it is our inference from where that company builds. Guessed rows are low confidence, and some of this capacity may sit in a provider's datacenter that is already listed without a named customer. Use "Show" to see named sites only.</p>
+        <p>Some capacity is committed in an agreement before any site is named. That part is in the totals as its own row, labelled "Agreement, no site". We take the agreement's size, subtract what is already at named sites, and subtract capacity that another agreement already covers. Chip supply agreements are assumed to fill the buyer's named sites first. The location is given by country only: "Country stated" where a source says so, <span class="tag guess">Estimate</span> where it is our estimate from where that company builds. Estimated locations are low confidence, and some of this capacity may sit in a provider's datacenter that is already listed without a named customer. Use "Show" to see named sites only.</p>
+      </div>
+      <div>
         <h3>What is not counted</h3>
-        <p>Every announced datacenter project and agreement is in the data. An item leaves the totals only when a public source says it was cancelled, dropped or replaced; it stays on record with that source and can be picked under "Stage". Power equipment for sites that are already listed (fuel cells, generators, supply contracts) adds nothing. A planned campus whose only published figure is its power supply is counted, with that figure as an upper bound. Where a chip deal and a site describe the same capacity, it is counted once, and the deals table shows how much of each deal is already counted at sites. Where a grid connection is the only published figure, it is counted as an upper bound and labelled.</p>
+        <p>Every announced datacenter project and agreement is in the data. An item leaves the totals only when a public source says it was <span class="tk tk-st-x">cancelled</span>, dropped or replaced; it stays on record with that source and can be picked under "Stage". Power equipment for sites that are already listed (fuel cells, generators, supply contracts) adds nothing. A planned campus whose only published figure is its power supply is counted, with that figure as an upper bound. Where a chip deal and a site describe the same capacity, it is counted once, and the deals table shows how much of each deal is already counted at sites. Where a grid connection is the only published figure, it is counted as an upper bound and labelled.</p>
+        <h3>Operator and end user</h3>
+        <p>The <span class="tk tk-co">operator</span> runs the facility or the cloud inside it; the <span class="tk tk-co">end user</span> is whose workloads run there. Both are taken only from what sources state. Where no source names one, the capacity sits in a "Not disclosed" row at the foot of the table rather than assigned by inference.</p>
         <h3>Sources and status</h3>
         <p>Every row links to at least one public source: a company release, filing, earnings call, utility or permit document, or press report. "Verified" rows have a supporting quote on file; "Sourced" rows have a matching public source and are awaiting a full read. Estimates are labelled.</p>
       </div>
+    </div>
+  </section>
+
+  <section class="downloads" aria-label="Downloads">
+    <p class="kicker">Data</p>
+    <h2 class="h-lg">Take it with you</h2>
+    <div class="dl-grid">
+      <a class="dl" href="data/dc-tracker.xlsx" download><b>Spreadsheet</b><span>All sheets, pivots included</span><code>.xlsx</code></a>
+      <a class="dl" href="data/phases.csv" download><b>Sites</b><span>One row per site phase</span><code>.csv</code></a>
+      <a class="dl" href="data/deployment.csv" download><b>Deployment</b><span>GW by period and chip</span><code>.csv</code></a>
+      <a class="dl" href="data/deals.csv" download><b>Deals</b><span>Agreements and commitments</span><code>.csv</code></a>
+      <a class="dl" href="data/sources.csv" download><b>Sources</b><span>Every public source cited</span><code>.csv</code></a>
     </div>
   </section>
 </main>
