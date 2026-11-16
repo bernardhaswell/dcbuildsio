@@ -214,7 +214,18 @@
 <footer class="wrap foot">
   <p>Data compiled from public sources. Figures are announcements and estimates, not guarantees, and change often. Corrections are welcome through the repository's issue tracker.</p>
 </footer>
-<div id="tip" class="tip" role="tooltip" hidden></div>
+<div id="bk" class="bk" hidden role="dialog" aria-modal="true" aria-labelledby="bk-who">
+    <aside class="bk-panel">
+      <header class="bk-head">
+        <div><div class="bk-k" id="bk-k"></div><h3 id="bk-who"></h3><div class="bk-v" id="bk-v"></div></div>
+        <button type="button" class="bk-x" id="bk-x" aria-label="Close">&times;</button>
+      </header>
+      <p class="bk-sub dim" id="bk-sub"></p>
+      <ol class="bk-list" id="bk-list"></ol>
+      <footer class="bk-sum" id="bk-sum"></footer>
+    </aside>
+  </div>
+  <div id="tip" class="tip" role="tooltip" hidden></div>
 <script src="assets/app.js"></script>
 </body>
 </html>

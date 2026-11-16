@@ -386,3 +386,51 @@ table.pivot tr.sub td .tag { margin: 0; }
 /* menu opens upward inside the hero so it is never clipped; clip (not hidden) so focus cannot scroll the hero */
 .hero { overflow: clip; }
 .ypick-menu { top: auto; bottom: calc(100% + 8px); max-height: 380px; }
+
+/* clickable figures in the year tables */
+.yt td.pick, td.pick { cursor: pointer; transition: box-shadow .12s, background .12s; }
+td.pick:hover, td.pick:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px var(--s1); border-radius: 6px; color: var(--text); }
+
+/* breakdown drawer */
+.bk { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0); transition: background .22s; }
+.bk.on { background: rgba(0,0,0,.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.bk-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(560px, 100vw); display: flex; flex-direction: column;
+  background: rgba(22,22,25,.92); backdrop-filter: saturate(160%) blur(24px); -webkit-backdrop-filter: saturate(160%) blur(24px);
+  box-shadow: -1px 0 0 var(--line-2), -30px 0 80px rgba(0,0,0,.5); transform: translateX(104%); transition: transform .26s cubic-bezier(.2,.8,.2,1); }
+.bk.on .bk-panel { transform: none; }
+.bk-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 26px 26px 6px; }
+.bk-k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.bk-head h3 { margin: 4px 0 6px; font-size: 24px; font-weight: 650; letter-spacing: -.02em; line-height: 1.2; }
+.bk-v { font-size: 15px; color: var(--text-2); }
+.bk-v b { font-size: 30px; font-weight: 650; color: var(--text); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.bk-x { flex: none; width: 34px; height: 34px; border-radius: 99px; font-size: 22px; line-height: 1; color: var(--text-2); background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px var(--line-2); }
+.bk-x:hover { color: var(--text); background: rgba(255,255,255,.12); }
+.bk-sub { margin: 4px 26px 12px; font-size: 13px; line-height: 1.5; }
+.bk-list { flex: 1; overflow: auto; margin: 0; padding: 0 14px 12px; list-style: none; overscroll-behavior: contain; }
+.bk-item { padding: 14px 12px; border-radius: 12px; border-top: 1px solid var(--line); }
+.bk-item:first-child { border-top: 0; }
+.bk-item:hover { background: rgba(255,255,255,.03); }
+.bk-top { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
+.bk-name { font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.bk-mw { flex: none; font-family: var(--mono); font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+.bk-mw::after { content: " GW"; color: var(--text-3); font-size: 11.5px; }
+.bk-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 7px; font-size: 12.5px; }
+.bk-how { margin-top: 8px; font-size: 12.5px; color: var(--text-2); }
+.bk-how summary { cursor: pointer; color: var(--text-3); list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+.bk-how summary::-webkit-details-marker { display: none; }
+.bk-how summary::before { content: ""; width: 5px; height: 5px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.bk-how[open] summary::before { transform: rotate(45deg); }
+.bk-how summary:hover { color: var(--text); }
+.bk-how ul { margin: 8px 0 0; padding: 10px 12px; list-style: none; border-radius: 10px; background: rgba(255,255,255,.035); line-height: 1.5; }
+.bk-how li + li { margin-top: 4px; }
+.bk-how b { font-weight: 600; color: var(--text); }
+.bk-src { margin-top: 7px; font-size: 12.5px; }
+.bk-src a { color: var(--t-co, var(--s1)); }
+.bk-sum { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 26px 22px; border-top: 1px solid var(--line-2); font-size: 14px; color: var(--text-2); }
+.bk-sum b { font-family: var(--mono); font-size: 16px; color: var(--text); }
+body.bk-on { overflow: hidden; }
+@media (max-width: 640px) {
+  .bk-panel { top: auto; left: 0; width: 100vw; height: 88vh; border-radius: 18px 18px 0 0; transform: translateY(104%); box-shadow: 0 -1px 0 var(--line-2), 0 -20px 60px rgba(0,0,0,.5); }
+  .bk-head { padding: 20px 18px 4px; } .bk-sub { margin: 4px 18px 10px; } .bk-list { padding: 0 6px 10px; } .bk-sum { padding: 14px 18px 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .bk, .bk-panel { transition: none; } }
