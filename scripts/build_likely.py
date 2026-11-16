@@ -60,7 +60,7 @@ def note(name):
 R = wb['Rows']; H = [c.value for c in R[1]]; ix = {h: j for j, h in enumerate(H)}
 rows = []
 for row in R.iter_rows(min_row=2, values_only=True):
-    if not row[0] or row[ix['region']] == 'china': continue
+    if not row[0] or str(row[ix['region']] or '').strip().lower() == 'china': continue
     g = lambda k: row[ix[k]]
     rows.append([g('id'), g('site'), g('phase'), g('FORECAST STATUS'), g('area'), g('us_state') or '', g('stage'), g('stated_year'),
                  r(g('it_gw')), r(g('counted_2025_2030')), [r(g(f'counted {y}')) for y in years], g('first_year_counted'),
