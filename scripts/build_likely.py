@@ -1,7 +1,7 @@
 """Build data/likely.json (and the published workbook) from the likely-energized workbook.
 
 Usage: python3 scripts/build_likely.py path/to/likely-energized-by-site.xlsx
-The workbook holds live formulas; it is recalculated with LibreOffice so the site reads
+The workbook holds live formulas; it is recalculated with LibreOffice so the site shows
 the same values a reader sees in Excel. Nothing on the site is hard-coded.
 """
 import json, shutil, subprocess, sys, tempfile, datetime, pathlib
@@ -14,41 +14,57 @@ shutil.copy(src, tmp / 'in.xlsx')
 subprocess.run(['soffice', '--headless', '--convert-to', 'xlsx:Calc MS Excel 2007 XML', '--outdir', str(tmp / 'out'), str(tmp / 'in.xlsx')], check=True, capture_output=True, timeout=300)
 calc = tmp / 'out' / 'in.xlsx'
 wb = openpyxl.load_workbook(calc, data_only=True)
+r = lambda v: round(float(v or 0), 4) if isinstance(v, (int, float)) or v is None else v
 
-r = lambda v: round(float(v or 0), 4)
 S = wb['Summary']
 years = [int(S.cell(1, c).value) for c in range(2, 8)]
-row = lambda ws, i: [r(ws.cell(i, c).value) for c in range(2, 8)]
-label = lambda i: str(S.cell(i, 1).value or '').strip()
-summary = {
-    'total': row(S, 3), 'us': row(S, 4), 'outside_us': row(S, 5),
-    'at_sites': row(S, 6), 'not_yet_tracked': row(S, 7),
-    'announced_dated': row(S, 10),
-}
-stages = [{'stage': label(i), 'it_gw': row(S, i)} for i in range(13, 20) if label(i)]
-regions = [{'region': label(i), 'it_gw': row(S, i)} for i in range(22, 28) if label(i)]
+lab = lambda i: str(S.cell(i, 1).value or '').strip()
+vals = lambda ws, i: [r(ws.cell(i, c).value) for c in range(2, 8)]
+def find(prefix):
+    for i in range(1, S.max_row + 1):
+        if lab(i).lower().startswith(prefix.lower()): return i
+    raise SystemExit(f'Summary row not found: {prefix}')
+summary = {'total': vals(S, find('Likely energized, total')), 'us': vals(S, find('US')), 'outside_us': vals(S, find('outside US')),
+           'at_sites': vals(S, find('at named sites')), 'estimate': vals(S, find('Estimate:')),
+           'announced_dated': vals(S, find('Tracker as published'))}
+summary_labels = {'at_sites': lab(find('at named sites')), 'estimate': lab(find('Estimate:'))}
+tiers, i = [], find('Named sites counted') + 1
+while lab(i).startswith('Tier'): tiers.append({'tier': lab(i), 'it_gw': vals(S, i)}); i += 1
+rec, i = [], find('Reconciliation') + 1
+while lab(i) and not lab(i).startswith('Rows by'): rec.append({'label': lab(i), 'it_gw': r(S.cell(i, 2).value)}); i += 1
+status, i = [], find('Rows by forecast status') + 1
+while lab(i) and not lab(i).startswith('For comparison'):
+    status.append({'status': lab(i), 'rows': int(S.cell(i, 2).value or 0), 'announced': r(S.cell(i, 3).value), 'counted': r(S.cell(i, 4).value)}); i += 1
 
 def table(name):
     ws = wb[name]; out = []
     for i in range(2, ws.max_row + 1):
         k = ws.cell(i, 1).value
-        if k is None: continue
-        v = [ws.cell(i, c).value for c in range(2, 13)]
-        out.append({'name': str(k), 'years': [r(x) for x in v[:6]], 'total': r(v[6]), 'at_sites': r(v[7]),
-                    'estimate': r(v[8]), 'announced': r(v[9]), 'rows': int(v[10] or 0)})
-    return sorted(out, key=lambda x: -x['total'])
+        if k is None or ws.cell(i, 2).value is None: continue
+        v = [ws.cell(i, c).value for c in range(2, 12)]
+        out.append({'name': str(k), 'years': [r(x) for x in v[:6]], 'total': r(v[6]), 'all_dates': r(v[7]), 'rows': int(v[8] or 0), 'rows_in': int(v[9] or 0)})
+    return out
 
+R = wb['Rows']; H = [c.value for c in R[1]]; ix = {h: j for j, h in enumerate(H)}
+rows = []
+for row in R.iter_rows(min_row=2, values_only=True):
+    if not row[0] or row[ix['region']] == 'china': continue
+    g = lambda k: row[ix[k]]
+    rows.append([g('id'), g('site'), g('phase'), g('FORECAST STATUS'), g('area'), g('us_state') or '', g('stage'), g('stated_year'),
+                 r(g('it_gw')), r(g('counted_2025_2030')), [r(g(f'counted {y}')) for y in years], g('first_year_counted'),
+                 g('chip_vendor'), g('end_user'), g('end_user_basis'), g('operator'), g('reason'), g('source_url'), g('tier')])
 A = wb['Assumptions']
-assumptions = []
-for i in range(2, 9):
-    if A.cell(i, 1).value:
-        assumptions.append({'stage': A.cell(i, 1).value, 'chance': r(A.cell(i, 2).value), 'on_time': r(A.cell(i, 3).value),
-                            'one_late': r(A.cell(i, 4).value), 'two_late': r(A.cell(i, 5).value), 'why': A.cell(i, 9).value})
-
-about = [str(c.value) for c in wb['About']['A'] if c.value]
+assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'counts': A.cell(i, 3).value, 'earliest': A.cell(i, 4).value, 'why': A.cell(i, 6).value}
+               for i in range(2, A.max_row + 1) if isinstance(A.cell(i, 1).value, int)]
 out = {'generated': datetime.date.today().isoformat(), 'basis': 'IT GW, worldwide excluding China', 'years': years,
-       'summary': summary, 'stages': stages, 'regions': regions, 'assumptions': assumptions, 'about': about,
-       'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')}}
-(root / 'data' / 'likely.json').write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')))
+       'summary': summary, 'summary_labels': summary_labels, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
+       'about': [str(c.value) for c in wb['About']['A'] if c.value],
+       'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
+       'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier'],
+       'rows': rows}
+txt = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
+assert 'defensib' not in txt.lower()
+(root / 'data' / 'likely.json').write_text(txt)
 shutil.copy(calc, root / 'data' / 'likely-energized-by-site.xlsx')
-print('likely.json written:', summary['total'])
+chk = [round(sum(x[10][k] for x in rows), 3) for k in range(6)]
+print('total', summary['total'], '\nat sites', summary['at_sites'], '\nrows sum', chk, '\nrows', len(rows))
