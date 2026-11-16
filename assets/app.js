@@ -35,18 +35,28 @@
   const fmtMW = (mw) => (mw == null ? '' : Math.round(mw).toLocaleString('en-US'));
 
   let DS, phaseById, state;
-  const defaults = () => ({ region: '', us_state: '', status: '', chip: '', role: 'operator', measure: 'facility_mw', q: '',
+  const defaults = () => ({ kind: '', stage: '', region: '', us_state: '', chip: '', role: 'operator', measure: 'facility_mw', q: '',
     period: 'year', group: 'chip_vendor', sort: { key: 'mw', dir: -1 }, open: new Set() });
 
   const entName = (id) => (DS.entities[id] && DS.entities[id].name) || id;
   const roleLabel = (p, role) => (p.roles[role] || []).map(entName).join(' + ') || 'Not disclosed';
   const mwOf = (p, measure) => (measure === 'it_mw' ? p.derived.it_mw : p.derived.facility_mw);
   const counted = (p) => p.counted !== false;
+  const isDeal = (p) => p.kind === 'deal';
+  const guessed = (p) => isDeal(p) && p.location_basis === 'guessed';
+  const stageOf = (p) => (isDeal(p) ? 'agreement' : p.status === 'live' || p.status === 'partially_live' ? 'operating'
+    : p.status === 'under_construction' ? 'construction' : p.status === 'permitted' ? 'permitted' : p.status === 'rumoured' ? 'rumoured'
+    : p.status === 'cancelled' ? 'cancelled' : 'announced');
+  const STAGE = { operating: 'Operating', construction: 'Under construction', permitted: 'Permitted, not started', announced: 'Paper: announced site',
+    agreement: 'Paper: agreement with no site', rumoured: 'Paper: reported, unconfirmed', cancelled: 'Cancelled' };
+  const passStage = (p) => { const s = stageOf(p), f = state.stage; return !f || (f === 'real' ? s === 'operating' || s === 'construction' : f === 'paper' ? s === 'announced' || s === 'agreement' || s === 'rumoured' : s === f); };
+  const kindLabel = (p) => (!isDeal(p) ? 'Named sites' : guessed(p) ? 'Agreements with no site, location guessed' : 'Agreements with no site, country stated');
 
   function passPhase(p) {
+    if (state.kind && (state.kind === 'guessed' ? !guessed(p) : (state.kind === 'deal') !== isDeal(p))) return false;
     if (state.region && p.region !== state.region) return false;
     if (state.us_state && p.us_state !== state.us_state) return false;
-    if (state.status && p.status !== state.status) return false;
+    if (!passStage(p)) return false;
     if (state.chip && !(p.chips || []).some((c) => c.vendor === state.chip)) return false;
     if (state.q) {
       const hay = [p.site_name, p.phase_name, p.city, p.county, p.us_state, p.country,
@@ -61,7 +71,9 @@
     const p = phaseById[d.id];
     if (g === 'company') return roleLabel(p, state.role);
     if (g === 'chip_family') return d.chip_vendor === 'undisclosed' ? 'Undisclosed' : `${lab(d.chip_vendor)} ${d.chip_family === 'unspecified' ? '(family n/a)' : d.chip_family.replace(/_/g, ' ')}`;
-    if (g === 'us_state') return p.us_state || 'Outside US';
+    if (g === 'us_state') return p.us_state || (p.region === 'us' && isDeal(p) ? 'US, state not known (agreements)' : 'Outside US');
+    if (g === 'kind') return kindLabel(p);
+    if (g === 'stage') return STAGE[stageOf(p)];
     if (g === 'chip_vendor') return lab(d.chip_vendor);
     return lab(g === 'region' ? p.region : p.status);
   };
@@ -69,7 +81,7 @@
   // Colour follows the entity: slots are assigned once from the full dataset, never from the filtered view.
   const colorMaps = {};
   function buildColors() {
-    for (const g of ['chip_vendor', 'chip_family', 'company', 'region', 'us_state', 'status']) {
+    for (const g of ['chip_vendor', 'chip_family', 'company', 'region', 'us_state', 'status', 'kind', 'stage']) {
       const totals = new Map();
       for (const d of DS.deployments) {
         const k = groupKey(d, g);
@@ -78,6 +90,7 @@
       let keys = [...totals.keys()].sort((a, b) => totals.get(b) - totals.get(a));
       if (g === 'chip_vendor') keys = CHIP_ORDER.map(lab).filter((k) => totals.has(k)).concat(keys.filter((k) => !CHIP_ORDER.map(lab).includes(k)));
       if (g === 'status') keys = STATUS_ORDER.map(lab).filter((k) => totals.has(k));
+      if (g === 'stage') keys = Object.values(STAGE).filter((k) => totals.has(k));
       const m = new Map();
       keys.filter((k) => !/^(Undisclosed|Not disclosed|Outside US|Other)$/.test(k)).slice(0, 7).forEach((k, i) => m.set(k, `var(--s${i + 1})`));
       colorMaps[g] = m;
@@ -226,12 +239,13 @@
     const m = state.measure, ps = DS.phases.filter(passPhase).filter(counted);
     const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
     const all = sum(() => true), live = sum((p) => p.status === 'live' || p.status === 'partially_live'), uc = sum((p) => p.status === 'under_construction' || p.status === 'permitted');
+    const sites = ps.filter((p) => !isDeal(p)), dealMW = sum(isDeal), guessMW = sum(guessed);
     const tiles = [
-      ['Capacity tracked', gw(all) + ' GW', `${ps.length} phases at ${new Set(ps.map((p) => p.site_id)).size} sites. Cancelled projects, options and power-supply figures are listed but not counted`],
-      ['Live or partly live', gw(live) + ' GW', 'Full phase size, including parts still ramping'],
-      ['Under construction or permitted', gw(uc) + ' GW', ''],
-      ['Announced, not started', gw(sum((p) => p.status === 'announced' || p.status === 'rumoured')) + ' GW', ''],
-      ['Deals and commitments', String(DS.deals.length), 'Chip and cloud agreements, listed separately. They overlap each other and the sites, so they are not summed'],
+      ['Capacity tracked', gw(all) + ' GW', `${gw(all - dealMW)} GW at ${new Set(sites.map((p) => p.site_id)).size} named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
+      ['Agreements with no site', gw(dealMW) + ' GW', `Only the part not already at a named site. ${gw(guessMW)} GW of it has a guessed location; the rest has a stated country`],
+      ['Operating', gw(live) + ' GW', 'Live or partly live. Full phase size, including parts still ramping'],
+      ['Under construction', gw(sum((p) => stageOf(p) === 'construction')) + ' GW', `Plus ${gw(sum((p) => stageOf(p) === 'permitted'))} GW permitted and not started`],
+      ['Paper stage', gw(sum((p) => ['announced', 'agreement', 'rumoured'].includes(stageOf(p)))) + ' GW', 'Announced sites not yet started, unconfirmed reports, and agreements with no site'],
     ];
     $('#tiles').replaceChildren(...tiles.map(([k, v, n]) => el('div', { class: 'tile' }, [el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v }), el('div', { class: 'n', text: n })])));
   }
@@ -255,7 +269,7 @@
     const ps = DS.phases.filter(passPhase);
     const col = COLS.find((c) => c[0] === state.sort.key) || COLS[4];
     ps.sort((a, b) => { const x = col[2](a), y = col[2](b); return (x > y ? 1 : x < y ? -1 : 0) * state.sort.dir; });
-    $('#t-sub').textContent = `${ps.length} of ${DS.phases.length} phases. MW shown is ${state.measure === 'it_mw' ? 'IT' : 'facility'} load; a dotted underline marks a derived figure. Select a row for sources and detail.`;
+    $('#t-sub').textContent = `${ps.length} of ${DS.phases.length} rows. MW shown is ${state.measure === 'it_mw' ? 'IT' : 'facility'} load; a dotted underline marks a derived figure. Select a row for sources and detail.`;
     thead.replaceChildren(el('tr', {}, COLS.map(([k, t, , cls]) => {
       const th = el('th', { text: k === 'company' ? `Company (${$('#f-role').selectedOptions[0].text.toLowerCase()})` : t, tabindex: 0, class: cls || '', scope: 'col' });
       if (state.sort.key === k) th.setAttribute('aria-sort', state.sort.dir > 0 ? 'ascending' : 'descending');
@@ -269,8 +283,8 @@
       const mw = mwOf(p, state.measure), basis = state.measure === 'it_mw' ? p.derived.it_basis : p.derived.facility_basis;
       const derived = basis && /estimated|treated|used as/.test(basis);
       const tr = el('tr', { class: 'row', tabindex: 0, 'aria-expanded': state.open.has(p.id) }, [
-        el('td', {}, [el('div', { class: 'site', text: p.site_name }), p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null]),
-        el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
+        el('td', {}, [el('div', { class: 'site', text: p.site_name }), isDeal(p) ? el('span', { class: 'tag deal', text: 'Agreement, no site' }) : (p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null)]),
+        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'guess' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Guessed location' : 'Country stated, no site' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
         el('td', { text: roleLabel(p, state.role) }),
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
@@ -289,6 +303,7 @@
     const dl = el('dl');
     const add = (k, v) => { if (v != null && v !== '' && !(Array.isArray(v) && !v.length)) dl.append(el('dt', { text: k }), el('dd', {}, v)); };
     const c = p.capacity || {}, d = p.derived, t = p.timeline || {}, pw = p.power || {}, mo = p.money || {};
+    if (isDeal(p)) add(guessed(p) ? 'Location (guessed)' : 'Location (country stated)', p.location_why);
     add('Stated capacity', c.stated_mw != null ? `${fmtMW(c.stated_mw)} MW (${c.stated_basis || 'basis unspecified'})` : null);
     add('Facility / IT', d.facility_mw != null ? `${fmtMW(d.facility_mw)} MW facility (${d.facility_basis}); ${fmtMW(d.it_mw)} MW IT (${d.it_basis})` : null);
     add('Campus plan', p.campus_planned_mw ? `${fmtMW(p.campus_planned_mw)} MW at full build-out` : null);
@@ -309,18 +324,21 @@
     return el('tr', { class: 'detail' }, el('td', { colspan: COLS.length }, dl));
   }
   function drawDeals() {
-    const head = ['Agreement', 'Buyer', 'Seller', 'GW', 'Chips', 'Schedule', 'Announced', 'Source'];
+    const head = ['Agreement', 'Buyer', 'Seller', 'GW', 'Likely location', 'In the totals', 'Chips', 'Schedule', 'Announced', 'Source'];
     $('#t-deals thead').replaceChildren(el('tr', {}, head.map((h, i) => el('th', { text: h, class: i === 3 ? 'num' : '', scope: 'col', style: 'cursor:default' }))));
     const body = $('#t-deals tbody');
     body.replaceChildren();
     const deals = DS.deals.slice().sort((a, b) => (b.capacity_mw || 0) - (a.capacity_mw || 0));
     if (!deals.length) { body.append(el('tr', {}, el('td', { colspan: head.length, class: 'empty', text: 'No sourced deals yet.' }))); return; }
     for (const d of deals) {
-      const pt = d.parties || {}, s = d.sources[0];
+      const pt = d.parties || {}, s = d.sources[0], lo = d.location || {};
       body.append(el('tr', {}, [
         el('td', {}, [el('div', { class: 'site', text: d.name }), el('div', { class: 'dim', text: String(d.type || '').replace(/_/g, ' ') })]),
         el('td', { text: (pt.buyer || []).map(entName).join(', ') }), el('td', { text: (pt.seller || []).map(entName).join(', ') }),
-        el('td', { class: 'num', text: d.capacity_mw ? gw(d.capacity_mw) : 'n/a' }), el('td', { text: chipText(d.chips) }),
+        el('td', { class: 'num', text: d.capacity_mw ? gw(d.capacity_mw) : 'n/a' }),
+        el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (lo.basis === 'guessed' ? 'guess' : 'stated'), title: lo.why || '', text: lo.basis === 'guessed' ? 'Guessed' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
+        el('td', {}, [lo.unsited_mw >= 1 ? el('b', { text: gw(lo.unsited_mw) + ' GW added' }) : el('span', { text: 'Nothing added' }), el('div', { class: 'dim', text: lo.unsited_mw >= 1 ? (lo.deductions || []).join('; ') : String(lo.treatment_text || '').replace(/^Not added: /, '').replace(/^Counted: .*/, 'All of it is already at named sites or in other agreements') })]),
+        el('td', { text: chipText(d.chips) }),
         el('td', { text: (d.schedule || []).filter((x) => x.cumulative_mw > 0).map((x) => `${x.period}: ${gw(x.cumulative_mw)} GW`).join(' · ') || 'Not given' }),
         el('td', { text: d.announced || '' }),
         el('td', {}, s ? [srcLink(s), el('div', { class: 'dim', text: lab(d.verification) })] : ''),
@@ -345,18 +363,17 @@
     const uniq = (f) => [...new Set(ds.phases.map(f).filter(Boolean))].sort();
     fill('#f-region', uniq((p) => p.region), 'All regions');
     fill('#f-state', uniq((p) => p.us_state), 'All states');
-    fill('#f-status', STATUS_ORDER.filter((s) => ds.phases.some((p) => p.status === s)), 'All statuses');
     fill('#f-chip', [...new Set(ds.phases.flatMap((p) => (p.chips || []).map((c) => c.vendor)))].sort(), 'All vendors');
     const bind = (sel, key, ev = 'change') => $(sel).addEventListener(ev, (e) => { state[key] = e.target.value; if (key === 'us_state' && e.target.value) { state.region = 'us'; $('#f-region').value = 'us'; } render(); });
-    bind('#f-region', 'region'); bind('#f-state', 'us_state'); bind('#f-status', 'status'); bind('#f-chip', 'chip');
+    bind('#f-kind', 'kind'); bind('#f-region', 'region'); bind('#f-state', 'us_state'); bind('#f-stage', 'stage'); bind('#f-chip', 'chip');
     bind('#f-role', 'role'); bind('#f-measure', 'measure'); bind('#f-q', 'q', 'input'); bind('#c-period', 'period'); bind('#c-group', 'group');
     $('#f-reset').addEventListener('click', () => {
       const keep = { period: state.period, group: state.group };
       state = Object.assign(defaults(), keep);
-      for (const [sel, key] of [['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-status', 'status'], ['#f-chip', 'chip'], ['#f-role', 'role'], ['#f-measure', 'measure'], ['#f-q', 'q']]) $(sel).value = state[key];
+      for (const [sel, key] of [['#f-kind', 'kind'], ['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-stage', 'stage'], ['#f-chip', 'chip'], ['#f-role', 'role'], ['#f-measure', 'measure'], ['#f-q', 'q']]) $(sel).value = state[key];
       render();
     });
-    $('#stamp').textContent = `Updated ${ds.generated.slice(0, 10)} · ${ds.phases.length} sourced phases, ${ds.deals.length} deals`;
+    $('#stamp').textContent = `Updated ${ds.generated.slice(0, 10)} · ${ds.phases.filter((p) => !isDeal(p)).length} sourced site phases, ${ds.deals.length} agreements`;
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 120); });
     drawDeals(); render();
   }
