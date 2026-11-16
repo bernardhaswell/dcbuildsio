@@ -424,7 +424,7 @@
     more.textContent = showAll ? 'Show top 12' : `Show all ${[...tot.keys()].filter((k) => k !== NONE).length}`;
     const grand = [...tot.values()].reduce((a, b) => a + b, 0);
     const named = grand - (tot.get(NONE) || 0);
-    host.querySelector('.sub').textContent = `${def.note} ${m === 'it_mw' ? 'IT' : 'Facility'} GW. ${grand ? Math.round((named / grand) * 100) : 0}% of capacity in this view has a named ${def.label.toLowerCase()}.`;
+    host.querySelector('.sub').textContent = `${def.note} ${m === 'it_mw' ? 'IT' : 'Facility'} GW. ${grand ? Math.round((named / grand) * 100) : 0}% of capacity in this view has a named ${def.label.toLowerCase()}. Click any figure to see the sites and agreements that add up to it.`;
     const thead = host.querySelector('thead'), tbody = host.querySelector('tbody');
     thead.replaceChildren(el('tr', {}, [el('th', { text: def.label, scope: 'col' }), ...cols.map((c) => el('th', { text: c, class: 'num', scope: 'col' })), el('th', { text: 'Total', class: 'num tot', scope: 'col' })]));
     tbody.replaceChildren();
@@ -433,29 +433,99 @@
     // Shading: one hue, stronger with more GW, scaled to the largest single cell among named rows.
     let peak = 0; for (const k of keys) for (const c of cols) if (c !== 'Undated') peak = Math.max(peak, cell.get(k + '|' + c) || 0);
     const shade = (v, c) => (v && c !== 'Undated' && peak ? `--h:color-mix(in srgb, var(--s1) ${Math.round(8 + 46 * Math.sqrt(v / peak))}%, var(--surface));color:var(--text)` : '');
-    const rowOf = (label, get, cls = '', heat = true, sw = null, extra = null) => el('tr', { class: cls }, [
+    // Every figure opens a breakdown of the rows that add up to it.
+    const pickCell = (td, v, match, who, col, sub) => {
+      if (!v || !match) return td;
+      td.classList.add('pick'); td.tabIndex = 0; td.setAttribute('role', 'button');
+      td.setAttribute('aria-label', `${f(v)} GW: ${who}, ${col || 'all years'}. Show how this adds up`);
+      const go = (ev) => { ev.stopPropagation(); openBreak({ table: def.label, who, sub, col, rows: rows.filter((d) => match(d) && (!col || pk(d) === col)), m, from: td }); };
+      td.addEventListener('click', go); td.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(ev); } });
+      return td;
+    };
+    const rowOf = (label, get, cls = '', heat = true, sw = null, extra = null, match = null, who = label, sub = '') => el('tr', { class: cls }, [
       el('td', { title: label }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label, extra]),
-      ...cols.map((c) => { const v = get(c); return el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }); }),
-      el('td', { class: 'num tot', text: f(cols.reduce((s, c) => s + (get(c) || 0), 0)) })]);
+      ...cols.map((c) => { const v = get(c); return pickCell(el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }), v, match, who, c, sub); }),
+      (() => { const v = cols.reduce((s, c) => s + (get(c) || 0), 0); return pickCell(el('td', { class: 'num tot', text: f(v) }), v, match, who, '', sub); })()]);
+    const isK = (k) => (d) => (def.key(d) || NONE) === k;
     for (const k of keys) {
       const e = etot.get(k) || 0, sw = def.swatch ? colorOf('chip_vendor', k) : null;
-      if (!e) { tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, sw)); continue; }
+      if (!e) { tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, sw, null, isK(k))); continue; }
       // One row per company; estimated capacity is broken out when the row is opened.
       const oid = id + '|' + k, open = YT.open.has(oid), pctE = Math.round((e / tot.get(k)) * 100);
-      const hint = el('span', { class: 'est-hint', text: e >= tot.get(k) - 0.5 ? 'all estimated' : `${pctE}% est.` });
-      const tr = rowOf(k, (c) => cell.get(k + '|' + c) || 0, 'grp' + (open ? ' open' : ''), true, sw, hint);
+      const hint = el('span', { class: 'est-hint', text: e >= tot.get(k) - 0.5 ? 'all estimated' : pctE < 1 ? '<1% est.' : `${pctE}% est.` });
+      const tr = rowOf(k, (c) => cell.get(k + '|' + c) || 0, 'grp' + (open ? ' open' : ''), true, sw, hint, isK(k));
       tr.tabIndex = 0; tr.setAttribute('aria-expanded', String(open)); tr.title = 'Show stated and estimated capacity';
       const tog = () => { open ? YT.open.delete(oid) : YT.open.add(oid); drawYearTable(id); };
       tr.addEventListener('click', tog); tr.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tog(); } });
       tbody.append(tr);
       if (open) {
-        tbody.append(rowOf('Stated', (c) => (cell.get(k + '|' + c) || 0) - (ecell.get(k + '|' + c) || 0), 'sub', false));
-        tbody.append(rowOf('', (c) => ecell.get(k + '|' + c) || 0, 'sub est', false, null, el('span', { class: 'tag estimate', text: 'Estimate' })));
+        tbody.append(rowOf('Stated', (c) => (cell.get(k + '|' + c) || 0) - (ecell.get(k + '|' + c) || 0), 'sub', false, null, null, (d) => isK(k)(d) && !def.est(d), k, 'stated'));
+        tbody.append(rowOf('', (c) => ecell.get(k + '|' + c) || 0, 'sub est', false, null, el('span', { class: 'tag estimate', text: 'Estimate' }), (d) => isK(k)(d) && def.est(d), k, 'estimated'));
       }
     }
-    if (other.length) tbody.append(rowOf(`${other.length} more`, (c) => other.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'quiet', false));
-    if (tot.has(NONE)) tbody.append(rowOf(NONE, (c) => cell.get(NONE + '|' + c) || 0, 'quiet', false, def.swatch ? 'var(--other)' : null));
-    tbody.append(rowOf('Total', (c) => [...tot.keys()].reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'total', false));
+    const otherSet = new Set(other);
+    if (other.length) tbody.append(rowOf(`${other.length} more`, (c) => other.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'quiet', false, null, null, (d) => otherSet.has(def.key(d) || NONE), `${other.length} smaller ${def.label.toLowerCase()}s`));
+    if (tot.has(NONE)) tbody.append(rowOf(NONE, (c) => cell.get(NONE + '|' + c) || 0, 'quiet', false, def.swatch ? 'var(--other)' : null, null, isK(NONE), `${def.label} not disclosed`));
+    tbody.append(rowOf('Total', (c) => [...tot.keys()].reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'total', false, null, null, () => true, `All ${def.label.toLowerCase()}s`));
+  }
+  // ---------------------------------------------------------------- breakdown drawer
+  const isEstText = (t) => /^(estimated|assumed|upper|guess)/i.test(String(t || '').trim());
+  const stageTok = { operating: 'op', construction: 'uc', permitted: 'pm', cancelled: 'x' };
+  function openBreak({ table, who, sub, col, rows, m, from }) {
+    const g2 = (mw) => (mw / 1000).toFixed(mw < 100 ? 3 : 2);
+    const byP = new Map();
+    for (const d of rows) { const g = byP.get(d.id) || { p: phaseById[d.id], mw: 0, ds: [] }; g.mw += d[m]; g.ds.push(d); byP.set(d.id, g); }
+    const items = [...byP.values()].sort((a, b) => b.mw - a.mw), total = items.reduce((s, g) => s + g.mw, 0);
+    const role = table === 'Operator' ? 'operator' : table === 'End user' ? 'end_customer' : null;
+    const line = (g) => {
+      const p = g.p, d0 = g.ds[0], basis = m === 'it_mw' ? p.derived.it_basis : p.derived.facility_basis, notes = [], tags = [];
+      const note = (k, t) => t && notes.push(el('li', {}, [el('b', { text: k + ' ' }), String(t)]));
+      if (isEstText(basis) || /upper bound|target/i.test(basis || '')) { tags.push('Size'); }
+      note('Size:', basis);
+      const timing = [...new Set(g.ds.map((d) => d.timing_basis).filter(Boolean))];
+      if (g.ds.some((d) => isEstText(d.timing_basis) || d.timing_from === 'estimated_ramp')) tags.push('Date');
+      if (timing.length) note('Timing:', timing.join('; '));
+      if (g.ds.length > 1) note('Schedule:', g.ds.map((d) => `${g2(d[m])} GW ${d.period || 'undated'}${d.chip_vendor && d.chip_vendor !== 'undisclosed' ? ' ' + lab(d.chip_vendor) : ''}`).join(', '));
+      if (g.ds.some((d) => estBasis(d.chip_basis))) { tags.push('Chip'); note('Chip:', [...new Set(g.ds.map((d) => d.chip_basis_note || d.chip_basis).filter(Boolean))].join('; ')); }
+      if (role === 'operator' && (estBasis(p.operator_basis) || (p.estimated || {}).operator)) { tags.push('Operator'); note('Operator:', p.operator_why || 'Estimated: no source names the operator.'); }
+      if (role === 'end_customer' && endEstimated(p)) { tags.push('End user'); note('End user:', p.end_customer_why || 'Estimated: no source names the end user.'); }
+      if (isDeal(p)) note('Location:', p.location_why || (guessed(p) ? 'Estimated' : 'Country stated in the agreement'));
+      if (p.count_note) note('Counting:', p.count_note);
+      const st = stageOf(p), place = isDeal(p) ? (p.region === 'orbital' ? 'Orbital' : [p.country, lab(p.region)].filter(Boolean).join(', ')) : [p.city, p.us_state || p.country].filter(Boolean).join(', ');
+      const src = p.sources || [];
+      return el('li', { class: 'bk-item' }, [
+        el('div', { class: 'bk-top' }, [
+          el('div', { class: 'bk-name' }, [el('span', { text: p.site_name }), p.phase_name ? el('span', { class: 'dim', text: ' · ' + p.phase_name }) : null]),
+          el('div', { class: 'bk-mw', text: g2(g.mw) })]),
+        el('div', { class: 'bk-meta' }, [
+          el('span', { class: 'tk sm tk-st-' + (stageTok[st] || 'pp'), text: STAGE[st] }),
+          place ? el('span', { class: 'dim', text: place }) : null,
+          role ? el('span', { class: 'dim', text: roleLabel(p, role) }) : null,
+          tags.length ? el('span', { class: 'tag estimate', title: 'Open “How this figure is worked out” for the reasoning', text: 'Estimate: ' + tags.map((t) => t.toLowerCase()).join(', ') }) : null]),
+        notes.length ? el('details', { class: 'bk-how' }, [el('summary', { text: 'How this figure is worked out' }), el('ul', {}, notes)]) : null,
+        src.length ? el('div', { class: 'bk-src' }, [el('span', { class: 'dim', text: src.length > 1 ? 'Sources ' : 'Source ' }), ...src.slice(0, 3).flatMap((s, i) => [i ? ' · ' : '', el('a', { href: s.url, target: '_blank', rel: 'noopener', text: `${s.publisher || 'Source'}${s.date ? ', ' + s.date : ''}` })])]) : null]);
+    };
+    const filt = [state.region && (state.region === 'ex_china' ? 'Everywhere except China' : lab(state.region)), state.us_state, state.stage && (STAGE[state.stage] || lab(state.stage)), state.chip && lab(state.chip), state.kind && 'Show: ' + $('#f-kind').selectedOptions[0].textContent, state.q && `“${state.q}”`].filter(Boolean);
+    const dlg = $('#bk');
+    $('#bk-k').textContent = `${table}${sub ? ' · ' + (sub === 'stated' ? 'stated' : 'estimate') : ''}`;
+    $('#bk-who').textContent = who;
+    $('#bk-v').replaceChildren(el('b', { text: g2(total) }), ' GW ', el('span', { class: 'dim', text: `${m === 'it_mw' ? 'IT' : 'facility'} · ${col ? (col === 'Undated' ? 'no date yet' : col === LATER ? 'due ' + LATER : 'due in ' + col) : 'all years'}` }));
+    $('#bk-sub').textContent = `${items.length} ${items.length === 1 ? 'site or agreement adds' : 'sites and agreements add'} up to this figure. ${filt.length ? 'Filtered to ' + filt.join(', ') + '. ' : ''}Largest first.`;
+    $('#bk-list').replaceChildren(...items.map(line));
+    $('#bk-sum').replaceChildren(el('span', { text: `Sum of ${items.length} ${items.length === 1 ? 'line' : 'lines'}` }), el('b', { text: g2(total) + ' GW' }));
+    dlg._from = from; dlg.hidden = false; document.body.classList.add('bk-on');
+    requestAnimationFrame(() => { dlg.classList.add('on'); $('#bk-x').focus(); });
+    $('#bk-list').scrollTop = 0; $('.bk-panel').scrollTop = 0;
+  }
+  function closeBreak() {
+    const dlg = $('#bk'); if (dlg.hidden) return;
+    dlg.classList.remove('on'); document.body.classList.remove('bk-on');
+    setTimeout(() => { dlg.hidden = true; }, 220); if (dlg._from && dlg._from.isConnected) dlg._from.focus();
+  }
+  function initBreak() {
+    $('#bk-x').addEventListener('click', closeBreak);
+    $('#bk').addEventListener('click', (e) => { if (e.target.id === 'bk') closeBreak(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBreak(); });
   }
   const drawYearTables = () => { for (const id of Object.keys(YT_DEF)) drawYearTable(id); };
 
@@ -632,7 +702,7 @@
       const blob = new Blob([[hdr, ...rows].map((r) => r.map(q).join(',')).join('\n')], { type: 'text/csv' });
       const a = el('a', { href: URL.createObjectURL(blob), download: 'register-filtered.csv' }); document.body.append(a); a.click(); a.remove();
     });
-    drawStageChips(); initYearPick();
+    drawStageChips(); initYearPick(); initBreak();
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 120); });
     drawDeals(); render();
   }
