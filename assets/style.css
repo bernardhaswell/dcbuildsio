@@ -229,3 +229,7 @@ table.pivot td:first-child { max-width: 230px; }
 table.pivot th.tot, table.pivot td.tot { position: sticky; right: 0; z-index: 1; background: var(--surface); }
 table.pivot th.tot { background: var(--surface-2); z-index: 2; }
 table.pivot tr.total td.tot { background: var(--surface-2); }
+#t-phases td:first-child { min-width: 260px; max-width: 360px; }
+#t-phases td:nth-child(3) { min-width: 140px; }
+#t-deals td:first-child { min-width: 240px; }
+@media (max-width: 640px) { .summary { font-size: 17px; } .hero { padding-top: 48px; } }
