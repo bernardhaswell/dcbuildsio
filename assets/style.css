@@ -59,7 +59,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
   background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1.2px); background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(ellipse 70% 80% at 70% 0%, #000 0%, transparent 70%); mask-image: radial-gradient(ellipse 70% 80% at 70% 0%, #000 0%, transparent 70%); }
-.hero .wrap { position: relative; }
+.hero .wrap { position: relative; z-index: 1; }
 .eyebrow { margin: 0 0 22px; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 h1 { margin: 0 0 26px; font-size: clamp(40px, 7vw, 80px); line-height: 1.02; letter-spacing: -.035em; font-weight: 700; }
 .h1-soft { color: var(--text-3); }
@@ -216,7 +216,7 @@ table.heat td.num.z { color: var(--text-3); opacity: .45; }
 .dl:hover { text-decoration: none; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line-2); }
 .dl b { font-weight: 600; } .dl span { font-size: 13px; color: var(--text-3); }
 .dl code { position: absolute; top: 16px; right: 16px; font-family: var(--mono); font-size: 11.5px; color: var(--t-chip); background: color-mix(in srgb, var(--t-chip) 12%, transparent); padding: 1px 7px; border-radius: 6px; }
-.foot { padding: 56px 16px 64px; color: var(--text-3); font-size: 13px; }
+.foot { padding-top: 56px; padding-bottom: 64px; color: var(--text-3); font-size: 13px; }
 
 .tip { position: fixed; z-index: 40; pointer-events: none; background: rgba(28,28,32,.86); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--text); box-shadow: 0 0 0 1px var(--line-2), 0 12px 32px rgba(0,0,0,.5); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; max-width: 300px; }
 .tip b { display: block; margin-bottom: 6px; font-weight: 600; } .tip .r { display: flex; justify-content: space-between; gap: 16px; color: var(--text-2); } .tip .r span:last-child { font-family: var(--mono); font-size: 12px; color: var(--text); } .tip .r span:first-child { display: inline-flex; gap: 7px; align-items: center; }
@@ -246,3 +246,43 @@ table.pivot tr.total td.tot { background: var(--surface-2); }
   .filters { gap: 8px; }
 }
 table.heat tr.total td.num.z { opacity: 1; color: var(--text-3); }
+
+/* ------------------------------------------------------------ background artwork */
+.grain { position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: .055; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.hero-glow { position: absolute; inset: -20% -10% auto auto; width: 70%; height: 120%; pointer-events: none;
+  background: conic-gradient(from 210deg at 70% 30%, transparent 0deg, rgba(57,135,229,.10) 50deg, rgba(47,191,113,.07) 110deg, rgba(144,133,233,.08) 170deg, transparent 230deg);
+  filter: blur(60px); opacity: .9; }
+/* blueprint lines: a fine engineering grid behind the hero, fading away from the top right */
+.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 88px 88px; background-position: -1px -1px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 80% 10%, #000, transparent 75%); mask-image: radial-gradient(ellipse 60% 70% at 80% 10%, #000, transparent 75%); }
+.hero::before { z-index: 0; }
+.waffle { position: absolute; right: 32px; top: 6px; margin: 0; width: 392px; z-index: 0; }
+.waffle-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 4px;
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent); mask-image: linear-gradient(180deg, #000 70%, rgba(0,0,0,.25)); }
+.waffle-grid i { aspect-ratio: 1; border-radius: 3px; background: var(--c); opacity: 0; animation: wf-in .6s ease-out var(--d) forwards; }
+.waffle-grid i.pp { background: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+.waffle-grid i.off { filter: saturate(.2) brightness(.45); }
+.waffle figcaption { margin-top: 10px; font-size: 11.5px; color: var(--text-3); text-align: right; }
+@keyframes wf-in { from { opacity: 0; transform: scale(.4); } to { opacity: .85; transform: none; } }
+@media (max-width: 1180px) { .waffle { display: none; } }
+@media (prefers-reduced-motion: reduce) { .waffle-grid i { animation: none; opacity: .85; } }
+
+/* section backdrops: a faint grid and a soft light at the top of each major section */
+.years, .method, .downloads { position: relative; }
+.years::before, .method::before, .downloads::before { content: ""; position: absolute; z-index: -1; left: 50%; top: -80px; width: 100vw; height: 520px; transform: translateX(-50%); pointer-events: none;
+  background-image: radial-gradient(ellipse 50% 60% at 50% 0%, var(--glow, rgba(57,135,229,.16)), transparent 70%),
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size: auto, 88px 88px, 88px 88px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 100% at 50% 0%, #000, transparent 80%); mask-image: radial-gradient(ellipse 60% 100% at 50% 0%, #000, transparent 80%); }
+.method { --glow: rgba(255,158,196,.11); }
+.downloads { --glow: rgba(200,227,106,.09); }
+main { position: relative; z-index: 0; }
+/* a light-catching hairline above each major section */
+.section-head, .method > .kicker, .downloads > .kicker { position: relative; }
+.section-head::before, .method > .kicker::before, .downloads > .kicker::before { content: ""; position: absolute; left: 0; right: 0; top: -44px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.14) 30%, rgba(255,255,255,.14) 70%, transparent); }
+.card, .tiles { position: relative; }
+.card { background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 140px), var(--surface); }
