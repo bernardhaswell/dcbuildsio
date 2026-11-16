@@ -17,7 +17,7 @@
   };
   const LABEL = {
     us: 'United States', canada: 'Canada', latam: 'Latin America', europe: 'Europe', middle_east: 'Middle East',
-    asia_pacific: 'Asia Pacific', china: 'China', africa: 'Africa', global: 'Global',
+    asia_pacific: 'Asia Pacific', china: 'China', africa: 'Africa', global: 'Global', orbital: 'Orbital',
     rumoured: 'Rumoured', announced: 'Announced', permitted: 'Permitted', under_construction: 'Under construction',
     partially_live: 'Partially live', live: 'Live', delayed: 'Delayed', paused: 'Paused', cancelled: 'Cancelled',
     nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA',
@@ -272,7 +272,7 @@
     const pct = (x, y) => (y ? Math.round((x / y) * 100) : 0) + '%';
     const tiles = [
       [showCancelled ? 'Cancelled capacity (not in totals)' : 'Capacity tracked', all, `${gw(all - dealMW)} GW at named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
-      ['At named sites', all - dealMW, `${nSites} sites in ${nCountries} ${nCountries === 1 ? 'country' : 'countries'}${nStates ? `, ${nStates} US states` : ''}`],
+      ['At named sites', all - dealMW, `${nSites} site${nSites === 1 ? "" : "s"} in ${nCountries} ${nCountries === 1 ? 'country' : 'countries'}${nStates ? `, ${nStates} US states` : ''}`],
       ['Agreements with no site', dealMW, `Only the part not already at a named site. ${gw(guessMW)} GW has an estimated location`],
       ['Chip disclosed', chipKnown, `${pct(chipKnown, depAll)} of capacity names its accelerator. ${pct(dated, depAll)} has an energization date`],
     ];
@@ -292,7 +292,7 @@
     const w = (t) => el('b', { text: t });
     const line = (...kids) => el('p', { class: 'hl' }, kids.flat().filter((k) => k != null));
     host.replaceChildren(
-      line(filtered ? 'In this view: ' : '', w(`${gw(all)} GW`), ' announced', dealMW > 0 ? [', ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named sites`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [' at ', w(`${nSites} named sites`), '.']),
+      line(filtered ? 'In this view: ' : '', w(`${gw(all)} GW`), ' announced', dealMW > 0 ? [', ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), '.']),
     );
   }
 
@@ -511,7 +511,7 @@
       const derived = basis && /estimated|treated|used as/.test(basis);
       const tr = el('tr', { class: 'row', tabindex: 0, 'aria-expanded': state.open.has(p.id) }, [
         el('td', {}, [el('div', { class: 'site', text: p.site_name }), isDeal(p) ? el('span', { class: 'tag deal', text: 'Agreement, no site' }) : (p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null)]),
-        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
+        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' || p.region === 'orbital' ? lab(p.region) : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || (p.region === 'orbital' ? 'Orbital' : ''), el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
         el('td', {}, [roleLabel(p, state.role), state.role === 'end_customer' && endEstimated(p) ? el('div', {}, el('span', { class: 'tag estimate', text: 'Estimate' })) : null]),
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
