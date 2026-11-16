@@ -285,14 +285,14 @@
     const host = $('#summary');
     if (!ps.length || all <= 0) { host.replaceChildren(el('p', { class: 'hero-line', text: 'Nothing in the tracker matches these filters. Reset to see everything.' })); return; }
     const by = (fn) => { const t = new Map(); rowsNow().forEach((d) => { if (d[m] == null) return; const k = fn(d); if (!k) return; t.set(k, (t.get(k) || 0) + d[m]); }); return [...t.entries()].sort((x, y) => y[1] - x[1])[0]; };
-    const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null));
+    const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' && !estBasis(d.chip_basis) ? lab(d.chip_vendor) : null));
     const endU = by((d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length && !endEstimated(p) ? r.map(entName).join(' + ') : null; });
     const real = sum((p) => ['operating', 'construction'].includes(stageOf(p)));
     // Apple-style two-tone copy: the facts in white, the connective words in grey. Three short lines.
     const w = (t) => el('b', { text: t });
     const line = (...kids) => el('p', { class: 'hl' }, kids.flat().filter((k) => k != null));
     host.replaceChildren(
-      line(filtered ? 'In this view, ' : '', w(`${gw(all)} GW`), ' announced across ', w(`${nSites} sites`), dealMW > 0 ? [', plus ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : '.'),
+      line(filtered ? 'In this view, ' : '', w(`${gw(all)} GW`), ' announced in total', dealMW > 0 ? [': ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named sites`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [', across ', w(`${nSites} named sites`), '.']),
       line(w(`${gw(real)} GW`), ' is real today, running or under construction.'),
       chip ? line(tk('chip', chip[0]), ' is the most-named chip.') : null,
       endU ? line(tk('co', endU[0]), ' is the largest named end user.') : null,
@@ -371,8 +371,8 @@
   // ---------------------------------------------------------------- the three year tables
   const YT = { period: 'year', all: { chip: false, op: false, end: false } };
   const YT_DEF = {
-    chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null), none: 'Not disclosed', label: 'Chip maker', swatch: true,
-      note: 'Capacity is split across chips where a site uses more than one. "Not disclosed" is capacity whose accelerator has not been published.' },
+    chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) + (estBasis(d.chip_basis) ? EST_SUFFIX : '') : null), none: 'Not disclosed', label: 'Chip maker', swatch: true,
+      note: 'Capacity is split across chips where a site uses more than one. Rows marked Estimate attribute capacity from chip agreements to that chip maker where no site states the chip. "Not disclosed" is capacity whose accelerator has not been published.' },
     op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'Operator',
       note: 'The company that runs the facility or the cloud inside it, as sources state. Joint operators share one row. Capacity with no named operator is in "Not disclosed".' },
     end: { key: (d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length ? r.map(entName).join(' + ') + (endEstimated(p) ? EST_SUFFIX : '') : null; }, none: 'Not disclosed', label: 'End user',
@@ -409,7 +409,7 @@
       el('td', { title: label.replace(EST_SUFFIX, ' (estimate)') }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label.replace(EST_SUFFIX, ''), label.endsWith(EST_SUFFIX) ? el('span', { class: 'tag estimate inl', text: 'Estimate' }) : null]),
       ...cols.map((c) => { const v = get(c); return el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }); }),
       el('td', { class: 'num tot', text: f(cols.reduce((s, c) => s + (get(c) || 0), 0)) })]);
-    for (const k of keys) tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, def.swatch ? colorOf('chip_vendor', k) : null));
+    for (const k of keys) tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, def.swatch ? colorOf('chip_vendor', k.replace(EST_SUFFIX, '')) : null));
     if (other.length) tbody.append(rowOf(`${other.length} more`, (c) => other.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'quiet', false));
     if (tot.has(NONE)) tbody.append(rowOf(NONE, (c) => cell.get(NONE + '|' + c) || 0, 'quiet', false, def.swatch ? 'var(--other)' : null));
     tbody.append(rowOf('Total', (c) => [...tot.keys()].reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'total', false));
