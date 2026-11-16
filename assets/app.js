@@ -292,7 +292,7 @@
     const w = (t) => el('b', { text: t });
     const line = (...kids) => el('p', { class: 'hl' }, kids.flat().filter((k) => k != null));
     host.replaceChildren(
-      line(filtered ? 'In this view: ' : '', w(`${gw(all)} GW`), ' announced', dealMW > 0 ? [', ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), '.']),
+      line(filtered ? 'In this view: ' : '', w(`${gw(all)} GW`), ' announced', dealMW > 0 && nSites === 0 ? [', all in deals with no site yet.'] : dealMW > 0 ? [', ', w(`${gw(all - dealMW)} GW`), ' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), ' and ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : [' at ', w(`${nSites} named site${nSites === 1 ? "" : "s"}`), '.']),
     );
   }
 
