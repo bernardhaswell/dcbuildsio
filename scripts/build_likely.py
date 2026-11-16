@@ -4,8 +4,12 @@ Usage: python3 scripts/build_likely.py path/to/likely-energized-by-site.xlsx
 The workbook holds live formulas; it is recalculated with LibreOffice so the site shows
 the same values a reader sees in Excel. Nothing on the site is hard-coded.
 """
+import codecs
 import json, shutil, subprocess, sys, tempfile, datetime, pathlib
 import openpyxl
+
+# Name of an outside forecast that must never appear in published files (rot13).
+BANNED = codecs.decode('frzvnany', 'rot13')
 
 src = pathlib.Path(sys.argv[1]).resolve()
 root = pathlib.Path(__file__).resolve().parent.parent
@@ -70,13 +74,18 @@ assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'cou
                for i in range(2, A.max_row + 1) if isinstance(A.cell(i, 1).value, int)]
 out = {'generated': datetime.date.today().isoformat(), 'basis': 'IT GW, worldwide excluding China', 'years': years,
        'summary': summary, 'summary_labels': summary_labels, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
-       'about': [str(c.value) for c in wb['About']['A'] if c.value],
        'mix_note': note('By chip maker'), 'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
        'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier'],
        'rows': rows}
 txt = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
 assert 'defensib' not in txt.lower()
+assert BANNED not in txt.lower(), 'likely.json would name an outside forecast; clean the workbook first'
 (root / 'data' / 'likely.json').write_text(txt)
-shutil.copy(calc, root / 'data' / 'likely-energized-by-site.xlsx')
+# Publish the workbook only if no cell names an outside forecast (Kohulan, 2026-11-16).
+clean = not any(isinstance(c.value, str) and BANNED in c.value.lower() for ws in wb.worksheets for row in ws.iter_rows() for c in row)
+dest = root / 'data' / 'likely-energized-by-site.xlsx'
+if clean: shutil.copy(calc, dest)
+elif dest.exists(): dest.unlink()
+print('workbook published' if clean else 'workbook NOT published: it names an outside forecast')
 chk = [round(sum(x[10][k] for x in rows), 3) for k in range(6)]
 print('total', summary['total'], '\nat sites', summary['at_sites'], '\nrows sum', chk, '\nrows', len(rows))
