@@ -461,3 +461,14 @@ body.bk-on { overflow: hidden; }
 .lk-table tr.quiet td { color: var(--text-3); }
 .lk-foot { margin-top: 8px; }
 @media (max-width: 720px) { .lk-dl { min-width: 0; width: 100%; } #lk-tabs { overflow-x: auto; max-width: 100%; } }
+.lk-sw.hatch { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--warn) 75%, transparent) 0 2px, color-mix(in srgb, var(--warn) 18%, transparent) 2px 5px); }
+.lk-bar { cursor: pointer; }
+.lk-q { width: 100%; max-width: 360px; margin: 4px 0 12px; }
+.lk-table.lk-list td { vertical-align: top; }
+.lk-table.lk-list th:first-child, .lk-table.lk-list td:first-child { min-width: 220px; max-width: 320px; white-space: normal; }
+.lk-site { font-weight: 600; color: var(--text); white-space: normal; }
+.lk-ph { font-size: 12px; white-space: normal; }
+.lk-reason { min-width: 280px; max-width: 460px; white-space: normal; font-size: 12.5px; color: var(--text-2); line-height: 1.45; }
+.lk-reason a { color: var(--t-co, var(--s1)); }
+.bk-why { margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
+#lk-tabs { flex-wrap: wrap; }
