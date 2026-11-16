@@ -31,6 +31,7 @@ def find(prefix):
 summary = {'total': vals(S, find('Likely energized, total')), 'us': vals(S, find('US')), 'outside_us': vals(S, find('outside US')),
            'at_sites': vals(S, find('at named sites')), 'estimate': vals(S, find('Estimate:')),
            'announced_dated': vals(S, find('Tracker as published'))}
+within = [{'label': lab(i).split(':', 1)[1].strip(), 'it_gw': vals(S, i)} for i in range(1, S.max_row + 1) if lab(i).lower().startswith('within named sites:')]
 summary_labels = {'at_sites': lab(find('at named sites')), 'estimate': lab(find('Estimate:'))}
 tiers, i = [], find('Named sites counted') + 1
 while lab(i).startswith('Tier'): tiers.append({'tier': lab(i), 'it_gw': vals(S, i)}); i += 1
@@ -84,7 +85,7 @@ A = wb['Assumptions']
 assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'counts': A.cell(i, 3).value, 'earliest': A.cell(i, 4).value, 'why': A.cell(i, 6).value}
                for i in range(2, A.max_row + 1) if isinstance(A.cell(i, 1).value, int)]
 out = {'generated': datetime.date.today().isoformat(), 'basis': 'IT GW, worldwide excluding China', 'years': years,
-       'summary': summary, 'summary_labels': summary_labels, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
+       'summary': summary, 'summary_labels': summary_labels, 'within': within, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
        'mix_note': note('By chip maker'), 'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
        'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier', 'region'],
        'regions': regions, 'rows': rows}
