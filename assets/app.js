@@ -306,6 +306,15 @@
     const tot = vals.reduce((s, v) => s + v[3], 0) || 1;
     const sel = state.stage === 'real' ? ['operating', 'construction'] : PAPER.includes(state.stage) ? ['paper'] : [state.stage];
     const bar = $('#stagebar'), leg = $('#stagelegend');
+    // Hero artwork: one square per half gigawatt, coloured by stage, following the filters.
+    const wf = $('#waffle');
+    if (wf) {
+      const cells = [];
+      vals.forEach(([k, , cls, v]) => { for (let i = 0; i < Math.round(v / 500); i++) cells.push([cls, sel.includes(k) || !state.stage || state.stage === 'cancelled']); });
+      const cap = 520, step = cells.length > cap ? cells.length / cap : 1;
+      const shown = step > 1 ? Array.from({ length: cap }, (_, i) => cells[Math.floor(i * step)]) : cells;
+      wf.replaceChildren(...shown.map(([cls, on], i) => el('i', { class: cls + (on ? '' : ' off'), style: `--c:var(--st-${cls});--d:${Math.min(i * 4, 1400)}ms` })));
+    }
     bar.classList.toggle('has-sel', !!state.stage && state.stage !== 'cancelled');
     const pick = (k) => { state.stage = state.stage === k ? '' : k; $('#f-stage').value = state.stage; render(); };
     bar.replaceChildren(...vals.filter((v) => v[3] > 0).map(([k, name, cls, v]) => {
