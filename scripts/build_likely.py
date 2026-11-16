@@ -38,12 +38,24 @@ while lab(i) and not lab(i).startswith('For comparison'):
 
 def table(name):
     ws = wb[name]; out = []
+    hdr = [str(ws.cell(1, c).value or '') for c in range(1, 12)]
+    mix = any('assigned by mix' in h for h in hdr)
     for i in range(2, ws.max_row + 1):
         k = ws.cell(i, 1).value
-        if k is None or ws.cell(i, 2).value is None: continue
+        if k is None or ws.cell(i, 2).value is None or str(k).startswith('Check'): continue
         v = [ws.cell(i, c).value for c in range(2, 12)]
-        out.append({'name': str(k), 'years': [r(x) for x in v[:6]], 'total': r(v[6]), 'all_dates': r(v[7]), 'rows': int(v[8] or 0), 'rows_in': int(v[9] or 0)})
+        if mix:
+            out.append({'name': str(k), 'years': [r(x) for x in v[:6]], 'total': r(v[6]), 'on_record': r(v[7]), 'assigned': r(v[8]), 'rows': int(v[9] or 0)})
+        else:
+            out.append({'name': str(k), 'years': [r(x) for x in v[:6]], 'total': r(v[6]), 'all_dates': r(v[7]), 'rows': int(v[8] or 0), 'rows_in': int(v[9] or 0)})
     return out
+
+def note(name):
+    ws = wb[name]
+    for i in range(ws.max_row, 1, -1):
+        v = ws.cell(i, 1).value
+        if isinstance(v, str) and ws.cell(i, 2).value is None and len(v) > 60: return v
+    return ''
 
 R = wb['Rows']; H = [c.value for c in R[1]]; ix = {h: j for j, h in enumerate(H)}
 rows = []
@@ -59,7 +71,7 @@ assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'cou
 out = {'generated': datetime.date.today().isoformat(), 'basis': 'IT GW, worldwide excluding China', 'years': years,
        'summary': summary, 'summary_labels': summary_labels, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
        'about': [str(c.value) for c in wb['About']['A'] if c.value],
-       'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
+       'mix_note': note('By chip maker'), 'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
        'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier'],
        'rows': rows}
 txt = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
