@@ -399,8 +399,8 @@
   const YT_DEF = {
     chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null), est: (d) => estBasis(d.chip_basis), none: 'Not disclosed', label: 'Chip maker', swatch: true,
       note: 'Capacity is split across chips where a site uses more than one. Where part of a chip maker’s capacity is our estimate (from chip agreements, or a buyer’s other chips), the row says so; click it to split stated from estimated. "Not disclosed" is capacity whose accelerator has not been published.' },
-    op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'Operator',
-      note: 'The company that runs the facility or the cloud inside it, as sources state. Joint operators share one row. Capacity with no named operator is in "Not disclosed".' },
+    op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, est: (d) => estBasis(phaseById[d.id].operator_basis) || !!((phaseById[d.id].estimated || {}).operator), none: 'Not disclosed', label: 'Operator',
+      note: 'The company that runs the facility or the cloud inside it. Where no source names one, the tenant running its own cloud there, or else the company developing the campus, is shown as an estimate; click a row marked "est." to split stated from estimated. Capacity with no named or estimated operator is in "Not disclosed".' },
     end: { key: (d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; }, est: (d) => endEstimated(phaseById[d.id]), none: 'Not disclosed', label: 'End user',
       note: 'Whose workloads run there. Where a provider runs its own site and no source names a customer, we count the provider as the end user as an estimate; click a row marked "est." to split stated from estimated. Capacity with no named or estimated end user, including speculative developer campuses, is in "Not disclosed".' },
   };
@@ -625,9 +625,9 @@
     $('#t-sort').addEventListener('change', (e) => { const [k, d] = e.target.value.split(':'); state.sort = { key: k, dir: +d }; drawPhases(); });
     $('#t-csv').addEventListener('click', () => {
       const q = (v) => { const t = String(v == null ? '' : v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
-      const hdr = ['id', 'site', 'phase', 'kind', 'stage', 'status', 'city', 'us_state', 'country', 'region', 'location_basis', 'operator', 'end_customer', 'end_customer_basis', 'developer', 'facility_mw', 'it_mw', 'energizes', 'chips', 'counted', 'source_url'];
+      const hdr = ['id', 'site', 'phase', 'kind', 'stage', 'status', 'city', 'us_state', 'country', 'region', 'location_basis', 'operator', 'operator_basis', 'end_customer', 'end_customer_basis', 'developer', 'facility_mw', 'it_mw', 'energizes', 'chips', 'counted', 'source_url'];
       const rows = tableRows.map((p) => [p.id, p.site_name, p.phase_name, p.kind || 'site', STAGE[stageOf(p)], p.status, p.city, p.us_state, p.country, p.region, isDeal(p) ? (guessed(p) ? 'estimate' : 'stated') : '',
-        roleLabel(p, 'operator'), roleLabel(p, 'end_customer'), (p.roles.end_customer || []).length ? (endEstimated(p) ? 'estimate' : 'stated') : '', roleLabel(p, 'developer'),
+        roleLabel(p, 'operator'), (p.roles.operator || []).length ? (estBasis(p.operator_basis) ? 'estimate' : 'stated') : '', roleLabel(p, 'end_customer'), (p.roles.end_customer || []).length ? (endEstimated(p) ? 'estimate' : 'stated') : '', roleLabel(p, 'developer'),
         p.derived.facility_mw, p.derived.it_mw, when(p), chipText(p.chips), counted(p) ? 'yes' : 'no', (p.sources[0] || {}).url]);
       const blob = new Blob([[hdr, ...rows].map((r) => r.map(q).join(',')).join('\n')], { type: 'text/csv' });
       const a = el('a', { href: URL.createObjectURL(blob), download: 'register-filtered.csv' }); document.body.append(a); a.click(); a.remove();
