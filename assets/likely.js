@@ -10,7 +10,9 @@
     return n;
   };
   const sv = (tag, attrs = {}, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
-  const CHIP = { nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'Amazon Trainium', meta: 'Meta MTIA', microsoft: 'Microsoft Maia', openai: 'OpenAI', broadcom: 'Broadcom', huawei: 'Huawei Ascend', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', intel: 'Intel', groq: 'Groq', cerebras: 'Cerebras', tesla: 'Tesla', undisclosed: 'Not disclosed', other: 'Other' };
+  // Display names for chip makers; same labels as the rest of the page. Unknown keys are title-cased, never shown raw.
+  const CHIP = { nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA', openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq', huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', tesla: 'Tesla', other: 'Other', undisclosed: 'Not disclosed' };
+  const chipName = (k) => CHIP[k] || String(k || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   const f1 = (v) => (v >= 0.05 ? v.toFixed(1) : v > 0 ? '<0.1' : '–');
   const f2 = (v) => (v >= 0.005 ? v.toFixed(2) : v > 0 ? '<0.01' : '–');
   let D, tab = 'summary', all = false;
@@ -19,7 +21,7 @@
   let F = {};
   const R = (row) => { const o = {}; D.row_fields.forEach((k, i) => { o[k] = row[i]; }); return o; };
   const KEY = { chip: 'chip', operator: 'operator', end_user: 'end_user', site: 'site' };
-  const nameOf = (tab, n) => (tab === 'chip' ? CHIP[n] || n : n);
+  const nameOf = (tab, n) => (tab === 'chip' ? chipName(n) : n);
   const stTok = (st) => (/^In/.test(st) ? 'op' : /^Partly/.test(st) ? 'uc' : /^Before/.test(st) ? 'pm' : 'pp');
 
   // ---- drawer (shares the page's breakdown panel)
