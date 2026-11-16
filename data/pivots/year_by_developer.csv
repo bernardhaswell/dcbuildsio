@@ -1,6 +1,6 @@
 Developer (GW facility),2020,2022,2023,2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2036,2040,2041,2047,Undated,Total
-Not disclosed,0.32,,,0.033,0.247,3.333,2.92,4.644,2.19,6.946,,35.685,0.39,,1.52,,,,,27.866,86.096
-Amazon (AWS),,,,0.573,1.402,0.481,0.976,3.507,3.4,,,0.72,,,,,1.1,,,2.873,15.032
+Not disclosed,0.32,,,0.033,0.247,3.333,2.92,4.744,2.79,10.046,0.4,35.885,0.39,,1.52,,,,,28.225,90.855
+Amazon (AWS),,,,0.573,1.402,0.481,0.976,3.507,3.4,,,0.72,,,,,1.1,,,2.873,15.031
 Meta Platforms,,,,0.537,0.198,2.579,0.97,2.437,,2.6,,0.4,,,,,,,,4.9,14.621
 O'Leary Digital,,,,,,,,9.0,,,,,,,,,,,,,9.0
 Google (Alphabet),,,0.308,2.536,,0.113,1.515,0.221,2.042,0.345,,,,,,,,,,,7.081
@@ -26,14 +26,15 @@ TeraWulf,,,,,0.023,0.328,0.218,1.021,0.5,,,,,,,,,,,0.416,2.507
 Nebius,,,,,0.075,,1.45,0.3,0.3,0.35,,,,,,,,,,,2.475
 Prologis,,,,,,,,0.9,,,,,,,,,,,1.44,,2.34
 xAI / SpaceX,,,,,0.3,1.23,0.76,,,,,,,,,,,,,,2.29
+Aligned Data Centers,,,,,,0.2,,2.0,,,,,,,,,,,,,2.2
 BorderPlex Digital Assets + STACK Infrastructure,,,,,,,,2.2,,,,,,,,,,,,,2.2
 Atlas Development,,,,,,,,,,,0.432,0.6,,,,1.08,,,,,2.112
 Fermi America,,,,,,0.086,1.914,,,,,,,,,,,,,,2.0
 Arizona Land Consulting,,,,,,,,2.0,,,,,,,,,,,,,2.0
 Applied Digital,,,,,0.13,0.26,1.17,0.273,,,,,,,,,,,,,1.833
-Hillwood Investment Properties + PowerHouse Data Centers,,,,,,,,,,,,,1.8,,,,,,,,1.8
 Google (Alphabet) + Intersect (Intersect Power,,,,,,,0.8,,1.0,,,,,,,,,,,,1.8
 Crusoe + Tallgrass + Google (Alphabet),,,,,,,,,,,1.8,,,,,,,,,,1.8
+Hillwood Investment Properties + PowerHouse Data Centers,,,,,,,,,,,,,1.8,,,,,,,,1.8
 Reliance Industries,,,,,,0.12,,0.5,0.168,1.0,,,,,,,,,,,1.788
 SoftBank Group + SB Energy,,,,,,,,,0.4,,1.35,,,,,,,,,,1.75
 EdgeCore Digital Infrastructure,,,,,,0.114,,1.532,,,,,,,,,,,,,1.646
@@ -48,77 +49,79 @@ Khazna Data Centers,,,,,,0.6,,0.8,,,,,,,,,,,,,1.4
 YTL Power International,,,,,0.02,0.298,,,1.0,,,,,,,,,,,,1.318
 PA Data Center Partners + PowerHouse Data Centers,,,,,,,,,,,1.3,,,,,,,,,,1.3
 Pioneer Development,,,,,,,,,1.26,,,,,,,,,,,,1.26
-Bell Canada,,,,,,,0.3,,,,0.9,,,,,,,,,,1.2
 Crusoe + Lancium,,,,,0.2,,,1.0,,,,,,,,,,,,,1.2
 SB Energy,,,,,,,,1.2,,,,,,,,,,,,,1.2
+Bell Canada,,,,,,,0.3,,,,0.9,,,,,,,,,,1.2
 Bitdeer,,,,,,0.067,0.194,0.3,0.57,,,,,,,,,,,,1.13
 Cloverleaf Infrastructure,,,,,,,,1.05,,,,,,,,,,,,,1.05
 du (EITC),,,,,,,,0.049,,1.0,,,,,,,,,,,1.049
-AdaniConneX + Bharti Airtel,,,,,,,,,,1.0,,,,,,,,,,,1.0
-Pacifico Energy + Amazon (AWS),,,,,,,1.0,,,,,,,,,,,,,,1.0
-Related Digital,,,,,,,,1.0,,,,,,,,,,,,,1.0
-Kai Shin Digital Infrastructure,,,,,,,,1.0,,,,,,,,,,,,,1.0
-Kanza Park Place LLC,,,,,,,,,1.0,,,,,,,,,,,,1.0
-AVAIO Digital Partners,,,,,,,0.15,,0.85,,,,,,,,,,,,1.0
-Indosat Ooredoo Hutchison,,,,,,,0.2,,0.8,,,,,,,,,,,,1.0
-SoftBank Group + Sesterce,,,,,,,,,,,1.0,,,,,,,,,,1.0
-Big Watt Digital + PowerHouse Data Centers,,,,,,,,1.0,,,,,,,,,,,,,1.0
 MARA Holdings,,,,,,,,,,,,,,,,,,,,1.0,1.0
+Kanza Park Place LLC,,,,,,,,,1.0,,,,,,,,,,,,1.0
+Big Watt Digital + PowerHouse Data Centers,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Indosat Ooredoo Hutchison,,,,,,,0.2,,0.8,,,,,,,,,,,,1.0
+Kai Shin Digital Infrastructure,,,,,,,,1.0,,,,,,,,,,,,,1.0
+AVAIO Digital Partners,,,,,,,0.15,,0.85,,,,,,,,,,,,1.0
+SoftBank Group + Sesterce,,,,,,,,,,,1.0,,,,,,,,,,1.0
+AdaniConneX + Bharti Airtel,,,,,,,,,,1.0,,,,,,,,,,,1.0
 Panattoni Development,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Related Digital,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Pacifico Energy + Amazon (AWS),,,,,,,1.0,,,,,,,,,,,,,,1.0
 NTT DATA Group,,,,,,0.039,0.05,0.5,0.1,,0.26,,,,,,,,,,0.949
 Digital Realty,,,,,,,,,0.86,,,,,,,,,,,,0.86
 CleanSpark,,,,,,,0.228,,,,,,,,,,,,,0.6,0.828
+SB Energy + SoftBank Group,,,,,,,,0.8,,,,,,,,,,,,,0.8
 PowerHouse Data Centers,,,,,0.15,,,,,,,,,,,,,,,0.65,0.8
 VOLT Data Centers,,,,,,,,,0.8,,,,,,,,,,,,0.8
-SB Energy + SoftBank Group,,,,,,,,0.8,,,,,,,,,,,,,0.8
 Prime Data Centers,,,,,,,,,0.208,,0.507,,,,,,,,,,0.715
-MGX + Bpifrance + Mistral AI + Nvidia,,,,,,,,,,0.7,,,,,,,,,,,0.7
-MGX + Bpifrance,,,,,,,,0.7,,,,,,,,,,,,,0.7
 HUMAIN,,,,,,0.2,,,,,,,,,,,,,,0.5,0.7
+MGX + Bpifrance,,,,,,,,0.7,,,,,,,,,,,,,0.7
+MGX + Bpifrance + Mistral AI + Nvidia,,,,,,,,,,0.7,,,,,,,,,,,0.7
 Sesterce,,,,,,0.064,,0.2,0.4,,,,,,,,,,,,0.664
 Black Chamber,,,,,,,,0.637,,,,,,,,,,,,,0.637
 Balterra Development,,,,,,,,,0.6,,,,,,,,,,,,0.6
 CleanArc Data Centers,,,,,,,0.3,,,0.3,,,,,,,,,,,0.6
-Gemini Data Center SD LLC,,,,,,,,0.5,,,,,,,,,,,,,0.5
-Anchorstone Advisors,,,,,,,0.5,,,,,,,,,,,,,,0.5
+Nexus Data Centers,,,,,,0.5,,,,,,,,,,,,,,,0.5
 Sur Energy,,,,,,,0.5,,,,,,,,,,,,,,0.5
+Gemini Data Center SD LLC,,,,,,,,0.5,,,,,,,,,,,,,0.5
 DataVita,,,,,,,,,0.5,,,,,,,,,,,,0.5
 Eni + Khazna Data Centers,,,,,,,,0.5,,,,,,,,,,,,,0.5
-Takanock,,,,,,,,0.25,,0.25,,,,,,,,,,,0.5
+Stream Data Centers,,,,,,,,,0.5,,,,,,,,,,,,0.5
 Quantica Infrastructure,,,,,,,,,0.5,,,,,,,,,,,,0.5
-Nexus Data Centers,,,,,,0.5,,,,,,,,,,,,,,,0.5
+Anchorstone Advisors,,,,,,,0.5,,,,,,,,,,,,,,0.5
+Takanock,,,,,,,,0.25,,0.25,,,,,,,,,,,0.5
 AdaniConneX,,,,,,,,0.24,,0.24,,,,,,,,,,,0.48
 Bitfarms,,,,,,0.08,0.398,,,,,,,,,,,,,,0.478
 Soluna Holdings + Metrobloks,,,,,,,,,,,,,,,,,,,,0.455,0.455
-Gigaland,,,,,,,0.4,,,,,,,,,,,,,,0.4
-Mubbadrah Investment,,,,,,,,,0.4,,,,,,,,,,,,0.4
 PowerPlay AI,,,,,,,,0.4,,,,,,,,,,,,,0.4
+Mubbadrah Investment,,,,,,,,,0.4,,,,,,,,,,,,0.4
+Gigaland,,,,,,,0.4,,,,,,,,,,,,,,0.4
 HIVE Digital Technologies (BUZZ HPC),,,,,,,0.32,,,,,,,,,,,,,0.07,0.39
-DayOne Data Centers + Firmus Technologies,,,,,,,,0.36,,,,,,,,,,,,,0.36
+Switch,,,,,,,,,0.38,,,,,,,,,,,,0.38
 Firmus Technologies + DayOne Data Centers,,,,,,,,0.36,,,,,,,,,,,,,0.36
+DayOne Data Centers + Firmus Technologies,,,,,,,,0.36,,,,,,,,,,,,,0.36
 Nscale + Aker,,,,,,,0.013,,,,,,,,,,,,,0.346,0.359
 Polarnode,,,,,,,0.06,,0.25,,,,,,,,,,,,0.31
-Data4,,,,,,,0.3,,,,,,,,,,,,,,0.3
 SoftBank Corp. + IDC Frontier,,,,,,0.05,,0.25,,,,,,,,,,,,,0.3
-Azora,,,,,,,,0.3,,,,,,,,,,,,,0.3
 SGC Energy,,,,,,,,0.06,,0.24,,,,,,,,,,,0.3
+Data4,,,,,,,0.3,,,,,,,,,,,,,,0.3
+Azora,,,,,,,,0.3,,,,,,,,,,,,,0.3
 Convergent VA LLC,,,,,,,0.27,,,,,,,,,,,,,,0.27
-Central Energy Group (CGE),,,,,,,,,0.26,,,,,,,,,,,,0.26
-Omnia Data Centers (Patria Investimentos),,,,,,,0.26,,,,,,,,,,,,,,0.26
 Yotta Data Services,,,,,,0.06,0.2,,,,,,,,,,,,,,0.26
+Central Energy Group (CGE),,,,,,,,,0.26,,,,,,,,,,,,0.26
 DAMAC Group (Skyline Data Center),,,,,,,,,0.26,,,,,,,,,,,,0.26
+Omnia Data Centers (Patria Investimentos),,,,,,,0.26,,,,,,,,,,,,,,0.26
 EcoDataCenter,,,,,,,0.25,,,,,,,,,,,,,,0.25
 Larsen & Toubro (L&T Vyoma),,,,,,0.25,,,,,,,,,,,,,,,0.25
-Grupo Samca (Green It Aragón),,,,,,,,0.24,,,,,,,,,,,,,0.24
-Azur (developer),,,,,,0.12,,,,,,,,,,,,,,0.12,0.24
 Ionic Digital,,,,,,0.24,,,,,,,,,,,,,,,0.24
+Azur (developer),,,,,,0.12,,,,,,,,,,,,,,0.12,0.24
+Grupo Samca (Green It Aragón),,,,,,,,0.24,,,,,,,,,,,,,0.24
 Fluidstack + TeraWulf,,,,,,0.218,,,,,,,,,,,,,,,0.218
 CoreWeave,,,,,,,,0.2,,,,,,,,,,,,,0.2
 DataOne,,,,,0.1,,0.1,,,,,,,,,,,,,,0.2
 Poolside Infrastructure Company,,,,,,,0.2,,,,,,,,,,,,,,0.2
+NAVER,,,,,,,0.1,0.1,,,,,,,,,,,,,0.2
 Schwarz Digits,,,,,,,0.2,,,,,,,,,,,,,,0.2
 LG Uplus,,,,,,,0.05,0.15,,,,,,,,,,,,,0.2
-NAVER,,,,,,,0.1,0.1,,,,,,,,,,,,,0.2
 SK Telecom,,,,,,,0.041,,0.082,0.075,,,,,,,,,,,0.198
 CyrusOne,,,,,,0.19,,,,,,,,,,,,,,,0.19
 Samsung SDS,,,,,,,,0.1,0.02,0.06,,,,,,,,,,,0.18
@@ -135,11 +138,11 @@ Yamna,,,,,,,,,0.118,,,,,,,,,,,,0.118
 evroc,,,,,0.096,,0.019,,,,,,,,,,,,,,0.115
 NEXTDC,,,,,,,0.11,,,,,,,,,,,,,,0.11
 Bridge Data Centres,,0.11,,,,,,,,,,,,,,,,,,,0.11
-Khazaen Data Campus (KDC) promoters,,,,,,,,0.045,,0.055,,,,,,,,,,,0.1
 Tata Consultancy Services (HyperVault),,,,,,,,,0.1,,,,,,,,,,,,0.1
 G42,,,,,,,,,,,,,,,,,,,,0.1,0.1
-Chirisa Technology Parks + Machine Investment Group,,,,,,0.1,,,,,,,,,,,,,,,0.1
 DataVolt + HUMAIN,,,,,,,,0.1,,,,,,,,,,,,,0.1
+Khazaen Data Campus (KDC) promoters,,,,,,,,0.045,,0.055,,,,,,,,,,,0.1
+Chirisa Technology Parks + Machine Investment Group,,,,,,0.1,,,,,,,,,,,,,,,0.1
 Clearview Dynamics,,,,,,,,,,0.094,,,,,,,,,,,0.094
 Green Mountain,,,,,0.09,,,,,,,,,,,,,,,,0.09
 Foxconn (Hon Hai),,,,,,0.047,0.04,,,,,,,,,,,,,,0.087
@@ -147,18 +150,18 @@ Polar,,,,,,0.016,0.052,,,,,,,,,,,,,,0.068
 Accelerated Infrastructure Capital + Kinh Bac City Development,,,,,,,0.065,,,,,,,,,,,,,,0.065
 Telekom Malaysia + Singtel / Nxera,,,,,,0.064,,,,,,,,,,,,,,,0.064
 ACS Group + Benbros,,,,,,,,,0.06,,,,,,,,,,,,0.06
-Equinix,,,,,,,,,0.05,,,,,,,,,,,,0.05
 Fibernet MercuryDelta,,,,,,,,0.05,,,,,,,,,,,,,0.05
-Keppel Data Centres,,,,,,,,,0.05,,,,,,,,,,,,0.05
 STT Global Data Centres,,,,,,,,,0.05,,,,,,,,,,,,0.05
+Equinix,,,,,,,,,0.05,,,,,,,,,,,,0.05
+Keppel Data Centres,,,,,,,,,0.05,,,,,,,,,,,,0.05
 CDC Data Centres,,,,,,0.046,,,,,,,,,,,,,,,0.046
 Start Campus,,,,,,0.031,,,,,,,,,,,,,,,0.031
 EdgeConneX,,,,,,0.03,,,,,,,,,,,,,,,0.03
 atNorth,,,,,,0.029,,,,,,,,,,,,,,,0.029
 Verne,,,,,,0.015,,,,,,,,,,,,,,0.01,0.025
 Lambda,,,,,,0.024,,,,,,,,,,,,,,,0.024
-Global AI,,,,,,0.024,,,,,,,,,,,,,,,0.024
 NTT DATA Group + TEPCO Power Grid,,,,,,,0.024,,,,,,,,,,,,,,0.024
+Global AI,,,,,,0.024,,,,,,,,,,,,,,,0.024
 Syntys (Ooredoo),,,,,,,,0.02,,,,,,,,,,,,,0.02
 KT Corporation,,,,,0.02,,,,,,,,,,,,,,,,0.02
 Polarise,,,,,,0.019,,,,,,,,,,,,,,,0.019
@@ -169,4 +172,4 @@ TECfusions,,,,,,0.01,,,,,,,,,,,,,,,0.01
 Patmos,,,,,0.005,,,,,,,,,,,,,,,,0.005
 Eurofiber,,,,,,,,0.004,,,,,,,,,,,,,0.004
 Sakura Internet,,,,,,0.002,,,,,,,,,,,,,,,0.002
-Total,0.32,0.11,0.308,4.682,3.503,22.219,28.368,61.442,35.808,16.315,9.049,45.545,4.19,0.8,1.52,4.78,1.85,3.0,1.44,46.084,291.334
+Total,0.32,0.11,0.308,4.682,3.503,22.419,28.368,63.542,37.288,19.415,9.449,45.745,4.19,0.8,1.52,4.78,1.85,3.0,1.44,46.443,299.173
