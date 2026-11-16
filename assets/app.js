@@ -22,13 +22,13 @@
     partially_live: 'Partially live', live: 'Live', delayed: 'Delayed', paused: 'Paused', cancelled: 'Cancelled',
     nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA',
     openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq',
-    huawei: 'Huawei', alibaba: 'Alibaba T-Head', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
+    huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
     verified: 'Verified', sourced: 'Sourced',
   };
   const lab = (k) => LABEL[k] || k;
   // Tables show years up to LAST_YEAR, then one column for everything later.
   const LAST_YEAR = 2032, LATER = `${LAST_YEAR + 1}+`;
-  const CHIP_ORDER = ['nvidia', 'amd', 'google', 'amazon', 'microsoft', 'meta', 'openai', 'broadcom'];
+  const CHIP_ORDER = ['nvidia', 'amd', 'google', 'amazon', 'huawei', 'openai', 'meta', 'alibaba', 'microsoft', 'broadcom'];
   const STATUS_ORDER = ['live', 'partially_live', 'under_construction', 'permitted', 'announced', 'delayed', 'paused', 'cancelled'];
   const gw = (mw) => {
     const g = mw / 1000;
@@ -101,7 +101,7 @@
       if (g === 'status') keys = STATUS_ORDER.map(lab).filter((k) => totals.has(k));
       if (g === 'stage') keys = Object.values(STAGE).filter((k) => totals.has(k));
       const m = new Map();
-      keys.filter((k) => !/^(Undisclosed|Not disclosed|Outside US|Other)$/.test(k)).slice(0, 7).forEach((k, i) => m.set(k, `var(--s${i + 1})`));
+      keys.filter((k) => !/^(Undisclosed|Not disclosed|Outside US|Other)$/.test(k)).slice(0, 8).forEach((k, i) => m.set(k, `var(--s${i + 1})`));
       colorMaps[g] = m;
     }
   }
@@ -328,23 +328,52 @@
     return el('figure', { class: 'traj-wrap' }, [root, el('figcaption', { text: `Capacity with a date, added up year by year as it is due to switch on. ${later > 0 ? `${gw(later)} GW is dated after ${Y1}; ` : ''}${gw(undated)} GW has no date yet.` })]);
   }
 
+  const SB = { year: 0 };
+  function initYearPick() {
+    const btn = $('#ypick-btn'), menu = $('#ypick-menu');
+    const opts = [[0, 'All years', 'Including undated']].concat(Array.from({ length: 11 }, (_, i) => 2025 + i).map((y) => [y, `By ${y}`, y === 2030 ? 'End of decade' : '']));
+    const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    const pick = (y) => { SB.year = y; close(); btn.focus(); drawStagebar(); };
+    const build = () => menu.replaceChildren(...opts.map(([y, t, n]) => {
+      const li = el('li', { role: 'option', tabindex: '-1', 'aria-selected': String(SB.year === y), 'data-y': y }, [el('span', { text: t }), n ? el('small', { text: n }) : null]);
+      li.addEventListener('click', () => pick(y)); li.addEventListener('keydown', (e) => {
+        const items = [...menu.children], i = items.indexOf(li);
+        if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || li).focus(); } else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || li).focus(); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(y); } else if (e.key === 'Escape') { close(); btn.focus(); } });
+      return li; }));
+    btn.addEventListener('click', () => { if (!menu.hidden) return close(); build(); menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); (menu.querySelector('[aria-selected="true"]') || menu.firstChild).focus(); });
+    document.addEventListener('click', (e) => { if (!$('#ypick').contains(e.target)) close(); });
+  }
   function drawStagebar() {
     const m = state.measure;
     // Uses every filter except Stage, so the bar always shows the full split and the current choice.
     const saved = state.stage; state.stage = '';
     const ps = DS.phases.filter(passPhase).filter(counted);
     state.stage = saved;
-    const vals = STAGE_GROUPS.map(([k, name, cls, f]) => [k, name, cls, ps.filter((p) => f(stageOf(p))).reduce((s, p) => s + (mwOf(p, m) || 0), 0)]);
+    let vals;
+    if (!SB.year) vals = STAGE_GROUPS.map(([k, name, cls, f]) => [k, name, cls, ps.filter((p) => f(stageOf(p))).reduce((s, p) => s + (mwOf(p, m) || 0), 0)]);
+    else {
+      // Cumulative: capacity due to energize by the end of the chosen year, from the dated deployment schedule.
+      const ids = new Set(ps.map((p) => p.id)), deps = DS.deployments.filter((d) => ids.has(d.id) && d[m] != null);
+      const due = deps.filter((d) => d.year != null && d.year <= SB.year), undated = deps.filter((d) => d.year == null).reduce((s, d) => s + d[m], 0);
+      const later = deps.filter((d) => d.year != null && d.year > SB.year).reduce((s, d) => s + d[m], 0);
+      vals = STAGE_GROUPS.map(([k, name, cls, f]) => [k, name, cls, due.filter((d) => f(stageOf(phaseById[d.id]))).reduce((s, d) => s + d[m], 0)]);
+      $('#sb-note').textContent = `Capacity due to switch on by the end of ${SB.year}. Not shown: ${gw(later)} GW due after ${SB.year} and ${gw(undated)} GW with no date yet.`;
+    }
+    $('#sb-note').hidden = !SB.year;
+    $('#ypick-v').textContent = SB.year ? `By ${SB.year}` : 'All years';
     const tot = vals.reduce((s, v) => s + v[3], 0) || 1;
     const sel = state.stage === 'real' ? ['operating', 'construction'] : PAPER.includes(state.stage) ? ['paper'] : [state.stage];
     const bar = $('#stagebar'), leg = $('#stagelegend');
     // Hero artwork: one square per half gigawatt, coloured by stage, following the filters.
     const wf = $('#waffle');
     if (wf) {
-      const cells = [];
-      vals.forEach(([k, , cls, v]) => { for (let i = 0; i < Math.round(v / 500); i++) cells.push([cls, sel.includes(k) || !state.stage || state.stage === 'cancelled']); });
-      const cap = 520, step = cells.length > cap ? cells.length / cap : 1;
-      const shown = step > 1 ? Array.from({ length: cap }, (_, i) => cells[Math.floor(i * step)]) : cells;
+      // Pick a square size so the grid stays within 12 rows of 24 and never reaches the stage bar.
+      const totMW = vals.reduce((t, v) => t + v[3], 0), unit = [0.5, 1, 2, 5, 10, 25].find((u) => totMW / (u * 1000) <= 288) || 50;
+      const shown = [];
+      vals.forEach(([k, , cls, v]) => { for (let i = 0; i < Math.round(v / (unit * 1000)); i++) shown.push([cls, sel.includes(k) || !state.stage || state.stage === 'cancelled']); });
+      const cap = wf.parentNode.querySelector('figcaption');
+      if (cap) cap.textContent = unit === 0.5 ? 'Each square is half a gigawatt' : unit === 1 ? 'Each square is one gigawatt' : `Each square is ${unit} gigawatts`;
       wf.replaceChildren(...shown.map(([cls, on], i) => el('i', { class: cls + (on ? '' : ' off'), style: `--c:var(--st-${cls});--d:${Math.min(i * 4, 1400)}ms` })));
     }
     bar.classList.toggle('has-sel', !!state.stage && state.stage !== 'cancelled');
@@ -579,7 +608,7 @@
     const bind = (sel, key, ev = 'change') => $(sel).addEventListener(ev, (e) => { state[key] = e.target.value; if (key === 'us_state' && e.target.value) { state.region = 'us'; $('#f-region').value = 'us'; } render(); });
     bind('#f-kind', 'kind'); bind('#f-region', 'region'); bind('#f-state', 'us_state'); bind('#f-stage', 'stage'); bind('#f-chip', 'chip');
     bind('#f-role', 'role'); bind('#f-measure', 'measure'); bind('#f-q', 'q', 'input'); bind('#c-period', 'period'); bind('#c-group', 'group');
-    $('#f-reset').addEventListener('click', () => {
+    $('#f-reset').addEventListener('click', () => { SB.year = 0;
       const keep = { period: state.period, group: state.group }; $('#t-q').value = '';
       state = Object.assign(defaults(), keep);
       for (const [sel, key] of [['#f-kind', 'kind'], ['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-stage', 'stage'], ['#f-chip', 'chip'], ['#f-role', 'role'], ['#f-measure', 'measure'], ['#f-q', 'q']]) $(sel).value = state[key];
@@ -603,7 +632,7 @@
       const blob = new Blob([[hdr, ...rows].map((r) => r.map(q).join(',')).join('\n')], { type: 'text/csv' });
       const a = el('a', { href: URL.createObjectURL(blob), download: 'register-filtered.csv' }); document.body.append(a); a.click(); a.remove();
     });
-    drawStageChips();
+    drawStageChips(); initYearPick();
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 120); });
     drawDeals(); render();
   }

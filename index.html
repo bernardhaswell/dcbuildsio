@@ -31,7 +31,15 @@
     <h1>The AI build-out,<br><span class="h1-soft">site by site.</span></h1>
     <div class="summary" id="summary" aria-live="polite"><p class="hero-line">Gigawatts of AI datacenter capacity by site, company, accelerator, region and US state, from 2024 to 2030 and beyond.</p></div>
     <div class="stagebar-wrap">
-      <div class="stagebar-head"><span>How real is it?</span><span class="dim">Select a stage to filter the whole page</span></div>
+      <div class="stagebar-head"><span>How real is it?</span>
+        <div class="sb-right"><span class="dim sb-hint">Select a stage to filter the whole page</span>
+          <div class="ypick" id="ypick">
+            <button type="button" class="ypick-btn" id="ypick-btn" aria-haspopup="listbox" aria-expanded="false"><span class="ypick-k">Due</span><span id="ypick-v">All years</span><i aria-hidden="true"></i></button>
+            <ul class="ypick-menu" id="ypick-menu" role="listbox" tabindex="-1" hidden></ul>
+          </div>
+        </div>
+      </div>
+      <p class="sb-note dim" id="sb-note" hidden></p>
       <div class="stagebar" id="stagebar" role="group" aria-label="Capacity by stage. Select a stage to filter."></div>
       <div class="stagelegend" id="stagelegend"></div>
     </div>
