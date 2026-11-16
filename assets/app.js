@@ -364,14 +364,14 @@
   }
 
   // ---------------------------------------------------------------- the three year tables
-  const YT = { period: 'year', all: { chip: false, op: false, end: false } };
+  const YT = { period: 'year', all: { chip: false, op: false, end: false }, open: new Set() };
   const YT_DEF = {
-    chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) + (estBasis(d.chip_basis) ? EST_SUFFIX : '') : null), none: 'Not disclosed', label: 'Chip maker', swatch: true,
-      note: 'Capacity is split across chips where a site uses more than one. Rows marked Estimate attribute capacity from chip agreements to that chip maker where no site states the chip. "Not disclosed" is capacity whose accelerator has not been published.' },
+    chip: { key: (d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null), est: (d) => estBasis(d.chip_basis), none: 'Not disclosed', label: 'Chip maker', swatch: true,
+      note: 'Capacity is split across chips where a site uses more than one. Where part of a chip maker’s capacity is our estimate (from chip agreements, or a buyer’s other chips), the row says so; click it to split stated from estimated. "Not disclosed" is capacity whose accelerator has not been published.' },
     op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'Operator',
       note: 'The company that runs the facility or the cloud inside it, as sources state. Joint operators share one row. Capacity with no named operator is in "Not disclosed".' },
-    end: { key: (d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length ? r.map(entName).join(' + ') + (endEstimated(p) ? EST_SUFFIX : '') : null; }, none: 'Not disclosed', label: 'End user',
-      note: 'Whose workloads run there. Rows marked Estimate are our inference where a provider runs its own site and no source names a customer. Capacity with no named or estimated end user, including speculative developer campuses, is in "Not disclosed".' },
+    end: { key: (d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; }, est: (d) => endEstimated(phaseById[d.id]), none: 'Not disclosed', label: 'End user',
+      note: 'Whose workloads run there. Where a provider runs its own site and no source names a customer, we count the provider as the end user as an estimate; click a row marked "est." to split stated from estimated. Capacity with no named or estimated end user, including speculative developer campuses, is in "Not disclosed".' },
   };
   function drawYearTable(id) {
     const def = YT_DEF[id], host = $('#yt-' + id), m = state.measure, quarterly = YT.period === 'quarter';
@@ -382,7 +382,9 @@
     if (!quarterly) { const ys = cols.filter((c) => c !== 'Undated' && c !== LATER).map(Number); if (ys.length) { const full = []; for (let y = Math.min(...ys); y <= Math.max(...ys); y++) full.push(String(y)); cols = full.concat(cols.filter((c) => c === LATER || c === 'Undated')); } }
     const cell = new Map(), tot = new Map();
     const NONE = def.none;
-    rows.forEach((d) => { const k = def.key(d) || NONE, c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]); });
+    const ecell = new Map(), etot = new Map();
+    rows.forEach((d) => { const k = def.key(d) || NONE, c = pk(d); cell.set(k + '|' + c, (cell.get(k + '|' + c) || 0) + d[m]); tot.set(k, (tot.get(k) || 0) + d[m]);
+      if (def.est && def.est(d) && k !== NONE) { ecell.set(k + '|' + c, (ecell.get(k + '|' + c) || 0) + d[m]); etot.set(k, (etot.get(k) || 0) + d[m]); } });
     let keys = [...tot.keys()].filter((k) => k !== NONE).sort((a, b) => tot.get(b) - tot.get(a));
     const LIMIT = 12, more = host.querySelector('.more'), showAll = YT.all[id];
     let other = [];
@@ -400,11 +402,26 @@
     // Shading: one hue, stronger with more GW, scaled to the largest single cell among named rows.
     let peak = 0; for (const k of keys) for (const c of cols) if (c !== 'Undated') peak = Math.max(peak, cell.get(k + '|' + c) || 0);
     const shade = (v, c) => (v && c !== 'Undated' && peak ? `--h:color-mix(in srgb, var(--s1) ${Math.round(8 + 46 * Math.sqrt(v / peak))}%, var(--surface));color:var(--text)` : '');
-    const rowOf = (label, get, cls = '', heat = true, sw = null) => el('tr', { class: cls }, [
-      el('td', { title: label.replace(EST_SUFFIX, ' (estimate)') }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label.replace(EST_SUFFIX, ''), label.endsWith(EST_SUFFIX) ? el('span', { class: 'tag estimate inl', text: 'Estimate' }) : null]),
+    const rowOf = (label, get, cls = '', heat = true, sw = null, extra = null) => el('tr', { class: cls }, [
+      el('td', { title: label }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label, extra]),
       ...cols.map((c) => { const v = get(c); return el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }); }),
       el('td', { class: 'num tot', text: f(cols.reduce((s, c) => s + (get(c) || 0), 0)) })]);
-    for (const k of keys) tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, def.swatch ? colorOf('chip_vendor', k.replace(EST_SUFFIX, '')) : null));
+    for (const k of keys) {
+      const e = etot.get(k) || 0, sw = def.swatch ? colorOf('chip_vendor', k) : null;
+      if (!e) { tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, sw)); continue; }
+      // One row per company; estimated capacity is broken out when the row is opened.
+      const oid = id + '|' + k, open = YT.open.has(oid), pctE = Math.round((e / tot.get(k)) * 100);
+      const hint = el('span', { class: 'est-hint', text: e >= tot.get(k) - 0.5 ? 'all estimated' : `${pctE}% est.` });
+      const tr = rowOf(k, (c) => cell.get(k + '|' + c) || 0, 'grp' + (open ? ' open' : ''), true, sw, hint);
+      tr.tabIndex = 0; tr.setAttribute('aria-expanded', String(open)); tr.title = 'Show stated and estimated capacity';
+      const tog = () => { open ? YT.open.delete(oid) : YT.open.add(oid); drawYearTable(id); };
+      tr.addEventListener('click', tog); tr.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tog(); } });
+      tbody.append(tr);
+      if (open) {
+        tbody.append(rowOf('Stated', (c) => (cell.get(k + '|' + c) || 0) - (ecell.get(k + '|' + c) || 0), 'sub', false));
+        tbody.append(rowOf('', (c) => ecell.get(k + '|' + c) || 0, 'sub est', false, null, el('span', { class: 'tag estimate', text: 'Estimate' })));
+      }
+    }
     if (other.length) tbody.append(rowOf(`${other.length} more`, (c) => other.reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'quiet', false));
     if (tot.has(NONE)) tbody.append(rowOf(NONE, (c) => cell.get(NONE + '|' + c) || 0, 'quiet', false, def.swatch ? 'var(--other)' : null));
     tbody.append(rowOf('Total', (c) => [...tot.keys()].reduce((s, k) => s + (cell.get(k + '|' + c) || 0), 0), 'total', false));
