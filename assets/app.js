@@ -46,6 +46,9 @@
   const EST = new Set(['guessed', 'estimated', 'assumed']);
   const estBasis = (b) => EST.has(b);
   const guessed = (p) => isDeal(p) && estBasis(p.location_basis);
+  // End user inferred by the compiler (e.g. a hyperscaler running its own site with no named tenant).
+  const endEstimated = (p) => estBasis(p.end_customer_basis) || !!(p.estimated && p.estimated.end_customer) || estBasis((p.roles_basis || {}).end_customer);
+  const EST_SUFFIX = '\u0000est';
   const stageOf = (p) => (isDeal(p) ? 'agreement' : p.status === 'live' || p.status === 'partially_live' ? 'operating'
     : p.status === 'under_construction' ? 'construction' : p.status === 'permitted' ? 'permitted' : p.status === 'rumoured' ? 'rumoured'
     : p.status === 'cancelled' ? 'cancelled' : 'announced');
@@ -283,7 +286,7 @@
     if (!ps.length || all <= 0) { host.replaceChildren('Nothing in the tracker matches these filters. ', el('b', { text: 'Reset' }), ' to see everything.'); return; }
     const by = (fn) => { const t = new Map(); rowsNow().forEach((d) => { if (d[m] == null) return; const k = fn(d); if (!k) return; t.set(k, (t.get(k) || 0) + d[m]); }); return [...t.entries()].sort((x, y) => y[1] - x[1])[0]; };
     const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null));
-    const endU = by((d) => { const r = phaseById[d.id].roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; });
+    const endU = by((d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length && !endEstimated(p) ? r.map(entName).join(' + ') : null; });
     const real = sum((p) => ['operating', 'construction'].includes(stageOf(p)));
     const kids = [
       filtered ? 'In this view, ' : 'The tracker holds ', gwTok(all), ` of AI datacenter ${unit} capacity: `,
@@ -340,8 +343,8 @@
       note: 'Capacity is split across chips where a site uses more than one. "Not disclosed" is capacity whose accelerator has not been published.' },
     op: { key: (d) => { const r = phaseById[d.id].roles.operator || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'Operator',
       note: 'The company that runs the facility or the cloud inside it, as sources state. Joint operators share one row. Capacity with no named operator is in "Not disclosed".' },
-    end: { key: (d) => { const r = phaseById[d.id].roles.end_customer || []; return r.length ? r.map(entName).join(' + ') : null; }, none: 'Not disclosed', label: 'End user',
-      note: 'Whose workloads run there, as sources state. Capacity with no named end user, including speculative developer campuses, is in "Not disclosed".' },
+    end: { key: (d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length ? r.map(entName).join(' + ') + (endEstimated(p) ? EST_SUFFIX : '') : null; }, none: 'Not disclosed', label: 'End user',
+      note: 'Whose workloads run there. Rows marked Estimate are our inference where a provider runs its own site and no source names a customer. Capacity with no named or estimated end user, including speculative developer campuses, is in "Not disclosed".' },
   };
   function drawYearTable(id) {
     const def = YT_DEF[id], host = $('#yt-' + id), m = state.measure, quarterly = YT.period === 'quarter';
@@ -371,7 +374,7 @@
     let peak = 0; for (const k of keys) for (const c of cols) if (c !== 'Undated') peak = Math.max(peak, cell.get(k + '|' + c) || 0);
     const shade = (v, c) => (v && c !== 'Undated' && peak ? `--h:color-mix(in srgb, var(--s1) ${Math.round(8 + 46 * Math.sqrt(v / peak))}%, var(--surface));color:var(--text)` : '');
     const rowOf = (label, get, cls = '', heat = true, sw = null) => el('tr', { class: cls }, [
-      el('td', { title: label }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label]),
+      el('td', { title: label.replace(EST_SUFFIX, ' (estimate)') }, [sw ? el('i', { class: 'sw', style: `background:${sw}` }) : null, label.replace(EST_SUFFIX, ''), label.endsWith(EST_SUFFIX) ? el('span', { class: 'tag estimate inl', text: 'Estimate' }) : null]),
       ...cols.map((c) => { const v = get(c); return el('td', { class: 'num' + (v ? '' : ' z') + (heat && v && c !== 'Undated' ? ' h' : ''), style: heat ? shade(v, c) : '', text: f(v) }); }),
       el('td', { class: 'num tot', text: f(cols.reduce((s, c) => s + (get(c) || 0), 0)) })]);
     for (const k of keys) tbody.append(rowOf(k, (c) => cell.get(k + '|' + c) || 0, '', true, def.swatch ? colorOf('chip_vendor', k) : null));
@@ -416,7 +419,7 @@
       const tr = el('tr', { class: 'row', tabindex: 0, 'aria-expanded': state.open.has(p.id) }, [
         el('td', {}, [el('div', { class: 'site', text: p.site_name }), isDeal(p) ? el('span', { class: 'tag deal', text: 'Agreement, no site' }) : (p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null)]),
         isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
-        el('td', { text: roleLabel(p, state.role) }),
+        el('td', {}, [roleLabel(p, state.role), state.role === 'end_customer' && endEstimated(p) ? el('div', {}, el('span', { class: 'tag estimate', text: 'Estimate' })) : null]),
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
         el('td', { text: when(p) || 'Not dated' }),
@@ -439,7 +442,10 @@
     add('Facility / IT', d.facility_mw != null ? `${fmtMW(d.facility_mw)} MW facility (${d.facility_basis}); ${fmtMW(d.it_mw)} MW IT (${d.it_basis})` : null);
     add('Campus plan', p.campus_planned_mw ? `${fmtMW(p.campus_planned_mw)} MW at full build-out` : null);
     for (const r of ['developer', 'owner', 'operator', 'tenant', 'end_customer', 'financing', 'power_supplier', 'builder', 'hardware_partner']) {
-      if ((p.roles[r] || []).length) add(r.replace('_', ' ').replace(/^./, (x) => x.toUpperCase()), p.roles[r].map(entName).join(', '));
+      if (!(p.roles[r] || []).length) continue;
+      const names = p.roles[r].map(entName).join(', ');
+      if (r === 'end_customer' && endEstimated(p)) add('End customer', [names, ' ', el('span', { class: 'tag estimate inl', text: 'Estimate' }), p.end_customer_why || (p.estimated || {}).end_customer ? el('div', { class: 'dim', text: p.end_customer_why || p.estimated.end_customer }) : null]);
+      else add(r.replace('_', ' ').replace(/^./, (x) => x.toUpperCase()), names);
     }
     add('Timeline', [['Announced', t.announced], ['Construction start', t.construction_start], ['First power', t.first_power], ['Full capacity', t.full_capacity]].filter((x) => x[1]).map((x) => `${x[0]} ${x[1]}`).join(' · '));
     add('Ramp', (t.ramp || []).map((r) => `${r.period}: ${fmtMW(r.cumulative_mw)} MW${r.basis === 'estimated' ? ' (est.)' : ''}`).join(' · '));
