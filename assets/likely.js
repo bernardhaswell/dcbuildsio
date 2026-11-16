@@ -164,7 +164,9 @@
     drawChart(); drawTable();
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(drawChart, 150); });
   }
-  const go = () => fetch('data/likely.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(init)
-    .catch(() => { const s = $('#likely'); if (s) s.hidden = true; });
+  // Only hide the section if the data cannot be fetched; a drawing problem shows a note instead of hiding it.
+  const go = () => fetch('data/likely.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then((d) => { try { init(d); } catch (e) { console.error(e); const n = $('#lk-note'); if (n) n.textContent = 'This section could not be drawn. Please refresh the page.'; } })
+    .catch(() => { const n = $('#lk-sub'); if (n) n.textContent = 'The forecast data could not be loaded. Please refresh the page.'; });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();
