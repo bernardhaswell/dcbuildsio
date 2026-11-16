@@ -472,3 +472,9 @@ body.bk-on { overflow: hidden; }
 .lk-reason a { color: var(--t-co, var(--s1)); }
 .bk-why { margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
 #lk-tabs { flex-wrap: wrap; }
+.lk-sw.us { background: var(--s1); }
+.lk-sw.xu { background: var(--s2); }
+.lk-sw.hatch-n { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--text, #ccc) 70%, transparent) 0 2px, transparent 2px 5px); border: 1px solid color-mix(in srgb, var(--text, #ccc) 40%, transparent); }
+.lk-col .lk-bar { cursor: pointer; }
+.lk-col rect.lk-bar:hover, .lk-col rect.lk-bar:focus { filter: brightness(1.18); outline: none; }
+.lk-table tr.ind td:first-child { padding-left: 22px; }

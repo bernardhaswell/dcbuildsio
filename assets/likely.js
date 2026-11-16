@@ -48,10 +48,10 @@
     $('#bk-list').scrollTop = 0;
   }
   const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return 'Source'; } };
-  const openYear = (i, pred = () => true, what = 'Named sites counted') => {
+  const openYear = (i, pred = () => true, what = 'Named sites counted', est = D.summary.estimate[i]) => {
     const items = F.rows.filter((o) => o.counted_by_year[i] > 0.0005 && pred(o));
     openList({ kicker: `Likely energized · ${D.years[i]}`, title: what, value: items.reduce((a, o) => a + o.counted_by_year[i], 0), yearIdx: i, items,
-      sub: `${items.length} sites and agreements counted in ${D.years[i]}, largest first, each with the reason it is in. ${f1(D.summary.estimate[i])} GW more that year is an Estimate of capacity not yet at a named site in the tracker, so it is not listed here.` });
+      sub: `${items.length} sites and agreements counted in ${D.years[i]}, largest first, each with the reason it is in.${est > 0.05 ? ` ${f1(est)} GW more that year is an Estimate of capacity not yet at a named site in the tracker, so it is not listed here.` : ''}` });
   };
   const clickable = (td, fn) => { td.classList.add('pick'); td.tabIndex = 0; td.setAttribute('role', 'button'); td.addEventListener('click', fn); td.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); return td; };
 
@@ -61,26 +61,49 @@
     const max = Math.max(...s.total) * 1.12, nice = max <= 20 ? 5 : max <= 50 ? 10 : 20, top = Math.ceil(max / nice) * nice;
     const x0 = padL, cw = (W - padL - padR) / ys.length, bw = Math.min(72, cw * 0.56), y = (v) => padT + (H - padT - padB) * (1 - v / top);
     const root = sv('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: 'lk-svg' });
-    const defs = sv('defs'), pat = sv('pattern', { id: 'lk-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
-    pat.append(sv('rect', { width: 6, height: 6, fill: 'color-mix(in srgb, var(--warn) 18%, transparent)' }), sv('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: 'color-mix(in srgb, var(--warn) 75%, transparent)', 'stroke-width': 2 }));
-    defs.append(pat); root.append(defs);
+    const defs = sv('defs');
+    for (const [id, c] of [['us', 'var(--s1)'], ['xu', 'var(--s2)']]) {
+      const pat = sv('pattern', { id: `lk-h-${id}`, width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+      pat.append(sv('rect', { width: 6, height: 6, fill: `color-mix(in srgb, ${c} 20%, transparent)` }), sv('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: `color-mix(in srgb, ${c} 80%, transparent)`, 'stroke-width': 2 }));
+      defs.append(pat);
+    }
+    root.append(defs);
     for (let v = 0; v <= top; v += nice) { root.append(sv('line', { x1: x0, x2: W - padR, y1: y(v), y2: y(v), class: 'lk-grid' })); root.append(sv('text', { x: x0 - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'lk-ax' }, String(v))); }
+    const RG = (n) => D.regions.find((g) => g.name === n), U = RG('United States'), X = RG('Outside the US');
     ys.forEach((yr, i) => {
-      const cx = x0 + cw * i + cw / 2, a = s.at_sites[i], e = s.estimate[i], t = s.total[i];
-      const g = sv('g', { class: 'lk-bar', tabindex: 0, role: 'button', 'aria-label': `${yr}: ${f1(t)} GW likely, ${f1(a)} at named sites, ${f1(e)} Estimate not at a named site. Show the sites` });
+      const cx = x0 + cw * i + cw / 2, t = s.total[i];
+      const uN = U.named[i], uE = U.estimate[i], xN = X.named[i], xE = X.estimate[i];
+      const segs = [
+        { v: uN, fill: 'var(--s1)', us: true, lab: 'US, named sites' },
+        { v: uE, fill: 'url(#lk-h-us)', us: true, est: true, lab: 'US, Estimate' },
+        { v: xN, fill: 'var(--s2)', us: false, lab: 'Outside the US, named sites' },
+        { v: xE, fill: 'url(#lk-h-xu)', us: false, est: true, lab: 'Outside the US, Estimate' }];
+      const g = sv('g', { class: 'lk-col' });
       g.append(sv('rect', { x: cx - cw / 2, y: padT - 20, width: cw, height: H - padT + 20 - padB + 24, fill: 'transparent' }));
-      if (e > 0.01) g.append(sv('rect', { x: cx - bw / 2, y: y(a + e), width: bw, height: Math.max(0, y(a) - y(a + e)), fill: 'url(#lk-hatch)' }));
-      g.append(sv('rect', { x: cx - bw / 2, y: y(a), width: bw, height: Math.max(0, y(0) - y(a)), fill: 'var(--s1)' }));
+      let base = 0;
+      for (const sg of segs) {
+        if (sg.v > 0.01) {
+          const region = sg.us ? 'US' : 'Outside the US', est = sg.us ? uE : xE;
+          const r = sv('rect', { x: cx - bw / 2, y: y(base + sg.v), width: bw, height: Math.max(0, y(base) - y(base + sg.v)), fill: sg.fill, class: 'lk-bar', tabindex: 0, role: 'button', 'aria-label': `${yr}, ${sg.lab}: ${f1(sg.v)} GW. Show the ${region} sites` });
+          r.append(sv('title', {}, `${yr}: ${f1(t)} GW likely\nUS ${f1(s.us[i])} (named sites ${f1(uN)}, Estimate ${f1(uE)})\nOutside the US ${f1(s.outside_us[i])} (named sites ${f1(xN)}, Estimate ${f1(xE)})\nClick to see the ${region} sites`));
+          const go = () => openRegion(sg.us ? U : X)(i);
+          r.addEventListener('click', go); r.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } });
+          g.append(r);
+        }
+        base += sg.v;
+      }
       g.append(sv('text', { x: cx, y: y(t) - 10, 'text-anchor': 'middle', class: 'lk-val' }, f1(t)));
       g.append(sv('text', { x: cx, y: H - 10, 'text-anchor': 'middle', class: 'lk-yr' }, String(yr)));
-      g.append(sv('title', {}, `${yr}: ${f1(t)} GW likely\n${f1(a)} GW at named sites\n${f1(e)} GW Estimate: not at a named site\nClick to see the sites`));
-      const go = () => openYear(i); g.addEventListener('click', go); g.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } });
       root.append(g);
     });
     root.append(sv('text', { x: x0 - 8, y: 14, 'text-anchor': 'end', class: 'lk-ax' }, 'GW'));
     host_.replaceChildren(root);
-    $('#lk-legend').replaceChildren(el('span', {}, [el('i', { class: 'lk-sw solid' }), 'Named sites: permitted, announced or company plan']), el('span', {}, [el('i', { class: 'lk-sw hatch' }), 'Estimate: capacity not yet at a named site']), el('span', { class: 'dim' }, 'Click a bar to see the sites counted that year'));
+    $('#lk-legend').replaceChildren(
+      el('span', {}, [el('i', { class: 'lk-sw us' }), 'US']), el('span', {}, [el('i', { class: 'lk-sw xu' }), 'Outside the US']),
+      el('span', {}, [el('i', { class: 'lk-sw hatch-n' }), 'Hatched: Estimate, capacity not yet at a named site']),
+      el('span', { class: 'dim' }, 'Solid: named sites, permitted, announced or company plan. Click a bar to see the sites'));
   }
+
 
   const head = (first, extra = []) => el('tr', {}, [el('th', { scope: 'col', text: first }), ...D.years.map((y) => el('th', { class: 'num', scope: 'col', text: String(y) })), el('th', { class: 'num tot', scope: 'col', text: '2025–30' }), ...extra.map((t) => el('th', { class: 'num', scope: 'col', text: t }))]);
   const line = (name, vals, cls = '', extra = [], onCell = null) => el('tr', { class: cls }, [el('td', { title: name }, name),
@@ -97,14 +120,31 @@
       sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${extra && extra.gw > 0.0005 ? ' The first line is assigned by mix and is an Estimate.' : ''}` });
   };
 
+
+  const EWHY = 'Capacity likely to be energized that is not yet at a named site in the tracker. Outside the US it is split between regions by each region’s share of named capacity counted in 2025 to 2030. See the By region sheet in the workbook.';
+  const inRegion = (g) => (g.name === 'Outside the US' ? (o) => o.region !== 'United States' : (o) => o.region === g.name);
+  const openRegion = (g) => (i) => {
+    const pred = inRegion(g), items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
+    const sum = (a) => (i == null ? a.reduce((x, y) => x + y, 0) : a[i]), est = sum(g.estimate);
+    openList({ kicker: `Likely energized · ${i == null ? '2025 to 2030' : D.years[i]}`, title: g.name, value: sum(g.years), items, yearIdx: i == null ? null : i,
+      extra: { gw: est, title: 'Estimate: not yet at a named site', why: EWHY },
+      sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${est > 0.0005 ? ' The first line is the Estimate for capacity not yet at a named site.' : ''}` });
+  };
+  const regionLine = (g, cls) => line(g.name, g.years, cls, [sumOf(g.named), sumOf(g.estimate)], openRegion(g));
+  const sumOf = (a) => a.reduce((x, y) => x + y, 0);
+
   function drawTable() {
     const t = $('#lk-table'), th = t.tHead, tb = t.tBodies[0], more = $('#lk-more'), s = D.summary, q = $('#lk-q');
     tb.replaceChildren(); more.hidden = true; q.hidden = !(tab === 'in' || tab === 'out');
     t.classList.toggle('lk-list', tab === 'in' || tab === 'out');
     if (tab === 'summary') {
-      $('#lk-tsub').textContent = 'IT GW. Each year is capacity switching on in that year, not a running total. Click a figure to see the sites behind it.';
-      th.replaceChildren(head(''));
-      tb.append(line('Likely energized', s.total, 'total'), line('United States', s.us, 'sub'), line('Outside the US', s.outside_us, 'sub'),
+      $('#lk-tsub').textContent = 'IT GW. Each year is capacity switching on in that year, not a running total. Rest of world is Canada, Latin America, Africa and Orbital. Click a figure to see the sites behind it, with the Estimate shown as its own line.';
+      th.replaceChildren(head('', ['Named sites', 'Estimate']));
+      const RGn = (n) => D.regions.find((g) => g.name === n);
+      tb.append(line('Likely energized', s.total, 'total', [sumOf(s.at_sites), sumOf(s.estimate)]),
+        regionLine(RGn('United States'), ''), regionLine(RGn('Outside the US'), ''),
+        ...['Europe', 'Middle East', 'Asia', 'Rest of world'].map((n) => regionLine(RGn(n), 'sub ind')),
+        sep('All regions'),
         line('Named sites and company plans', s.at_sites, '', [], openSet('Named sites counted', 'Likely energized', () => true)),
         line('Estimate: not yet at a named site', s.estimate, 'est'),
         sep('Named sites counted, by strength of evidence'),

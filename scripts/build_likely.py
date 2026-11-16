@@ -61,6 +61,17 @@ def note(name):
         if isinstance(v, str) and ws.cell(i, 2).value is None and len(v) > 60: return v
     return ''
 
+BUCKET = {'United States': 'United States', 'Europe': 'Europe', 'Middle East': 'Middle East', 'Asia Pacific': 'Asia', 'Asia': 'Asia'}
+G = wb['By region']; regions = []
+def rv(i): return [r(G.cell(i, c).value or 0) for c in range(2, 8)]
+for i in range(2, 8):
+    nm = str(G.cell(i, 1).value).strip()
+    nm = 'Outside the US' if nm.startswith('Outside') else nm
+    off = {'United States': 0, 'Europe': 1, 'Middle East': 2, 'Asia': 3, 'Rest of world': 4, 'Outside the US': 5}[nm]
+    assert str(G.cell(12 + off, 1).value).strip().startswith(nm[:7]) and str(G.cell(20 + off, 1).value).strip().startswith(nm[:7]), nm
+    regions.append({'name': nm, 'years': rv(i), 'total': r(G.cell(i, 8).value), 'named': rv(12 + off), 'estimate': rv(20 + off)})
+for g_ in regions: assert abs(sum(g_['years']) - sum(g_['named']) - sum(g_['estimate'])) < 0.01, g_['name']
+assert [g_['name'] for g_ in regions] == ['United States', 'Outside the US', 'Europe', 'Middle East', 'Asia', 'Rest of world'], [g_['name'] for g_ in regions]
 R = wb['Rows']; H = [c.value for c in R[1]]; ix = {h: j for j, h in enumerate(H)}
 rows = []
 for row in R.iter_rows(min_row=2, values_only=True):
@@ -68,15 +79,15 @@ for row in R.iter_rows(min_row=2, values_only=True):
     g = lambda k: row[ix[k]]
     rows.append([g('id'), g('site'), g('phase'), g('FORECAST STATUS'), g('area'), g('us_state') or '', g('stage'), g('stated_year'),
                  r(g('it_gw')), r(g('counted_2025_2030')), [r(g(f'counted {y}')) for y in years], g('first_year_counted'),
-                 g('chip_vendor'), g('end_user'), g('end_user_basis'), g('operator'), g('reason'), g('source_url'), g('tier')])
+                 g('chip_vendor'), g('end_user'), g('end_user_basis'), g('operator'), g('reason'), g('source_url'), g('tier'), BUCKET.get(str(g('region') or ''), 'Rest of world')])
 A = wb['Assumptions']
 assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'counts': A.cell(i, 3).value, 'earliest': A.cell(i, 4).value, 'why': A.cell(i, 6).value}
                for i in range(2, A.max_row + 1) if isinstance(A.cell(i, 1).value, int)]
 out = {'generated': datetime.date.today().isoformat(), 'basis': 'IT GW, worldwide excluding China', 'years': years,
        'summary': summary, 'summary_labels': summary_labels, 'tiers': tiers, 'reconciliation': rec, 'status': status, 'assumptions': assumptions,
        'mix_note': note('By chip maker'), 'by': {'chip': table('By chip maker'), 'operator': table('By operator'), 'end_user': table('By end user'), 'site': table('By site')},
-       'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier'],
-       'rows': rows}
+       'row_fields': ['id', 'site', 'phase', 'status', 'area', 'us_state', 'stage', 'stated_year', 'it_gw', 'counted', 'counted_by_year', 'first_year', 'chip', 'end_user', 'end_user_basis', 'operator', 'reason', 'source_url', 'tier', 'region'],
+       'regions': regions, 'rows': rows}
 txt = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
 assert 'defensib' not in txt.lower()
 assert BANNED not in txt.lower(), 'likely.json would name an outside forecast; clean the workbook first'
