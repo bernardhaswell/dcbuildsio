@@ -32,7 +32,7 @@
       <div class="stagebar" id="stagebar" role="group" aria-label="Capacity by stage. Select a stage to filter."></div>
       <div class="stagelegend" id="stagelegend"></div>
     </div>
-    <p class="hero-note">Every figure links to a public source. Everything announced or planned counts, including agreements with no site yet; where no source states a location, the country is our estimate and is marked <span class="tag guess">Estimate</span>.</p>
+    <p class="hero-note">Every figure links to a public source. Everything announced or planned counts, including agreements with no site yet; where no source states a location, the country is our estimate and is marked <span class="tag estimate">Estimate</span>.</p>
   </div>
 </header>
 
@@ -41,7 +41,7 @@
     <div class="filters">
       <label>Show <select id="f-kind">
         <option value="">Sites and agreements</option><option value="site">Named sites only</option>
-        <option value="deal">Agreements with no site</option><option value="guessed">Estimated locations only</option>
+        <option value="deal">Agreements with no site</option><option value="estimated">Estimated locations only</option>
       </select></label>
       <label>Stage <select id="f-stage">
         <option value="">All stages</option><option value="real">Operating or under construction</option>
@@ -162,7 +162,7 @@
         <h3>Everything announced counts</h3>
         <p>The totals include everything that has been announced or planned, from operating halls to letters of intent. Use "Stage" to narrow it: <span class="tk tk-st-op">operating</span>, <span class="tk tk-st-uc">under construction</span>, <span class="tk tk-st-pm">permitted</span>, or <span class="tk tk-st-pp">paper stage</span>. Paper stage means announced but not started, reported but unconfirmed, or committed in an agreement with no site yet.</p>
         <h3>Agreements with no site</h3>
-        <p>Some capacity is committed in an agreement before any site is named. That part is in the totals as its own row, labelled "Agreement, no site". We take the agreement's size, subtract what is already at named sites, and subtract capacity that another agreement already covers. Chip supply agreements are assumed to fill the buyer's named sites first. The location is given by country only: "Country stated" where a source says so, <span class="tag guess">Estimate</span> where it is our estimate from where that company builds. Estimated locations are low confidence, and some of this capacity may sit in a provider's datacenter that is already listed without a named customer. Use "Show" to see named sites only.</p>
+        <p>Some capacity is committed in an agreement before any site is named. That part is in the totals as its own row, labelled "Agreement, no site". We take the agreement's size, subtract what is already at named sites, and subtract capacity that another agreement already covers. Chip supply agreements are assumed to fill the buyer's named sites first. The location is given by country only: "Country stated" where a source says so, <span class="tag estimate">Estimate</span> where it is our estimate from where that company builds. Estimated locations are low confidence, and some of this capacity may sit in a provider's datacenter that is already listed without a named customer. Use "Show" to see named sites only.</p>
       </div>
       <div>
         <h3>What is not counted</h3>

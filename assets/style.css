@@ -201,7 +201,7 @@ table.heat td.num.z { color: var(--text-3); opacity: .45; }
 
 /* ------------------------------------------------------------ tags (status labels that must stand out) */
 .tag { display: inline-block; margin-top: 4px; padding: 1px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; white-space: nowrap; color: var(--text-2); box-shadow: inset 0 0 0 1px var(--line-2); }
-.tag.guess { color: #1d1400; background: var(--warn); box-shadow: none; }
+.tag.estimate { color: #1d1400; background: var(--warn); box-shadow: none; }
 .tag.stated { color: var(--t-place); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-place) 30%, transparent); }
 .tag.deal { box-shadow: none; border: 1px dashed var(--line-2); color: var(--text-2); }
 .hero-note .tag, .method .tag { margin-top: 0; }

@@ -55,7 +55,7 @@
   const kindLabel = (p) => (!isDeal(p) ? 'Named sites' : guessed(p) ? 'Agreements with no site, location estimated' : 'Agreements with no site, country stated');
 
   function passPhase(p) {
-    if (state.kind && (state.kind === 'guessed' ? !guessed(p) : (state.kind === 'deal') !== isDeal(p))) return false;
+    if (state.kind && ((state.kind === 'estimated' || state.kind === 'guessed') ? !guessed(p) : (state.kind === 'deal') !== isDeal(p))) return false;
     if (state.region && p.region !== state.region) return false;
     if (state.us_state && p.us_state !== state.us_state) return false;
     if (!passStage(p)) return false;
@@ -406,7 +406,7 @@
       const derived = basis && /estimated|treated|used as/.test(basis);
       const tr = el('tr', { class: 'row', tabindex: 0, 'aria-expanded': state.open.has(p.id) }, [
         el('td', {}, [el('div', { class: 'site', text: p.site_name }), isDeal(p) ? el('span', { class: 'tag deal', text: 'Agreement, no site' }) : (p.phase_name && p.phase_name !== p.site_name ? el('div', { class: 'dim', text: p.phase_name }) : null)]),
-        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'guess' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
+        isDeal(p) ? el('td', {}, [lab(p.region) === 'United States' ? 'United States' : `${p.country || ''} (${lab(p.region)})`, el('div', {}, el('span', { class: 'tag ' + (guessed(p) ? 'estimate' : 'stated'), title: p.location_why || '', text: guessed(p) ? 'Estimate' : 'Country stated' }))]) : el('td', {}, [[p.city, p.us_state].filter(Boolean).join(', ') || '', el('div', { class: 'dim', text: p.region === 'us' ? (p.county ? p.county + ' County' : '') : p.country || '' })]),
         el('td', { text: roleLabel(p, state.role) }),
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
@@ -458,7 +458,7 @@
         el('td', {}, [el('div', { class: 'site', text: d.name }), el('div', { class: 'dim', text: String(d.type || '').replace(/_/g, ' ') })]),
         el('td', { text: (pt.buyer || []).map(entName).join(', ') }), el('td', { text: (pt.seller || []).map(entName).join(', ') }),
         el('td', { class: 'num', text: d.capacity_mw ? gw(d.capacity_mw) : 'n/a' }),
-        el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (estBasis(lo.basis) ? 'guess' : 'stated'), title: lo.why || '', text: estBasis(lo.basis) ? 'Estimate' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
+        el('td', {}, lo.region ? [lab(lo.region) === 'United States' ? 'United States' : [lo.country, lab(lo.region)].filter(Boolean).join(', '), el('div', {}, el('span', { class: 'tag ' + (estBasis(lo.basis) ? 'estimate' : 'stated'), title: lo.why || '', text: estBasis(lo.basis) ? 'Estimate' : 'Stated' })), el('div', { class: 'dim', text: lo.why || '' })] : ''),
         el('td', {}, [lo.unsited_mw >= 1 ? el('b', { text: gw(lo.unsited_mw) + ' GW added' }) : el('span', { text: lo.treatment === 'count' ? 'Counted at sites' : lo.treatment === 'dropped' ? 'Dropped or superseded' : 'Nothing added' }), el('div', { class: 'dim', text: lo.treatment === 'count' ? ((lo.unsited_mw >= 1 ? 'Already counted: ' : 'All of it is already counted: ') + ((lo.deductions || []).join('; ') || 'at named sites')) : String(lo.treatment_text || '').replace(/^Not added: /, '') }), lo.note ? el('div', { class: 'dim', text: lo.note }) : null, lo.dropped_source ? el('div', {}, ['Source: ', el('a', { href: lo.dropped_source.url, target: '_blank', rel: 'noopener', text: `${lo.dropped_source.publisher}, ${lo.dropped_source.date}` })]) : null]),
         el('td', { text: chipText(d.chips) }),
         el('td', { text: (d.schedule || []).filter((x) => x.cumulative_mw > 0).map((x) => `${x.period}: ${gw(x.cumulative_mw)} GW`).join(' · ') || 'Not given' }),
