@@ -345,3 +345,14 @@ main { position: relative; z-index: 0; }
 #t-phases th:hover::after, #t-deals th[tabindex]:hover::after { opacity: .6; }
 .tbar #t-sort { width: 168px; } .tbar { gap: 8px 10px; }
 .tbar .chipset { order: 3; flex-basis: 100%; } .tbar #t-csv { order: 2; }
+
+/* grouped rows with an estimate breakout */
+table.pivot tr.grp { cursor: pointer; }
+table.pivot tr.grp td:first-child::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 9px 2px 0; border-right: 1.5px solid var(--text-3); border-bottom: 1.5px solid var(--text-3); transform: rotate(-45deg); transition: transform .15s; }
+table.pivot tr.grp.open td:first-child::before { transform: rotate(45deg); }
+table.pivot tr.grp:hover td:first-child { color: var(--accent); }
+.est-hint { margin-left: 8px; font-size: 11px; font-weight: 500; color: var(--warn); opacity: .85; }
+table.pivot tr.sub td { background: var(--page); color: var(--text-2); font-size: 12px; padding-top: 6px; padding-bottom: 6px; }
+table.pivot tr.sub td:first-child { padding-left: 46px; font-weight: 400; background: var(--page); }
+table.pivot tr.sub.est td.num { color: var(--warn); }
+table.pivot tr.sub td .tag { margin: 0; }
