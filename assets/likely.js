@@ -23,7 +23,7 @@
   const stTok = (st) => (/^In/.test(st) ? 'op' : /^Partly/.test(st) ? 'uc' : /^Before/.test(st) ? 'pm' : 'pp');
 
   // ---- drawer (shares the page's breakdown panel)
-  function openList({ kicker, title, value, sub, items, yearIdx }) {
+  function openList({ kicker, title, value, sub, items, yearIdx, extra }) {
     const dlg = $('#bk'); if (!dlg) return;
     const val = (o) => (yearIdx == null ? o.counted : o.counted_by_year[yearIdx]);
     const list = items.slice().sort((a, b) => val(b) - val(a) || b.it_gw - a.it_gw);
@@ -36,8 +36,11 @@
         el('span', { class: 'dim', text: `${f2(o.it_gw)} GW announced` })]),
       o.reason ? el('div', { class: 'bk-why', text: o.reason }) : null,
       o.source_url ? el('div', { class: 'bk-src' }, [el('span', { class: 'dim', text: 'Source ' }), el('a', { href: o.source_url, target: '_blank', rel: 'noopener', text: host(o.source_url) })]) : null])));
-    const tot = list.reduce((a, o) => a + val(o), 0);
-    $('#bk-sum').replaceChildren(el('span', { text: `Sum of ${list.length} ${list.length === 1 ? 'row' : 'rows'}` }), el('b', { text: f2(tot) + ' GW' }));
+    if (extra && extra.gw > 0.0005) $('#bk-list').prepend(el('li', { class: 'bk-item' }, [
+      el('div', { class: 'bk-top' }, [el('div', { class: 'bk-name' }, extra.title), el('div', { class: 'bk-mw', text: f2(extra.gw) })]),
+      el('div', { class: 'bk-meta' }, el('span', { class: 'tag estimate', text: 'Estimate' })), el('div', { class: 'bk-why', text: extra.why })]));
+    const tot = list.reduce((a, o) => a + val(o), 0) + (extra ? extra.gw : 0);
+    $('#bk-sum').replaceChildren(el('span', { text: `Sum of ${list.length} ${list.length === 1 ? 'row' : 'rows'}${extra && extra.gw > 0.0005 ? ' and the Estimate' : ''}` }), el('b', { text: f2(tot) + ' GW' }));
     dlg.hidden = false; document.body.classList.add('bk-on');
     requestAnimationFrame(() => { dlg.classList.add('on'); $('#bk-x').focus(); });
     $('#bk-list').scrollTop = 0;
@@ -83,9 +86,13 @@
     (() => { const v = vals.reduce((a, b) => a + b, 0), td = el('td', { class: 'num tot', text: f2(v) }); return onCell && v > 0.0005 ? clickable(td, () => onCell(null)) : td; })(),
     ...extra.map((v) => el('td', { class: 'num dim', text: typeof v === 'number' ? f2(v) : v }))]);
   const sep = (t) => el('tr', { class: 'lk-sep' }, el('td', { colspan: D.years.length + 4, text: t }));
-  const openSet = (title, kicker, pred) => (i) => {
-    if (i == null) { const items = F.rows.filter((o) => o.counted > 0.0005 && pred(o)); return openList({ kicker: kicker + ' · 2025 to 2030', title, value: items.reduce((a, o) => a + o.counted, 0), items, sub: `${items.length} sites and agreements counted in 2025 to 2030, largest first, each with the reason it is in.` }); }
-    openYear(i, pred, title);
+  const MIXWHY = 'Capacity with no value on record for this, plus the Estimate not yet at a named site, is shared out in proportion to the known mix in the same area (US, or outside the US and China) over 2025 to 2030. See the Assignment pools sheet in the workbook.';
+  const openSet = (title, kicker, pred, cellOf) => (i) => {
+    const items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
+    const rec = items.reduce((a, o) => a + (i == null ? o.counted : o.counted_by_year[i]), 0);
+    const cell = cellOf ? cellOf(i) : rec, extra = cellOf ? { gw: Math.max(0, cell - rec), title: 'Assigned by mix', why: MIXWHY } : null;
+    openList({ kicker: `${kicker} · ${i == null ? '2025 to 2030' : D.years[i]}`, title, value: cell, items, yearIdx: i == null ? null : i, extra,
+      sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${extra && extra.gw > 0.0005 ? ' The first line is assigned by mix and is an Estimate.' : ''}` });
   };
 
   function drawTable() {
@@ -127,14 +134,22 @@
       return;
     }
     const lbl = { chip: 'Chip maker', operator: 'Operator', end_user: 'End user', site: 'Site' }[tab], key = KEY[tab];
-    const isSpecial = (n) => /^(Total|Subtotal|Estimate)/.test(n);
-    const rows = D.by[tab].filter((r) => !isSpecial(r.name)), specials = D.by[tab].filter((r) => isSpecial(r.name));
-    $('#lk-tsub').textContent = `IT GW by ${lbl.toLowerCase()}, counted at named sites. The Estimate for capacity not yet at a named site is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`;
-    th.replaceChildren(head(lbl, ['All dates', 'Rows in']));
+    const isSpecial = (n) => /^(Total|Subtotal|Estimate|Check)/.test(n);
+    const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
+    const mix = rows.some((r) => r.assigned != null);
+    $('#lk-tsub').textContent = mix
+      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity with nothing on record and the Estimate not yet at a named site, shared out by the known mix in the same area (the "Assigned" column, an Estimate). Click a figure to see the sites.`
+      : `IT GW by ${lbl.toLowerCase()}, counted at named sites. The Estimate for capacity not yet at a named site is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`;
+    th.replaceChildren(head(lbl, mix ? ['On record', 'Assigned'] : ['All dates', 'Rows in']));
+    const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
+    const cellOf = (r) => (mix ? (i) => (i == null ? r.total : r.years[i]) : null);
     const LIMIT = 15, show = all ? rows : rows.slice(0, LIMIT);
-    for (const r of show) tb.append(line(nameOf(tab, r.name), r.years, '', [r.all_dates, `${r.rows_in} of ${r.rows}`], openSet(nameOf(tab, r.name), lbl, (o) => o[key] === r.name)));
-    if (!all && rows.length > LIMIT) { const rest = rows.slice(LIMIT), set = new Set(rest.map((r) => r.name)); tb.append(line(`${rest.length} more`, D.years.map((_, i) => rest.reduce((a, r) => a + r.years[i], 0)), 'quiet', [rest.reduce((a, r) => a + r.all_dates, 0), ''], openSet(`${rest.length} smaller ${lbl.toLowerCase()}s`, lbl, (o) => set.has(o[key])))); }
-    for (const r of specials) tb.append(line(r.name.replace(/ \(.*\)$/, ''), r.years, /^Total/.test(r.name) ? 'total' : /^Estimate/.test(r.name) ? 'est' : 'quiet', [r.all_dates || '', '']));
+    for (const r of show) tb.append(line(nameOf(tab, r.name), r.years, '', extraOf(r), openSet(nameOf(tab, r.name), lbl, (o) => o[key] === r.name, cellOf(r))));
+    if (!all && rows.length > LIMIT) {
+      const rest = rows.slice(LIMIT), set = new Set(rest.map((r) => r.name)), sumY = D.years.map((_, i) => rest.reduce((a, r) => a + r.years[i], 0)), tot = rest.reduce((a, r) => a + r.total, 0);
+      tb.append(line(`${rest.length} more`, sumY, 'quiet', mix ? [rest.reduce((a, r) => a + r.on_record, 0), rest.reduce((a, r) => a + r.assigned, 0)] : [rest.reduce((a, r) => a + r.all_dates, 0), ''], openSet(`${rest.length} smaller ${lbl.toLowerCase()}s`, lbl, (o) => set.has(o[key]), mix ? (i) => (i == null ? tot : sumY[i]) : null)));
+    }
+    for (const r of specials) tb.append(line(r.name.replace(/ \(.*\)$/, '').replace(/;.*$/, ''), r.years, /^Total/.test(r.name) ? 'total' : /^Estimate/.test(r.name) ? 'est' : 'quiet', mix ? [r.on_record ?? '', r.assigned ?? ''] : [r.all_dates || '', '']));
     more.hidden = rows.length <= LIMIT; more.textContent = all ? 'Show top 15' : `Show all ${rows.length}`;
   }
 
