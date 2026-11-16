@@ -146,7 +146,10 @@
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
     const cellOf = (r) => (mix ? (i) => (i == null ? r.total : r.years[i]) : null);
     const LIMIT = 15, show = all ? rows : rows.slice(0, LIMIT);
-    for (const r of show) tb.append(line(nameOf(tab, r.name), r.years, '', extraOf(r), openSet(nameOf(tab, r.name), lbl, (o) => o[key] === r.name, cellOf(r))));
+    const isAssume = (r) => mix && r.total > 0.0005 && !r.on_record && !r.assigned;
+    for (const r of show) tb.append(isAssume(r)
+      ? line(`${nameOf(tab, r.name)} · Assumption`, r.years, 'est', ['', 'Assumption'])
+      : line(nameOf(tab, r.name), r.years, '', extraOf(r), openSet(nameOf(tab, r.name), lbl, (o) => o[key] === r.name, cellOf(r))));
     if (!all && rows.length > LIMIT) {
       const rest = rows.slice(LIMIT), set = new Set(rest.map((r) => r.name)), sumY = D.years.map((_, i) => rest.reduce((a, r) => a + r.years[i], 0)), tot = rest.reduce((a, r) => a + r.total, 0);
       tb.append(line(`${rest.length} more`, sumY, 'quiet', mix ? [rest.reduce((a, r) => a + r.on_record, 0), rest.reduce((a, r) => a + r.assigned, 0)] : [rest.reduce((a, r) => a + r.all_dates, 0), ''], openSet(`${rest.length} smaller ${lbl.toLowerCase()}s`, lbl, (o) => set.has(o[key]), mix ? (i) => (i == null ? tot : sumY[i]) : null)));
