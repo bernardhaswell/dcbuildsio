@@ -277,26 +277,58 @@
 
   const FILTER_SELS = [['#f-kind', 'kind'], ['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-stage', 'stage'], ['#f-chip', 'chip'], ['#f-q', 'q']];
   function drawSummary() {
-    const m = state.measure, ps = tilePhases(), unit = m === 'it_mw' ? 'IT' : 'facility';
+    const m = state.measure, ps = tilePhases();
     const sum = (f) => ps.filter(f).reduce((s, p) => s + (mwOf(p, m) || 0), 0);
     const all = sum(() => true), dealMW = sum(isDeal);
     const nSites = new Set(ps.filter((p) => !isDeal(p)).map((p) => p.site_id)).size;
     const filtered = FILTER_SELS.some(([, k]) => state[k]);
     const host = $('#summary');
-    if (!ps.length || all <= 0) { host.replaceChildren('Nothing in the tracker matches these filters. ', el('b', { text: 'Reset' }), ' to see everything.'); return; }
+    if (!ps.length || all <= 0) { host.replaceChildren(el('p', { class: 'hero-line', text: 'Nothing in the tracker matches these filters. Reset to see everything.' })); return; }
     const by = (fn) => { const t = new Map(); rowsNow().forEach((d) => { if (d[m] == null) return; const k = fn(d); if (!k) return; t.set(k, (t.get(k) || 0) + d[m]); }); return [...t.entries()].sort((x, y) => y[1] - x[1])[0]; };
     const chip = by((d) => (d.chip_vendor && d.chip_vendor !== 'undisclosed' ? lab(d.chip_vendor) : null));
     const endU = by((d) => { const p = phaseById[d.id], r = p.roles.end_customer || []; return r.length && !endEstimated(p) ? r.map(entName).join(' + ') : null; });
     const real = sum((p) => ['operating', 'construction'].includes(stageOf(p)));
-    const kids = [
-      filtered ? 'In this view, ' : 'The tracker holds ', gwTok(all), ` of AI datacenter ${unit} capacity: `,
-      gwTok(all - dealMW), ' at ', tk('num', String(nSites)), ` named site${nSites === 1 ? '' : 's'}`,
-      dealMW > 0 ? [' and ', gwTok(dealMW), ' committed under agreements with no site yet. '] : '. ',
-      gwTok(real), ' of it is ', tk('st-op', 'operating'), ' or ', el('span', { class: 'nw' }, [tk('st-uc', 'under construction'), ';']), ' the rest is ', tk('st-pm', 'permitted'), ' or ', el('span', { class: 'nw' }, [tk('st-pp', 'on paper'), '.']),
-    ];
-    if (chip) kids.push(' Where the accelerator is named, ', tk('chip', chip[0]), ' leads with ', el('span', { class: 'nw' }, [gwTok(chip[1]), '.']));
-    if (endU) kids.push(' The largest named end user is ', el('span', { class: 'nw' }, [tk('co', endU[0]), '.']));
-    host.replaceChildren(...kids.flat());
+    // Apple-style two-tone copy: the facts in white, the connective words in grey. Three short lines.
+    const w = (t) => el('b', { text: t });
+    const line = (...kids) => el('p', { class: 'hl' }, kids.flat().filter((k) => k != null));
+    host.replaceChildren(
+      line(filtered ? 'In this view, ' : '', w(`${gw(all)} GW`), ' announced across ', w(`${nSites} sites`), dealMW > 0 ? [', plus ', w(`${gw(dealMW)} GW`), ' in deals with no site yet.'] : '.'),
+      line(w(`${gw(real)} GW`), ' is real today, running or under construction.'),
+      chip ? line(tk('chip', chip[0]), ' is the most-named chip.') : null,
+      endU ? line(tk('co', endU[0]), ' is the largest named end user.') : null,
+    );
+  }
+
+  // Cumulative capacity switching on, year by year: a quiet line under the intro.
+  function trajectory() {
+    const m = state.measure, Y0 = 2024, Y1 = 2030;
+    const rows = rowsNow().filter((d) => d[m] != null && d.year != null);
+    if (!rows.length) return null;
+    const per = new Map(); rows.forEach((d) => { const y = Math.min(Math.max(d.year, Y0), Y1 + 1); per.set(y, (per.get(y) || 0) + d[m]); });
+    const pts = []; let acc = 0;
+    for (let y = Y0; y <= Y1; y++) { acc += per.get(y) || 0; pts.push([y, acc]); }
+    const later = per.get(Y1 + 1) || 0;
+    const W = 760, H = 150, L = 4, R = 64, T = 26, B = 26, max = acc || 1;
+    const x = (y) => L + ((y - Y0) / (Y1 - Y0)) * (W - L - R), yv = (v) => T + (H - T - B) * (1 - v / max);
+    const line = pts.map(([y, v], i) => `${i ? 'L' : 'M'}${x(y).toFixed(1)},${yv(v).toFixed(1)}`).join('');
+    const root = svg('svg', { viewBox: `0 0 ${W} ${H}`, class: 'traj', role: 'img', 'aria-label': `Cumulative capacity scheduled to switch on: ${pts.map(([y, v]) => `${y} ${gw(v)} GW`).join(', ')}` });
+    const defs = svg('defs'); const g = svg('linearGradient', { id: 'tg', x1: 0, x2: 0, y1: 0, y2: 1 });
+    g.append(svg('stop', { offset: '0', 'stop-color': 'var(--s1)', 'stop-opacity': '.35' }), svg('stop', { offset: '1', 'stop-color': 'var(--s1)', 'stop-opacity': '0' }));
+    const gl = svg('linearGradient', { id: 'tl', x1: 0, x2: 1, y1: 0, y2: 0 });
+    gl.append(svg('stop', { offset: '0', 'stop-color': 'var(--st-op)' }), svg('stop', { offset: '.45', 'stop-color': 'var(--s1)' }), svg('stop', { offset: '1', 'stop-color': 'var(--st-pm)' }));
+    defs.append(g, gl); root.append(defs);
+    root.append(svg('path', { d: `${line}L${x(Y1)},${H - B}L${x(Y0)},${H - B}Z`, fill: 'url(#tg)' }));
+    root.append(svg('path', { d: line, fill: 'none', stroke: 'url(#tl)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    pts.forEach(([y, v], i) => {
+      root.append(svg('text', { x: x(y), y: H - 6, 'text-anchor': i === 0 ? 'start' : 'middle', class: 'ty' }, String(y)));
+      if (i === 0 || i === pts.length - 1 || y === 2026 || y === 2028) {
+        root.append(svg('circle', { cx: x(y), cy: yv(v), r: 3.5, class: 'tdot' }));
+        root.append(svg('text', { x: x(y) + (i === pts.length - 1 ? 10 : 0), y: yv(v) - 10, 'text-anchor': i === 0 ? 'start' : i === pts.length - 1 ? 'start' : 'middle', class: 'tv' }, gw(v)));
+      }
+    });
+    root.append(svg('text', { x: x(Y1) + 10, y: yv(acc) + 6 + 12, class: 'ty' }, 'GW'));
+    const undated = rowsNow().filter((d) => d[m] != null && d.year == null).reduce((s, d) => s + d[m], 0);
+    return el('figure', { class: 'traj-wrap' }, [root, el('figcaption', { text: `Capacity with a date, added up year by year as it is due to switch on. ${later > 0 ? `${gw(later)} GW is dated after ${Y1}; ` : ''}${gw(undated)} GW has no date yet.` })]);
   }
 
   function drawStagebar() {
