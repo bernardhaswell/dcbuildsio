@@ -36,7 +36,7 @@
 
   let DS, phaseById, state;
   const defaults = () => ({ kind: '', stage: '', region: '', us_state: '', chip: '', role: 'operator', measure: 'facility_mw', q: '',
-    period: 'year', group: 'chip_vendor', sort: { key: 'mw', dir: -1 }, open: new Set() });
+    period: 'year', group: 'chip_vendor', sort: { key: 'mw', dir: -1 }, open: new Set(), tq: '', tstage: new Set(), dsort: { key: 'gw', dir: -1 } });
 
   const entName = (id) => (DS.entities[id] && DS.entities[id].name) || id;
   const roleLabel = (p, role) => (p.roles[role] || []).map(entName).join(' + ') || 'Not disclosed';
@@ -419,16 +419,34 @@
     ['company', 'Company', (p) => roleLabel(p, state.role)],
     ['status', 'Status', (p) => STATUS_ORDER.indexOf(p.status)],
     ['mw', 'MW', (p) => mwOf(p, state.measure) || 0, 'num'],
-    ['when', 'Energizes', (p) => String(when(p))],
+    ['when', 'Energizes', (p) => String(when(p) || '')],
     ['chips', 'Chips', (p) => chipText(p.chips)],
     ['src', 'Source', (p) => (p.sources[0] || {}).date || ''],
   ];
+  const T_STAGES = [['operating', 'Operating', 'op'], ['construction', 'Under construction', 'uc'], ['permitted', 'Permitted', 'pm'], ['paper', 'Paper stage', 'pp'], ['cancelled', 'Cancelled', 'x']];
+  const tStageOf = (p) => { const s = stageOf(p); return PAPER.includes(s) ? 'paper' : s; };
+  const hayOf = (p) => [p.site_name, p.phase_name, p.city, p.county, p.us_state, p.country, lab(p.region), lab(p.status), STAGE[stageOf(p)],
+    ...Object.values(p.roles).flat().map(entName), ...(p.chips || []).map((c) => `${lab(c.vendor)} ${c.family} ${c.model || ''}`), guessed(p) || endEstimated(p) ? 'estimate' : ''].join(' ').toLowerCase();
+  // Compare with blanks always last, whichever direction.
+  const cmp = (x, y, dir) => { const ex = x === '' || x == null || x === -1, ey = y === '' || y == null || y === -1; if (ex || ey) return ex === ey ? 0 : ex ? 1 : -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; };
+  let tableRows = [];
+  function drawStageChips() {
+    const host = $('#t-stage'), all = !state.tstage.size;
+    const b = (k, name, cls) => { const on = k ? state.tstage.has(k) : all;
+      const n = el('button', { type: 'button', class: 'fchip' + (on ? ' on' : ''), 'aria-pressed': String(on) }, [cls ? el('i', { class: 'dot ' + cls }) : null, name]);
+      n.addEventListener('click', () => { if (!k) state.tstage.clear(); else state.tstage.has(k) ? state.tstage.delete(k) : state.tstage.add(k); drawStageChips(); drawPhases(); });
+      return n; };
+    host.replaceChildren(b('', 'All'), ...T_STAGES.map(([k, name, cls]) => b(k, name, cls)));
+  }
   function drawPhases() {
     const thead = $('#t-phases thead'), tbody = $('#t-phases tbody');
-    const ps = DS.phases.filter(passPhase);
+    const base = DS.phases.filter(passPhase), q = state.tq.trim().toLowerCase();
+    const ps = base.filter((p) => (!state.tstage.size || state.tstage.has(tStageOf(p))) && (!q || q.split(/\s+/).every((t) => hayOf(p).includes(t))));
     const col = COLS.find((c) => c[0] === state.sort.key) || COLS[4];
-    ps.sort((a, b) => { const x = col[2](a), y = col[2](b); return (x > y ? 1 : x < y ? -1 : 0) * state.sort.dir; });
-    $('#t-sub').textContent = `${ps.length} of ${DS.phases.length} rows. MW shown is ${state.measure === 'it_mw' ? 'IT' : 'facility'} load; a dotted underline marks a derived figure. Select a row for sources and detail.`;
+    ps.sort((a, b) => cmp(col[2](a), col[2](b), state.sort.dir) || (mwOf(b, state.measure) || 0) - (mwOf(a, state.measure) || 0));
+    tableRows = ps;
+    const sv = `${state.sort.key}:${state.sort.dir}`; if ([...$('#t-sort').options].some((o) => o.value === sv)) $('#t-sort').value = sv;
+    $('#t-sub').textContent = `${ps.length} of ${DS.phases.length} rows${ps.length !== base.length ? ` (${base.length} match the page filters)` : ''}. Click a column heading to sort. MW shown is ${state.measure === 'it_mw' ? 'IT' : 'facility'} load; a dotted underline marks a derived figure. Select a row for sources and detail.`;
     thead.replaceChildren(el('tr', {}, COLS.map(([k, t, , cls]) => {
       const th = el('th', { text: k === 'company' ? `Company (${$('#f-role').selectedOptions[0].text.toLowerCase()})` : t, tabindex: 0, class: cls || '', scope: 'col' });
       if (state.sort.key === k) th.setAttribute('aria-sort', state.sort.dir > 0 ? 'ascending' : 'descending');
@@ -487,10 +505,19 @@
   }
   function drawDeals() {
     const head = ['Agreement', 'Buyer', 'Seller', 'GW', 'Likely location', 'In the totals', 'Chips', 'Schedule', 'Announced', 'Source'];
-    $('#t-deals thead').replaceChildren(el('tr', {}, head.map((h, i) => el('th', { text: h, class: i === 3 ? 'num' : '', scope: 'col', style: 'cursor:default' }))));
+    const DK = { 0: ['name', (d) => d.name || ''], 1: ['buyer', (d) => ((d.parties || {}).buyer || []).map(entName).join(', ')], 2: ['seller', (d) => ((d.parties || {}).seller || []).map(entName).join(', ')],
+      3: ['gw', (d) => d.capacity_mw || ''], 4: ['loc', (d) => { const lo = d.location || {}; return lo.region ? lab(lo.region) + (lo.country || '') : ''; }], 5: ['added', (d) => (d.location || {}).unsited_mw || 0],
+      6: ['chips', (d) => chipText(d.chips)], 8: ['ann', (d) => d.announced || ''] };
+    $('#t-deals thead').replaceChildren(el('tr', {}, head.map((h, i) => {
+      const k = DK[i]; const th = el('th', { text: h, class: [3, 5].includes(i) ? (i === 3 ? 'num' : '') : '', scope: 'col', style: k ? '' : 'cursor:default' });
+      if (k) { th.tabIndex = 0; if (state.dsort.key === k[0]) th.setAttribute('aria-sort', state.dsort.dir > 0 ? 'ascending' : 'descending');
+        const go = () => { state.dsort = { key: k[0], dir: state.dsort.key === k[0] ? -state.dsort.dir : ([3, 5, 8].includes(i) ? -1 : 1) }; drawDeals(); };
+        th.addEventListener('click', go); th.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); }
+      return th; })));
     const body = $('#t-deals tbody');
     body.replaceChildren();
-    const deals = DS.deals.slice().sort((a, b) => (b.capacity_mw || 0) - (a.capacity_mw || 0));
+    const dk = Object.values(DK).find((x) => x[0] === state.dsort.key) || DK[3];
+    const deals = DS.deals.slice().sort((a, b) => cmp(dk[1](a), dk[1](b), state.dsort.dir) || (b.capacity_mw || 0) - (a.capacity_mw || 0));
     if (!deals.length) { body.append(el('tr', {}, el('td', { colspan: head.length, class: 'empty', text: 'No sourced deals yet.' }))); return; }
     for (const d of deals) {
       const pt = d.parties || {}, s = d.sources[0], lo = d.location || {};
@@ -531,10 +558,10 @@
     bind('#f-kind', 'kind'); bind('#f-region', 'region'); bind('#f-state', 'us_state'); bind('#f-stage', 'stage'); bind('#f-chip', 'chip');
     bind('#f-role', 'role'); bind('#f-measure', 'measure'); bind('#f-q', 'q', 'input'); bind('#c-period', 'period'); bind('#c-group', 'group');
     $('#f-reset').addEventListener('click', () => {
-      const keep = { period: state.period, group: state.group };
+      const keep = { period: state.period, group: state.group }; $('#t-q').value = '';
       state = Object.assign(defaults(), keep);
       for (const [sel, key] of [['#f-kind', 'kind'], ['#f-region', 'region'], ['#f-state', 'us_state'], ['#f-stage', 'stage'], ['#f-chip', 'chip'], ['#f-role', 'role'], ['#f-measure', 'measure'], ['#f-q', 'q']]) $(sel).value = state[key];
-      render();
+      drawStageChips(); render();
     });
     $('#stamp').textContent = `Updated ${ds.generated.slice(0, 10)} · ${ds.phases.filter((p) => !isDeal(p)).length} sourced site phases, ${ds.deals.length} agreements`;
     document.querySelectorAll('#yt-period button').forEach((b) => b.addEventListener('click', () => {
@@ -543,6 +570,18 @@
       drawYearTables();
     }));
     for (const id of Object.keys(YT_DEF)) $('#yt-' + id + ' .more').addEventListener('click', () => { YT.all[id] = !YT.all[id]; drawYearTable(id); });
+    $('#t-q').addEventListener('input', (e) => { state.tq = e.target.value; drawPhases(); });
+    $('#t-sort').addEventListener('change', (e) => { const [k, d] = e.target.value.split(':'); state.sort = { key: k, dir: +d }; drawPhases(); });
+    $('#t-csv').addEventListener('click', () => {
+      const q = (v) => { const t = String(v == null ? '' : v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+      const hdr = ['id', 'site', 'phase', 'kind', 'stage', 'status', 'city', 'us_state', 'country', 'region', 'location_basis', 'operator', 'end_customer', 'end_customer_basis', 'developer', 'facility_mw', 'it_mw', 'energizes', 'chips', 'counted', 'source_url'];
+      const rows = tableRows.map((p) => [p.id, p.site_name, p.phase_name, p.kind || 'site', STAGE[stageOf(p)], p.status, p.city, p.us_state, p.country, p.region, isDeal(p) ? (guessed(p) ? 'estimate' : 'stated') : '',
+        roleLabel(p, 'operator'), roleLabel(p, 'end_customer'), (p.roles.end_customer || []).length ? (endEstimated(p) ? 'estimate' : 'stated') : '', roleLabel(p, 'developer'),
+        p.derived.facility_mw, p.derived.it_mw, when(p), chipText(p.chips), counted(p) ? 'yes' : 'no', (p.sources[0] || {}).url]);
+      const blob = new Blob([[hdr, ...rows].map((r) => r.map(q).join(',')).join('\n')], { type: 'text/csv' });
+      const a = el('a', { href: URL.createObjectURL(blob), download: 'register-filtered.csv' }); document.body.append(a); a.click(); a.remove();
+    });
+    drawStageChips();
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 120); });
     drawDeals(); render();
   }
