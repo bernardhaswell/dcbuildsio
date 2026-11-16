@@ -233,3 +233,16 @@ table.pivot tr.total td.tot { background: var(--surface-2); }
 #t-phases td:nth-child(3) { min-width: 140px; }
 #t-deals td:first-child { min-width: 240px; }
 @media (max-width: 640px) { .summary { font-size: 17px; } .hero { padding-top: 48px; } }
+#t-deals { min-width: 1280px; }
+#t-deals td:nth-child(5), #t-deals td:nth-child(6) { min-width: 230px; }
+#t-deals td:nth-child(7), #t-deals td:nth-child(8) { min-width: 160px; }
+@media (min-width: 721px) { .filters select { max-width: 180px; } .filters .grow { flex: 1 1 140px; } }
+.filters .grow { min-width: 0; } .filters .grow input { width: 100%; }
+@media (min-width: 721px) { .filters .grow { flex: 1 1 100px; } .filters select { max-width: 170px; } }
+@media (min-width: 721px) {
+  .filters select { max-width: none; }
+  #f-kind { width: 186px; } #f-stage { width: 138px; } #f-region { width: 128px; } #f-state { width: 110px; }
+  #f-chip { width: 120px; } #f-role { width: 126px; } #f-measure { width: 116px; }
+  .filters { gap: 8px; }
+}
+table.heat tr.total td.num.z { opacity: 1; color: var(--text-3); }
