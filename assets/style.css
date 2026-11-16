@@ -356,3 +356,33 @@ table.pivot tr.sub td { background: var(--page); color: var(--text-2); font-size
 table.pivot tr.sub td:first-child { padding-left: 46px; font-weight: 400; background: var(--page); }
 table.pivot tr.sub.est td.num { color: var(--warn); }
 table.pivot tr.sub td .tag { margin: 0; }
+
+/* year picker on the stage bar */
+.sb-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ypick { position: relative; }
+.ypick-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 5px 12px 5px 14px; border-radius: 99px; font-size: 14px; font-weight: 600; color: var(--text);
+  background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px var(--line-2); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: background .15s; }
+.ypick-btn:hover { background: rgba(255,255,255,.1); }
+.ypick-k { font-weight: 500; color: var(--text-3); }
+.ypick-btn i { width: 6px; height: 6px; margin: 0 2px 3px 2px; border-right: 1.5px solid var(--text-2); border-bottom: 1.5px solid var(--text-2); transform: rotate(45deg); transition: transform .2s; }
+.ypick-btn[aria-expanded="true"] i { transform: rotate(-135deg); margin-bottom: -2px; }
+.ypick-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; min-width: 210px; max-height: 340px; overflow: auto; margin: 0; padding: 6px; list-style: none; border-radius: 14px;
+  background: rgba(30,30,34,.88); backdrop-filter: saturate(160%) blur(22px); -webkit-backdrop-filter: saturate(160%) blur(22px); box-shadow: 0 0 0 1px var(--line-2), 0 18px 48px rgba(0,0,0,.55); animation: ypop .16s ease-out; }
+@keyframes ypop { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+.ypick-menu li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 12px; border-radius: 9px; font-size: 14px; color: var(--text-2); cursor: pointer; outline: none; }
+.ypick-menu li small { font-size: 11.5px; color: var(--text-3); }
+.ypick-menu li:hover, .ypick-menu li:focus { background: rgba(255,255,255,.08); color: var(--text); }
+.ypick-menu li[aria-selected="true"] { color: var(--text); }
+.ypick-menu li[aria-selected="true"]::after { content: ""; width: 9px; height: 5px; border-left: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); transform: rotate(-45deg) translateY(-2px); margin-left: auto; }
+.ypick-menu li[aria-selected="true"] small { display: none; }
+.sb-note { margin: -4px 0 12px; font-size: 13px; }
+@media (max-width: 640px) { .sb-hint { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ypick-menu { animation: none; } }
+/* keep the waffle caption clear of the stage bar header */
+@media (max-width: 1180px) { .waffle { display: none !important; } }
+.waffle { display: flex; flex-direction: column-reverse; }
+.waffle figcaption { margin: 0 0 10px; }
+.stagebar-wrap { position: relative; z-index: 2; }
+/* menu opens upward inside the hero so it is never clipped; clip (not hidden) so focus cannot scroll the hero */
+.hero { overflow: clip; }
+.ypick-menu { top: auto; bottom: calc(100% + 8px); max-height: 380px; }
