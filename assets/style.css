@@ -434,3 +434,30 @@ body.bk-on { overflow: hidden; }
   .bk-head { padding: 20px 18px 4px; } .bk-sub { margin: 4px 18px 10px; } .bk-list { padding: 0 6px 10px; } .bk-sum { padding: 14px 18px 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .bk, .bk-panel { transition: none; } }
+
+/* likely energized forecast */
+.likely .section-head { align-items: flex-end; }
+.lk-tag { vertical-align: middle; font-size: 13px; margin-left: 8px; letter-spacing: 0; }
+.lk-dl { min-width: 260px; }
+.lk-card { padding-top: 22px; }
+.lk-chart { width: 100%; }
+.lk-svg { display: block; width: 100%; height: auto; }
+.lk-grid { stroke: var(--line); stroke-width: 1; }
+.lk-ax { fill: var(--text-3); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.lk-yr { fill: var(--text-2); font-size: 13px; font-weight: 500; }
+.lk-val { fill: var(--text); font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.lk-bar { outline: none; }
+.lk-bar:hover rect, .lk-bar:focus rect { filter: brightness(1.15); }
+.lk-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 10px; font-size: 13px; color: var(--text-2); }
+.lk-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.lk-sw { width: 12px; height: 12px; border-radius: 3px; }
+.lk-sw.solid { background: var(--s1); }
+.lk-sw.hatch { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--s1) 70%, transparent) 0 2px, color-mix(in srgb, var(--s1) 22%, transparent) 2px 5px); }
+.lk-note { margin: 14px 0 0; font-size: 13px; line-height: 1.6; max-width: 92ch; }
+.lk-table tr.total td { font-weight: 650; color: var(--text); }
+.lk-table tr.sub td:first-child { padding-left: 22px; color: var(--text-2); }
+.lk-table tr.est td:first-child { color: var(--warn); }
+.lk-table tr.lk-sep td { padding-top: 16px; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3); border-bottom: 0; }
+.lk-table tr.quiet td { color: var(--text-3); }
+.lk-foot { margin-top: 8px; }
+@media (max-width: 720px) { .lk-dl { min-width: 0; width: 100%; } #lk-tabs { overflow-x: auto; max-width: 100%; } }
