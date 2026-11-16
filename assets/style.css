@@ -328,3 +328,4 @@ main { position: relative; z-index: 0; }
 .stagelegend .v { font-size: 30px; }
 .stagelegend .l { font-size: 14px; }
 .summary .hl b { white-space: nowrap; }
+.chip-est { display: inline-flex; align-items: center; white-space: nowrap; } .chip-est .tag.inl { margin-left: 4px; }

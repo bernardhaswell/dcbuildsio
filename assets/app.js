@@ -448,7 +448,7 @@
         el('td', {}, [el('span', { class: 'badge ' + p.status }, [el('i'), lab(p.status)]), counted(p) ? null : el('div', { class: 'dim', text: 'Not counted' })]),
         el('td', { class: 'num' }, mw == null ? el('span', { class: 'dim', text: 'n/a' }) : el('span', derived ? { class: 'est', title: basis, text: fmtMW(mw) } : { text: fmtMW(mw) })),
         el('td', { text: when(p) || 'Not dated' }),
-        el('td', {}, (p.chips || []).length ? el('div', { class: 'chips' }, chipText(p.chips).split(', ').map((c) => tk('chip', c))) : el('span', { class: 'dim', text: 'Not disclosed' })),
+        el('td', {}, (p.chips || []).length ? el('div', { class: 'chips' }, p.chips.map((c) => estBasis(c.basis) ? el('span', { class: 'chip-est', title: (p.estimated || {}).chips || 'Chip inferred, not stated by a source' }, [tk('chip', chipText([c])), el('span', { class: 'tag estimate inl', text: 'Estimate' })]) : tk('chip', chipText([c])))) : el('span', { class: 'dim', text: 'Not disclosed' })),
         el('td', {}, p.sources[0] ? [srcLink(p.sources[0]), el('div', { class: 'dim', text: `${p.sources[0].date || ''} · ${lab(p.verification)}` })] : ''),
       ]);
       const toggle = () => { state.open.has(p.id) ? state.open.delete(p.id) : state.open.add(p.id); drawPhases(); };
