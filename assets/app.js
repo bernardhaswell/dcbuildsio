@@ -480,15 +480,18 @@
     const line = (g) => {
       const p = g.p, d0 = g.ds[0], basis = m === 'it_mw' ? p.derived.it_basis : p.derived.facility_basis, notes = [], tags = [];
       const note = (k, t) => t && notes.push(el('li', {}, [el('b', { text: k + ' ' }), String(t)]));
+      const hows = [...new Set(g.ds.map((d) => d.how).filter(Boolean))];
       if (isEstText(basis) || /upper bound|target/i.test(basis || '')) { tags.push('Size'); }
-      note('Size:', basis);
+      if (!hows.length) note('Size:', basis);
       const timing = [...new Set(g.ds.map((d) => d.timing_basis).filter(Boolean))];
       if (g.ds.some((d) => isEstText(d.timing_basis) || d.timing_from === 'estimated_ramp')) tags.push('Date');
-      if (timing.length) note('Timing:', timing.join('; '));
+      if (timing.length && !hows.length) note('Timing:', timing.join('; '));
       if (g.ds.length > 1) note('Schedule:', g.ds.map((d) => `${g2(d[m])} GW ${d.period || 'undated'}${d.chip_vendor && d.chip_vendor !== 'undisclosed' ? ' ' + lab(d.chip_vendor) : ''}`).join(', '));
-      if (g.ds.some((d) => estBasis(d.chip_basis))) { tags.push('Chip'); note('Chip:', [...new Set(g.ds.map((d) => d.chip_basis_note || d.chip_basis).filter(Boolean))].join('; ')); }
-      if (role === 'operator' && (estBasis(p.operator_basis) || (p.estimated || {}).operator)) { tags.push('Operator'); note('Operator:', p.operator_why || 'Estimated: no source names the operator.'); }
-      if (role === 'end_customer' && endEstimated(p)) { tags.push('End user'); note('End user:', p.end_customer_why || 'Estimated: no source names the end user.'); }
+      if (g.ds.some((d) => /estimate|upper/i.test(d.size_is || '')) && !tags.includes('Size')) tags.push('Size');
+      hows.forEach((t, i) => note(hows.length > 1 ? `Row ${i + 1}:` : 'Calculation:', t));
+      if (g.ds.some((d) => estBasis(d.chip_basis))) { tags.push('Chip'); if (!hows.length) note('Chip:', [...new Set(g.ds.map((d) => d.chip_basis_note || d.chip_basis).filter(Boolean))].join('; ')); }
+      if (role === 'operator' && (estBasis(p.operator_basis) || (p.estimated || {}).operator)) { tags.push('Operator'); if (!hows.some((t) => /operator/i.test(t))) note('Operator:', p.operator_why || 'Estimated: no source names the operator.'); }
+      if (role === 'end_customer' && endEstimated(p)) { tags.push('End user'); if (!hows.some((t) => /end user/i.test(t))) note('End user:', p.end_customer_why || 'Estimated: no source names the end user.'); }
       if (isDeal(p)) note('Location:', p.location_why || (guessed(p) ? 'Estimated' : 'Country stated in the agreement'));
       if (p.count_note) note('Counting:', p.count_note);
       const st = stageOf(p), place = isDeal(p) ? (p.region === 'orbital' ? 'Orbital' : [p.country, lab(p.region)].filter(Boolean).join(', ')) : [p.city, p.us_state || p.country].filter(Boolean).join(', ');
