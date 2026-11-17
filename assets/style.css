@@ -501,3 +501,8 @@ table.pivot.sh-table { min-width: 0; width: 100%; }
 .sh-likely { fill: none; stroke: var(--text); stroke-width: 2; stroke-dasharray: 6 4; }
 .sh-likely-pt { fill: var(--text); }
 .sh-key-likely { width: 22px; height: 0; border-top: 2px dashed var(--text); }
+
+.sh-dl { position: relative; display: inline-flex; flex-direction: column; gap: 2px; margin-top: 14px; padding: 12px 64px 12px 14px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); color: var(--text); font-size: 14px; transition: background .15s, box-shadow .15s; }
+.sh-dl:hover { text-decoration: none; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line-2); }
+.sh-dl b { font-weight: 600; } .sh-dl span { font-size: 12.5px; color: var(--text-3); }
+.sh-dl code { position: absolute; top: 12px; right: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--t-chip); background: color-mix(in srgb, var(--t-chip) 12%, transparent); padding: 1px 7px; border-radius: 6px; }
