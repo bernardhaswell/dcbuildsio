@@ -58,7 +58,7 @@
   function drawChart() {
     const host_ = $('#lk-chart'), s = D.summary, ys = D.years;
     const W = Math.max(320, host_.clientWidth || 800), H = W < 560 ? 280 : 340, padL = W < 560 ? 30 : 44, padR = 8, padT = 34, padB = 34;
-    const max = Math.max(...s.total) * 1.12, nice = max <= 20 ? 5 : max <= 50 ? 10 : 20, top = Math.ceil(max / nice) * nice;
+    const max = Math.max(...s.total, ...((D.range && D.range.upper) || [])) * 1.12, nice = max <= 20 ? 5 : max <= 50 ? 10 : 20, top = Math.ceil(max / nice) * nice;
     const x0 = padL, cw = (W - padL - padR) / ys.length, bw = Math.min(72, cw * 0.56), y = (v) => padT + (H - padT - padB) * (1 - v / top);
     const root = sv('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: 'lk-svg' });
     const defs = sv('defs');
@@ -92,7 +92,13 @@
         }
         base += sg.v;
       }
-      g.append(sv('text', { x: cx, y: y(t) - 10, 'text-anchor': 'middle', class: 'lk-val' }, f1(t)));
+      const RNG = D.range, up = RNG ? RNG.upper[i] : t, lo = RNG ? RNG.lower[i] : t;
+      if (RNG) {
+        const wx = cx + bw / 2 + 7;
+        g.append(sv('line', { x1: wx, x2: wx, y1: y(up), y2: y(lo), class: 'lk-rng' }), sv('line', { x1: wx - 4, x2: wx + 4, y1: y(up), y2: y(up), class: 'lk-rng' }), sv('line', { x1: wx - 4, x2: wx + 4, y1: y(lo), y2: y(lo), class: 'lk-rng' }));
+        g.append(sv('title', {}, `${yr} range (Estimate): lower ${f1(lo)}, likely ${f1(t)}, upper ${f1(up)} GW`));
+      }
+      g.append(sv('text', { x: cx, y: y(Math.max(t, up)) - 10, 'text-anchor': 'middle', class: 'lk-val' }, f1(t)));
       g.append(sv('text', { x: cx, y: H - 10, 'text-anchor': 'middle', class: 'lk-yr' }, String(yr)));
       root.append(g);
     });
@@ -101,7 +107,9 @@
     $('#lk-legend').replaceChildren(
       el('span', {}, [el('i', { class: 'lk-sw us' }), 'US']), el('span', {}, [el('i', { class: 'lk-sw xu' }), 'Outside the US']),
       el('span', {}, [el('i', { class: 'lk-sw hatch-n' }), 'Hatched: sites not itemised (Estimate)']),
+      ...(D.range ? [el('span', {}, [el('i', { class: 'lk-sw rng' }), 'Range: lower to upper estimate']) ] : []),
       el('span', { class: 'dim' }, 'Solid: named sites, permitted, announced or company plan. Click a bar to see the sites'));
+    if (D.range) $('#lk-legend').after(Object.assign($('#lk-rng-note') || el('p', { id: 'lk-rng-note', class: 'lk-note dim' }), { textContent: 'Range (Estimate): upper if spending is cut less and sites already under construction or permitted come in on their stated dates; lower if paper-stage sites and capacity at sites not itemised slip past 2030.' }));
   }
 
 
@@ -141,7 +149,9 @@
       $('#lk-tsub').textContent = 'IT GW. Each year is capacity switching on in that year, not a running total. Rest of world is Canada, Latin America, Africa and Orbital. Click a figure to see the sites behind it, with the Estimate shown as its own line.';
       th.replaceChildren(head('', ['Named sites', 'Estimate']));
       const RGn = (n) => D.regions.find((g) => g.name === n);
+      if (D.range) tb.append(line('Upper estimate', D.range.upper, 'quiet'));
       tb.append(line('Likely energized', s.total, 'total', [sumOf(s.at_sites), sumOf(s.estimate)]),
+        ...(D.range ? [line('Lower estimate', D.range.lower, 'quiet')] : []),
         regionLine(RGn('United States'), ''), regionLine(RGn('Outside the US'), ''),
         ...['Europe', 'Middle East', 'Asia', 'Rest of world'].map((n) => regionLine(RGn(n), 'sub ind')),
         sep('All regions'),
