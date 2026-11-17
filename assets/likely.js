@@ -196,7 +196,7 @@
     const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
     const mix = rows.some((r) => r.assigned != null);
     $('#lk-tsub').textContent = caseNote + (mix
-      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers by accelerator shipments and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.`
+      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers by accelerator shipments and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
       : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`);
     th.replaceChildren(head(lbl, mix ? ['On record', 'Allocated'] : ['All dates', 'Rows in']));
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
@@ -233,7 +233,7 @@
   }
   function init(d) {
     D = d; F.rows = d.rows.map(R);
-    $('#lk-sub').textContent = `What is likely to be energized each year, as opposed to everything announced. IT GW, worldwide excluding China. Our estimate, updated ${d.generated}; figures may be revised.`;
+    $('#lk-sub').textContent = `What is likely to be energized each year, as opposed to everything announced. IT GW of all datacenter capacity, AI and conventional cloud, worldwide excluding China. Our estimate, updated ${d.generated}; figures may be revised.`;
     $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer, then dated company plans for capacity with no site named yet. Whatever named sites and company-reported capacity cannot cover is allocated by shipments and company reports to sites not itemised (Estimate), kept separate from named sites. Every site is marked in, partly in or not in, with the reason. The Case menu switches the chart and summary to the lower or upper estimate: upper if spending is cut less and sites already under construction or permitted come in on their stated dates; lower if paper-stage sites and capacity at sites not itemised slip past 2030. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
     $('#lk-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; tab = b.dataset.v; all = false; $('#lk-q').value = ''; for (const x of $('#lk-tabs').children) x.setAttribute('aria-checked', String(x === b)); drawTable(); });
     $('#lk-more').addEventListener('click', () => { all = !all; drawTable(); });
