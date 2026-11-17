@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=202611170105">
+<link rel="stylesheet" href="assets/style.css?v=202611170110">
 </head>
 <body>
 <nav class="nav" aria-label="Sections">
@@ -115,6 +115,12 @@
       <a class="dl lk-dl" href="data/likely-energized-by-site.xlsx" download><b>How it is calculated</b><span>By site, chip maker, operator, end user</span><code>.xlsx</code></a>
     </div>
     <section class="card lk-card">
+      <div class="lk-top" id="lk-top" hidden>
+        <div class="ypick" id="lk-case">
+          <button type="button" class="ypick-btn" id="lk-case-btn" aria-haspopup="listbox" aria-expanded="false"><span class="ypick-k">Case</span><span id="lk-case-v">Likely</span><i aria-hidden="true"></i></button>
+          <ul class="ypick-menu" id="lk-case-menu" role="listbox" tabindex="-1" hidden></ul>
+        </div>
+      </div>
       <div id="lk-chart" class="lk-chart" role="img" aria-label="Likely capacity energized by year"></div>
       <div class="lk-legend" id="lk-legend"></div>
       <p class="lk-note dim" id="lk-note"></p>
@@ -260,7 +266,7 @@
     </aside>
   </div>
   <div id="tip" class="tip" role="tooltip" hidden></div>
-<script src="assets/likely.js?v=202611170105" defer></script>
-<script src="assets/app.js?v=202611170105"></script>
+<script src="assets/likely.js?v=202611170110" defer></script>
+<script src="assets/app.js?v=202611170110"></script>
 </body>
 </html>

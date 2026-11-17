@@ -55,10 +55,17 @@
   };
   const clickable = (td, fn) => { td.classList.add('pick'); td.tabIndex = 0; td.setAttribute('role', 'button'); td.addEventListener('click', fn); td.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); return td; };
 
+  let CASE = 'likely';
+  const CASES = [['lower', 'Lower estimate'], ['likely', 'Likely'], ['upper', 'Upper estimate']];
+  const caseName = () => CASES.find((c) => c[0] === CASE)[1];
+  const isLikely = () => CASE === 'likely' || !(D.range && D.range.cases && D.range.cases[CASE]);
+  const TOT = () => (isLikely() ? D.summary.total : D.range.cases[CASE].total);
+  const REGS = () => (isLikely() ? D.regions : D.range.cases[CASE].regions);
+  const REG = (n) => REGS().find((g) => g.name === n);
   function drawChart() {
     const host_ = $('#lk-chart'), s = D.summary, ys = D.years;
     const W = Math.max(320, host_.clientWidth || 800), H = W < 560 ? 280 : 340, padL = W < 560 ? 30 : 44, padR = 8, padT = 34, padB = 34;
-    const max = Math.max(...s.total, ...((D.range && D.range.upper) || [])) * 1.12, nice = max <= 20 ? 5 : max <= 50 ? 10 : 20, top = Math.ceil(max / nice) * nice;
+    const max = Math.max(...s.total, ...((D.range && D.range.upper) || [])) * 1.08, nice = max <= 20 ? 5 : max <= 50 ? 10 : 20, top = Math.ceil(max / nice) * nice;
     const x0 = padL, cw = (W - padL - padR) / ys.length, bw = Math.min(72, cw * 0.56), y = (v) => padT + (H - padT - padB) * (1 - v / top);
     const root = sv('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: 'lk-svg' });
     const defs = sv('defs');
@@ -69,9 +76,9 @@
     }
     root.append(defs);
     for (let v = 0; v <= top; v += nice) { root.append(sv('line', { x1: x0, x2: W - padR, y1: y(v), y2: y(v), class: 'lk-grid' })); root.append(sv('text', { x: x0 - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'lk-ax' }, String(v))); }
-    const RG = (n) => D.regions.find((g) => g.name === n), U = RG('United States'), X = RG('Outside the US');
+    const U = REG('United States'), X = REG('Outside the US'), T = TOT(), live = isLikely(), word = live ? 'likely' : caseName().toLowerCase();
     ys.forEach((yr, i) => {
-      const cx = x0 + cw * i + cw / 2, t = s.total[i];
+      const cx = x0 + cw * i + cw / 2, t = T[i];
       const uN = U.named[i], uE = U.estimate[i], xN = X.named[i], xE = X.estimate[i];
       const segs = [
         { v: uN, fill: 'var(--s1)', us: true, lab: 'US, named sites' },
@@ -84,21 +91,16 @@
       for (const sg of segs) {
         if (sg.v > 0.01) {
           const region = sg.us ? 'US' : 'Outside the US', est = sg.us ? uE : xE;
-          const r = sv('rect', { x: cx - bw / 2, y: y(base + sg.v), width: bw, height: Math.max(0, y(base) - y(base + sg.v)), fill: sg.fill, class: 'lk-bar', tabindex: 0, role: 'button', 'aria-label': `${yr}, ${sg.lab}: ${f1(sg.v)} GW. Show the ${region} sites` });
-          r.append(sv('title', {}, `${yr}: ${f1(t)} GW likely\nUS ${f1(s.us[i])} (named sites ${f1(uN)}, sites not itemised ${f1(uE)})\nOutside the US ${f1(s.outside_us[i])} (named sites ${f1(xN)}, sites not itemised ${f1(xE)})\nClick to see the ${region} sites`));
-          const go = () => openRegion(sg.us ? U : X)(i);
-          r.addEventListener('click', go); r.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } });
+          const r = sv('rect', live ? { x: cx - bw / 2, y: y(base + sg.v), width: bw, height: Math.max(0, y(base) - y(base + sg.v)), fill: sg.fill, class: 'lk-bar', tabindex: 0, role: 'button', 'aria-label': `${yr}, ${sg.lab}: ${f1(sg.v)} GW. Show the ${region} sites` }
+            : { x: cx - bw / 2, y: y(base + sg.v), width: bw, height: Math.max(0, y(base) - y(base + sg.v)), fill: sg.fill, class: 'lk-seg' });
+          r.append(sv('title', {}, `${yr}, ${word}: ${f1(t)} GW\nUS ${f1(U.years[i])} (named sites ${f1(uN)}, sites not itemised ${f1(uE)})\nOutside the US ${f1(X.years[i])} (named sites ${f1(xN)}, sites not itemised ${f1(xE)})${live ? `\nClick to see the ${region} sites` : ''}`));
+          if (live) { const go = () => openRegion(sg.us ? U : X)(i);
+          r.addEventListener('click', go); r.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } }); }
           g.append(r);
         }
         base += sg.v;
       }
-      const RNG = D.range, up = RNG ? RNG.upper[i] : t, lo = RNG ? RNG.lower[i] : t;
-      if (RNG) {
-        const wx = cx + bw / 2 + 7;
-        g.append(sv('line', { x1: wx, x2: wx, y1: y(up), y2: y(lo), class: 'lk-rng' }), sv('line', { x1: wx - 4, x2: wx + 4, y1: y(up), y2: y(up), class: 'lk-rng' }), sv('line', { x1: wx - 4, x2: wx + 4, y1: y(lo), y2: y(lo), class: 'lk-rng' }));
-        g.append(sv('title', {}, `${yr} range (Estimate): lower ${f1(lo)}, likely ${f1(t)}, upper ${f1(up)} GW`));
-      }
-      g.append(sv('text', { x: cx, y: y(Math.max(t, up)) - 10, 'text-anchor': 'middle', class: 'lk-val' }, f1(t)));
+      g.append(sv('text', { x: cx, y: y(t) - 10, 'text-anchor': 'middle', class: 'lk-val' }, f1(t)));
       g.append(sv('text', { x: cx, y: H - 10, 'text-anchor': 'middle', class: 'lk-yr' }, String(yr)));
       root.append(g);
     });
@@ -107,9 +109,7 @@
     $('#lk-legend').replaceChildren(
       el('span', {}, [el('i', { class: 'lk-sw us' }), 'US']), el('span', {}, [el('i', { class: 'lk-sw xu' }), 'Outside the US']),
       el('span', {}, [el('i', { class: 'lk-sw hatch-n' }), 'Hatched: sites not itemised (Estimate)']),
-      ...(D.range ? [el('span', {}, [el('i', { class: 'lk-sw rng' }), 'Range: lower to upper estimate']) ] : []),
-      el('span', { class: 'dim' }, 'Solid: named sites, permitted, announced or company plan. Click a bar to see the sites'));
-    if (D.range) $('#lk-legend').after(Object.assign($('#lk-rng-note') || el('p', { id: 'lk-rng-note', class: 'lk-note dim' }), { textContent: 'Range (Estimate): upper if spending is cut less and sites already under construction or permitted come in on their stated dates; lower if paper-stage sites and capacity at sites not itemised slip past 2030.' }));
+      el('span', { class: 'dim' }, `Solid: named sites, permitted, announced or company plan.${live ? ' Click a bar to see the sites' : ''}`));
   }
 
 
@@ -138,7 +138,7 @@
       extra: { gw: est, title: 'Sites not itemised (Estimate)', why: EWHY },
       sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${est > 0.0005 ? ' The first line is capacity at sites not itemised (Estimate).' : ''}` });
   };
-  const regionLine = (g, cls) => line(g.name, g.years, cls, [sumOf(g.named), sumOf(g.estimate)], openRegion(g));
+  const regionLine = (g, cls) => line(g.name, g.years, cls, [sumOf(g.named), sumOf(g.estimate)], isLikely() ? openRegion(g) : null);
   const sumOf = (a) => a.reduce((x, y) => x + y, 0);
 
   function drawTable() {
@@ -146,14 +146,17 @@
     tb.replaceChildren(); more.hidden = true; q.hidden = !(tab === 'in' || tab === 'out');
     t.classList.toggle('lk-list', tab === 'in' || tab === 'out');
     if (tab === 'summary') {
-      $('#lk-tsub').textContent = 'IT GW. Each year is capacity switching on in that year, not a running total. Rest of world is Canada, Latin America, Africa and Orbital. Click a figure to see the sites behind it, with the Estimate shown as its own line.';
+      $('#lk-tsub').textContent = isLikely() ? 'IT GW. Each year is capacity switching on in that year, not a running total. Rest of world is Canada, Latin America, Africa and Orbital. Click a figure to see the sites behind it, with the Estimate shown as its own line.'
+        : `IT GW, ${caseName().toLowerCase()} (Estimate). Each year is capacity switching on in that year, not a running total. Rest of world is Canada, Latin America, Africa and Orbital. Switch to Likely to click through to the sites.`;
       th.replaceChildren(head('', ['Named sites', 'Estimate']));
-      const RGn = (n) => D.regions.find((g) => g.name === n);
-      if (D.range) tb.append(line('Upper estimate', D.range.upper, 'quiet'));
-      tb.append(line('Likely energized', s.total, 'total', [sumOf(s.at_sites), sumOf(s.estimate)]),
-        ...(D.range ? [line('Lower estimate', D.range.lower, 'quiet')] : []),
+      const RGn = REG, U = REG('United States'), X = REG('Outside the US');
+      tb.append(line(isLikely() ? 'Likely energized' : caseName(), TOT(), 'total', [sumOf(U.named) + sumOf(X.named), sumOf(U.estimate) + sumOf(X.estimate)]),
         regionLine(RGn('United States'), ''), regionLine(RGn('Outside the US'), ''),
-        ...['Europe', 'Middle East', 'Asia', 'Rest of world'].map((n) => regionLine(RGn(n), 'sub ind')),
+        ...['Europe', 'Middle East', 'Asia', 'Rest of world'].map((n) => regionLine(RGn(n), 'sub ind')));
+      if (!isLikely()) {
+        tb.append(sep(`The rows below, and the chip maker, operator, end user and site views, show the Likely case`));
+      }
+      tb.append(
         sep('All regions'),
         line('Named sites and company plans', s.at_sites, '', [], openSet('Named sites counted', 'Likely energized', () => true)),
         ...(D.within || []).map((w) => line(`of which ${w.label.charAt(0).toLowerCase()}${w.label.slice(1)}`, w.it_gw, 'sub',
@@ -171,9 +174,9 @@
       rows.sort((a, b) => val(b) - val(a));
       const st = D.status, find = (k) => st.find((x) => x.status === k) || { rows: 0, announced: 0, counted: 0 };
       const I = find('In'), P = find('Partly in'), N = find('Not in'), B = find('Before 2025');
-      $('#lk-tsub').textContent = inn
+      $('#lk-tsub').textContent = (isLikely() ? '' : 'Shown for the Likely case. ') + (inn
         ? `${I.rows + P.rows} sites and agreements are counted (${P.rows} only in part): ${f1(I.counted + P.counted)} GW in 2025 to 2030. Sites are taken in order of evidence, operating first, then under construction, then permitted or announced sites, until each year’s likely total is reached.`
-        : `${N.rows} sites and agreements are not counted by 2030, and ${P.rows} are cut back: ${f1(N.announced + (P.announced - P.counted))} GW of announced capacity. Each has its reason. ${B.rows} more (${f1(B.announced)} GW) were energized before 2025. China is not part of this forecast.`;
+        : `${N.rows} sites and agreements are not counted by 2030, and ${P.rows} are cut back: ${f1(N.announced + (P.announced - P.counted))} GW of announced capacity. Each has its reason. ${B.rows} more (${f1(B.announced)} GW) were energized before 2025. China is not part of this forecast.`);
       if (term) rows = rows.filter((o) => [o.site, o.phase, o.area, o.us_state, o.operator, o.end_user, o.reason, o.stage].join(' ').toLowerCase().includes(term));
       th.replaceChildren(el('tr', {}, [['Site', ''], ['Where', ''], ['Stage', ''], ['Announced', 'num'], [inn ? 'Counted' : 'Not counted', 'num'], [inn ? 'Year' : 'Status', ''], ['Reason and source', '']].map(([x, c]) => el('th', { scope: 'col', class: c, text: x }))));
       const LIMIT = 30, show = all ? rows : rows.slice(0, LIMIT);
@@ -187,13 +190,14 @@
       more.hidden = rows.length <= LIMIT; more.textContent = all ? 'Show first 30' : `Show all ${rows.length}`;
       return;
     }
+    const caseNote = isLikely() ? '' : `Shown for the Likely case; the ${caseName().toLowerCase()} applies to the chart and summary only. `;
     const lbl = { chip: 'Chip maker', operator: 'Operator', end_user: 'End user', site: 'Site' }[tab], key = KEY[tab];
     const isSpecial = (n) => /^(Total|Subtotal|Estimate|Check)/.test(n);
     const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
     const mix = rows.some((r) => r.assigned != null);
-    $('#lk-tsub').textContent = mix
+    $('#lk-tsub').textContent = caseNote + (mix
       ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers by accelerator shipments and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.`
-      : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`;
+      : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`);
     th.replaceChildren(head(lbl, mix ? ['On record', 'Allocated'] : ['All dates', 'Rows in']));
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
     const cellOf = (r) => (mix ? (i) => (i == null ? r.total : r.years[i]) : null);
@@ -210,13 +214,31 @@
     more.hidden = rows.length <= LIMIT; more.textContent = all ? 'Show top 15' : `Show all ${rows.length}`;
   }
 
+  function initCase() {
+    if (!(D.range && D.range.cases && D.range.cases.lower && D.range.cases.upper)) return;
+    const btn = $('#lk-case-btn'), menu = $('#lk-case-menu'), box = $('#lk-case');
+    const NOTE = { lower: 'Paper-stage sites slip past 2030', likely: 'Central case', upper: 'Spending cut less; sites on time' };
+    const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    const pick = (k) => { CASE = k; close(); btn.focus(); $('#lk-case-v').textContent = caseName(); drawChart(); drawTable(); };
+    const build = () => menu.replaceChildren(...CASES.map(([k, t]) => {
+      const li = el('li', { role: 'option', tabindex: '-1', 'aria-selected': String(CASE === k) }, [el('span', { text: t }), el('small', { text: NOTE[k] })]);
+      li.addEventListener('click', () => pick(k)); li.addEventListener('keydown', (e) => {
+        const items = [...menu.children], i = items.indexOf(li);
+        if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || li).focus(); } else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || li).focus(); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(k); } else if (e.key === 'Escape') { close(); btn.focus(); } });
+      return li; }));
+    btn.addEventListener('click', () => { if (!menu.hidden) return close(); build(); menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); (menu.querySelector('[aria-selected="true"]') || menu.firstChild).focus(); });
+    document.addEventListener('click', (e) => { if (!box.contains(e.target)) close(); });
+    $('#lk-top').hidden = false;
+  }
   function init(d) {
     D = d; F.rows = d.rows.map(R);
     $('#lk-sub').textContent = `What is likely to be energized each year, as opposed to everything announced. IT GW, worldwide excluding China. Our estimate, updated ${d.generated}; figures may be revised.`;
-    $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer, then dated company plans for capacity with no site named yet. Whatever named sites and company-reported capacity cannot cover is allocated by shipments and company reports to sites not itemised (Estimate), kept separate from named sites. Every site is marked in, partly in or not in, with the reason. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
+    $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer, then dated company plans for capacity with no site named yet. Whatever named sites and company-reported capacity cannot cover is allocated by shipments and company reports to sites not itemised (Estimate), kept separate from named sites. Every site is marked in, partly in or not in, with the reason. The Case menu switches the chart and summary to the lower or upper estimate: upper if spending is cut less and sites already under construction or permitted come in on their stated dates; lower if paper-stage sites and capacity at sites not itemised slip past 2030. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
     $('#lk-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; tab = b.dataset.v; all = false; $('#lk-q').value = ''; for (const x of $('#lk-tabs').children) x.setAttribute('aria-checked', String(x === b)); drawTable(); });
     $('#lk-more').addEventListener('click', () => { all = !all; drawTable(); });
     let qt; $('#lk-q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(drawTable, 120); });
+    initCase();
     drawChart(); drawTable();
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(drawChart, 150); });
   }

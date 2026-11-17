@@ -41,6 +41,22 @@ if RG_ is not None:
             if str(RG_.cell(i, 1).value or '').strip().upper() == prefix: return [r(RG_.cell(i, c).value) for c in range(2, 8)]
         raise SystemExit('Range row not found: ' + prefix)
     rng = {'upper': rrow('UPPER ESTIMATE'), 'lower': rrow('LOWER ESTIMATE')}
+    # Per-case split: blocks headed 'Upper estimate', 'Likely (central)', 'Lower estimate', 20 rows each.
+    cases = {}
+    for key, head in (('upper', 'upper estimate'), ('likely', 'likely (central)'), ('lower', 'lower estimate')):
+        h = next((i for i in range(1, RG_.max_row + 1) if str(RG_.cell(i, 1).value or '').strip().lower() == head and str(RG_.cell(i + 1, 1).value or '').strip() == 'Total'), None)
+        if h is None: continue
+        rowv = lambda k: [r(RG_.cell(k, c).value or 0) for c in range(2, 8)]
+        lb = lambda k: str(RG_.cell(k, 1).value or '').strip()
+        assert lb(h + 1) == 'Total' and lb(h + 2) == 'US' and lb(h + 5) == 'Outside US', (key, lb(h + 1), lb(h + 2), lb(h + 5))
+        def reg(name, k):
+            assert lb(k) == name and 'not itemised' in lb(k + 1) and 'named' in lb(k + 2), (key, name, lb(k), lb(k + 1), lb(k + 2))
+            return {'name': {'US': 'United States', 'Outside US': 'Outside the US'}.get(name, name), 'years': rowv(k), 'estimate': rowv(k + 1), 'named': rowv(k + 2)}
+        regs = [reg('US', h + 2), reg('Outside US', h + 5)] + [reg(n, h + 8 + 3 * j) for j, n in enumerate(['Europe', 'Middle East', 'Asia', 'Rest of world'])]
+        cases[key] = {'total': rowv(h + 1), 'regions': regs}
+        for g in regs: assert all(abs(a - b - c) < 0.01 for a, b, c in zip(g['years'], g['named'], g['estimate'])), (key, g['name'])
+        assert all(abs(a - b - c) < 0.01 for a, b, c in zip(cases[key]['total'], regs[0]['years'], regs[1]['years'])), key
+    rng['cases'] = cases
 summary_labels = {'at_sites': lab(find('at named sites')), 'estimate': lab(EST)}
 tiers, i = [], find('Named sites counted') + 1
 while lab(i).startswith('Tier'): tiers.append({'tier': lab(i), 'it_gw': vals(S, i)}); i += 1
