@@ -487,3 +487,17 @@ body.bk-on { overflow: hidden; }
 .lk-top { display: flex; justify-content: flex-end; margin: -4px 0 2px; }
 .lk-top[hidden] { display: none; }
 #lk-case .ypick-menu { top: calc(100% + 8px); bottom: auto; right: 0; min-width: 260px; }
+
+/* accelerator shipments */
+.sh-pair { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 18px; }
+@media (min-width: 1000px) { .sh-pair { grid-template-columns: 1fr 1fr; } }
+.sh-pair .sh-card { margin: 0; min-width: 0; }
+.sh-card .sub { margin: 4px 0 8px; }
+.sh-legend { gap: 6px 16px; font-size: 12.5px; margin-bottom: 14px; }
+table.pivot.sh-table th, table.pivot.sh-table td { padding-left: 8px; padding-right: 8px; font-size: 13px; }
+table.pivot.sh-table td:first-child, table.pivot.sh-table th:first-child { white-space: normal; min-width: 0; padding-left: 12px; }
+table.pivot.sh-table { min-width: 0; width: 100%; }
+.sh-note p { margin: 0 0 8px; }
+.sh-likely { fill: none; stroke: var(--text); stroke-width: 2; stroke-dasharray: 6 4; }
+.sh-likely-pt { fill: var(--text); }
+.sh-key-likely { width: 22px; height: 0; border-top: 2px dashed var(--text); }
