@@ -484,3 +484,5 @@ body.bk-on { overflow: hidden; }
   table.pivot th.tot, table.pivot td.tot { position: static; }
   table.pivot td:first-child { max-width: 150px; }
 }
+.lk-rng { stroke: var(--text-2); stroke-width: 1.5; }
+.lk-sw.rng { background: linear-gradient(var(--text-2), var(--text-2)) center / 2px 100% no-repeat; }
