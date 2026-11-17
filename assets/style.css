@@ -478,6 +478,12 @@ body.bk-on { overflow: hidden; }
 .lk-col .lk-bar { cursor: pointer; }
 .lk-col rect.lk-bar:hover, .lk-col rect.lk-bar:focus { filter: brightness(1.18); outline: none; }
 .lk-table tr.ind td:first-child { padding-left: 22px; }
+
+/* Phones: let the Total column scroll with the years so the year figures are readable. */
+@media (max-width: 640px) {
+  table.pivot th.tot, table.pivot td.tot { position: static; }
+  table.pivot td:first-child { max-width: 150px; }
+}
 .lk-top { display: flex; justify-content: flex-end; margin: -4px 0 2px; }
 .lk-top[hidden] { display: none; }
 #lk-case .ypick-menu { top: calc(100% + 8px); bottom: auto; right: 0; min-width: 260px; }
