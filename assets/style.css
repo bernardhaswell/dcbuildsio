@@ -478,3 +478,5 @@ body.bk-on { overflow: hidden; }
 .lk-col .lk-bar { cursor: pointer; }
 .lk-col rect.lk-bar:hover, .lk-col rect.lk-bar:focus { filter: brightness(1.18); outline: none; }
 .lk-table tr.ind td:first-child { padding-left: 22px; }
+.lk-rng { stroke: var(--text-2); stroke-width: 1.5; }
+.lk-sw.rng { background: linear-gradient(var(--text-2), var(--text-2)) center / 2px 100% no-repeat; }
