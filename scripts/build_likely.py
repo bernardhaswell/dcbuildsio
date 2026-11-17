@@ -28,11 +28,12 @@ def find(prefix):
     for i in range(1, S.max_row + 1):
         if lab(i).lower().startswith(prefix.lower()): return i
     raise SystemExit(f'Summary row not found: {prefix}')
+EST = next((i for i in range(1, S.max_row + 1) if lab(i).lower().startswith(('estimate:', 'allocated by'))), None) or find('Estimate:')
 summary = {'total': vals(S, find('Likely energized, total')), 'us': vals(S, find('US')), 'outside_us': vals(S, find('outside US')),
-           'at_sites': vals(S, find('at named sites')), 'estimate': vals(S, find('Estimate:')),
+           'at_sites': vals(S, find('at named sites')), 'estimate': vals(S, EST),
            'announced_dated': vals(S, find('Tracker as published'))}
 within = [{'label': lab(i).split(':', 1)[1].strip(), 'it_gw': vals(S, i)} for i in range(1, S.max_row + 1) if lab(i).lower().startswith('within named sites:')]
-summary_labels = {'at_sites': lab(find('at named sites')), 'estimate': lab(find('Estimate:'))}
+summary_labels = {'at_sites': lab(find('at named sites')), 'estimate': lab(EST)}
 tiers, i = [], find('Named sites counted') + 1
 while lab(i).startswith('Tier'): tiers.append({'tier': lab(i), 'it_gw': vals(S, i)}); i += 1
 rec, i = [], find('Reconciliation') + 1
@@ -44,7 +45,7 @@ while lab(i) and not lab(i).startswith('For comparison'):
 def table(name):
     ws = wb[name]; out = []
     hdr = [str(ws.cell(1, c).value or '') for c in range(1, 12)]
-    mix = any('assigned by mix' in h for h in hdr)
+    mix = any(('assigned by mix' in h) or ('allocated' in h.lower()) for h in hdr)
     for i in range(2, ws.max_row + 1):
         k = ws.cell(i, 1).value
         if k is None or ws.cell(i, 2).value is None or str(k).startswith('Check'): continue
