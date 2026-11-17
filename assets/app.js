@@ -22,10 +22,23 @@
     partially_live: 'Partially live', live: 'Live', delayed: 'Delayed', paused: 'Paused', cancelled: 'Cancelled',
     nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA',
     openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq',
-    huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'Other', undisclosed: 'Undisclosed', unspecified: 'unspecified',
+    huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'Other', undisclosed: 'Not disclosed', unspecified: 'unspecified',
     verified: 'Verified', sourced: 'Sourced',
   };
   const lab = (k) => LABEL[k] || (typeof k === 'string' && /^[a-z0-9_]+$/.test(k) ? k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : k);
+  const FAMILY = { mi300: 'MI300', mi350: 'MI350', mi400: 'MI400', ai200: 'AI200', wse: 'WSE', blackwell_ultra: 'Blackwell Ultra', tpu_v5: 'TPU v5', tpu_v6: 'TPU v6', tpu_v7: 'TPU v7', maia200: 'Maia 200' };
+  const famLabel = (f) => FAMILY[f] || f.replace(/_/g, ' ').replace(/^./, (m) => m.toUpperCase());
+  // Vendor label plus model (or family), without repeating a word the label already carries.
+  const chipOne = (c) => {
+    const label = lab(c.vendor).split(' ');
+    const fam = c.family && c.family !== 'unspecified' ? famLabel(c.family) : '';
+    let model = c.model === 'unassigned' ? '' : String(c.model || '');
+    if ((model.match(/\(/g) || []).length > (model.match(/\)/g) || []).length) model += ')';
+    const detail = (model || fam).split(' ').filter(Boolean);
+    while (detail.length && label.some((w) => w.toLowerCase() === detail[0].toLowerCase())) detail.shift();
+    if (detail.length && label.length > 1 && detail[0].toLowerCase().startsWith(label[label.length - 1].toLowerCase())) label.pop();
+    return [...label, ...detail].join(' ');
+  };
   // Tables show years up to LAST_YEAR, then one column for everything later.
   const LAST_YEAR = 2032, LATER = `${LAST_YEAR + 1}+`;
   const CHIP_ORDER = ['nvidia', 'amd', 'google', 'amazon', 'huawei', 'openai', 'meta', 'alibaba', 'microsoft', 'broadcom'];
@@ -79,7 +92,7 @@
   const groupKey = (d, g) => {
     const p = phaseById[d.id];
     if (g === 'company') return roleLabel(p, state.role);
-    if (g === 'chip_family') return d.chip_vendor === 'undisclosed' ? 'Undisclosed' : `${lab(d.chip_vendor)} ${d.chip_family === 'unspecified' ? '(family n/a)' : d.chip_family.replace(/_/g, ' ')}`;
+    if (g === 'chip_family') return d.chip_vendor === 'undisclosed' ? 'Not disclosed' : (d.chip_family === 'unspecified' ? `${lab(d.chip_vendor)} (family not stated)` : chipOne({ vendor: d.chip_vendor, family: d.chip_family }));
     if (g === 'us_state') return p.us_state || (p.region === 'us' && isDeal(p) ? 'US, state not known (agreements)' : 'Outside US');
     if (g === 'kind') return kindLabel(p);
     if (g === 'stage') return STAGE[stageOf(p)];
@@ -274,7 +287,7 @@
       [showCancelled ? 'Cancelled capacity (not in totals)' : 'Capacity tracked', all, `${gw(all - dealMW)} GW at named sites plus ${gw(dealMW)} GW under agreements with no site yet`],
       ['At named sites', all - dealMW, `${nSites} site${nSites === 1 ? "" : "s"} in ${nCountries} ${nCountries === 1 ? 'country' : 'countries'}${nStates ? `, ${nStates} US states` : ''}`],
       ['Agreements with no site', dealMW, `Only the part not already at a named site. ${gw(guessMW)} GW has an estimated location`],
-      ['Chip disclosed', chipKnown, `${pct(chipKnown, depAll)} of capacity names its accelerator. ${pct(dated, depAll)} has an energization date`],
+      ['Chip maker assigned', chipKnown, `${pct(chipKnown, depAll)} of capacity has a chip maker, stated or estimated. ${pct(dated, depAll)} has an energization date`],
     ];
     $('#tiles').replaceChildren(...tiles.map(([k, v, n]) => el('div', { class: 'tile' }, [el('div', { class: 'k', text: k }), tileVal(v), el('div', { class: 'n', text: n })])));
   }
@@ -533,7 +546,7 @@
   const drawYearTables = () => { for (const id of Object.keys(YT_DEF)) drawYearTable(id); };
 
   // ---------------------------------------------------------------- tables
-  const chipText = (cs) => (cs || []).map((c) => `${lab(c.vendor)}${c.model && !lab(c.vendor).includes(c.model) ? ' ' + c.model : c.family && c.family !== 'unspecified' ? ' ' + c.family.replace(/_/g, ' ') : ''}`).join(', ');
+  const chipText = (cs) => (cs || []).map(chipOne).join(', ');
   const when = (p) => p.timeline.full_capacity || p.timeline.first_power || ((p.timeline.ramp || []).slice(-1)[0] || {}).period || '';
   const srcLink = (s) => el('a', { href: s.url, target: '_blank', rel: 'noopener', text: s.publisher || 'Source' });
   const COLS = [
