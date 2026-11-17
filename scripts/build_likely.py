@@ -105,7 +105,7 @@ for row in R.iter_rows(min_row=2, values_only=True):
     g = lambda k: row[ix[k]]
     rows.append([g('id'), g('site'), g('phase'), g('FORECAST STATUS'), g('area'), g('us_state') or '', g('stage'), g('stated_year'),
                  r(g('it_gw')), r(g('counted_2025_2030')), [r(g(f'counted {y}')) for y in years], g('first_year_counted'),
-                 g('chip_vendor'), g('end_user'), g('end_user_basis'), g('operator'), g('reason'), g('source_url'), g('tier'), BUCKET.get(str(g('region') or ''), 'Rest of world')])
+                 (g('chip_for_forecast') if 'chip_for_forecast' in ix else g('chip_vendor')), g('end_user'), g('end_user_basis'), g('operator'), g('reason'), g('source_url'), g('tier'), BUCKET.get(str(g('region') or ''), 'Rest of world')])
 A = wb['Assumptions']
 assumptions = [{'tier': A.cell(i, 1).value, 'evidence': A.cell(i, 2).value, 'counts': A.cell(i, 3).value, 'earliest': A.cell(i, 4).value, 'why': A.cell(i, 6).value}
                for i in range(2, A.max_row + 1) if isinstance(A.cell(i, 1).value, int)]
