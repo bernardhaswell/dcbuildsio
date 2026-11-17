@@ -51,7 +51,7 @@
   const openYear = (i, pred = () => true, what = 'Named sites counted', est = D.summary.estimate[i]) => {
     const items = F.rows.filter((o) => o.counted_by_year[i] > 0.0005 && pred(o));
     openList({ kicker: `Likely energized · ${D.years[i]}`, title: what, value: items.reduce((a, o) => a + o.counted_by_year[i], 0), yearIdx: i, items,
-      sub: `${items.length} sites and agreements counted in ${D.years[i]}, largest first, each with the reason it is in.${est > 0.05 ? ` ${f1(est)} GW more that year is an allocated to sites not itemised (Estimate), so it is not listed here.` : ''}` });
+      sub: `${items.length} sites and agreements counted in ${D.years[i]}, largest first, each with the reason it is in.${est > 0.05 ? ` ${f1(est)} GW more that year is at sites not itemised (Estimate), so it is not listed here.` : ''}` });
   };
   const clickable = (td, fn) => { td.classList.add('pick'); td.tabIndex = 0; td.setAttribute('role', 'button'); td.addEventListener('click', fn); td.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); return td; };
 
@@ -119,7 +119,7 @@
     (() => { const v = vals.reduce((a, b) => a + b, 0), td = el('td', { class: 'num tot', text: f2(v) }); return onCell && v > 0.0005 ? clickable(td, () => onCell(null)) : td; })(),
     ...extra.map((v) => el('td', { class: 'num dim', text: typeof v === 'number' ? f2(v) : v }))]);
   const sep = (t) => el('tr', { class: 'lk-sep' }, el('td', { colspan: D.years.length + 4, text: t }));
-  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers by accelerator shipments, and to end users and operators by capital spending. See the Allocation basis sheet in the workbook.';
+  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by the capital spending of the largest buyers. See the Allocation basis sheet in the workbook.';
   const openSet = (title, kicker, pred, cellOf) => (i) => {
     const items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
     const rec = items.reduce((a, o) => a + (i == null ? o.counted : o.counted_by_year[i]), 0);
@@ -129,7 +129,7 @@
   };
 
 
-  const EWHY = 'Capacity allocated by shipments and company reports to sites not itemised (Estimate), kept separate from named sites. Outside the US it is split between regions by each region’s share of named capacity counted in 2025 to 2030. See the By region sheet in the workbook.';
+  const EWHY = 'Capacity at sites the tracker does not itemise (Estimate): smaller datacenters, colocation halls and expansions inside existing campuses. Measured for 2025 and 2026 and held at that level after, kept separate from named sites. Outside the US it is split so each region keeps a steady share. See the By region sheet in the workbook.';
   const inRegion = (g) => (g.name === 'Outside the US' ? (o) => o.region !== 'United States' : (o) => o.region === g.name);
   const openRegion = (g) => (i) => {
     const pred = inRegion(g), items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
@@ -175,8 +175,8 @@
       const st = D.status, find = (k) => st.find((x) => x.status === k) || { rows: 0, announced: 0, counted: 0 };
       const I = find('In'), P = find('Partly in'), N = find('Not in'), B = find('Before 2025');
       $('#lk-tsub').textContent = (isLikely() ? '' : 'Shown for the Likely case. ') + (inn
-        ? `${I.rows + P.rows} sites and agreements are counted (${P.rows} only in part): ${f1(I.counted + P.counted)} GW in 2025 to 2030. Sites are taken in order of evidence, operating first, then under construction, then permitted or announced sites, until each year’s likely total is reached.`
-        : `${N.rows} sites and agreements are not counted by 2030, and ${P.rows} are cut back: ${f1(N.announced + (P.announced - P.counted))} GW of announced capacity. Each has its reason. ${B.rows} more (${f1(B.announced)} GW) were energized before 2025. China is not part of this forecast.`);
+        ? `${I.rows + P.rows} sites and agreements are counted (${P.rows} only in part): ${f1(I.counted + P.counted)} GW in 2025 to 2030. Each is counted at its own chance of completion, from its own first power year. In means at least three quarters of the announced capacity is counted by 2030; partly in means less than that.`
+        : `${N.rows} sites and agreements are not counted by 2030, and ${P.rows} are counted in part: ${f1(N.announced + (P.announced - P.counted))} GW of announced capacity. Each has its reason. ${B.rows} more (${f1(B.announced)} GW) were energized before 2025. China is not part of this forecast.`);
       if (term) rows = rows.filter((o) => [o.site, o.phase, o.area, o.us_state, o.operator, o.end_user, o.reason, o.stage].join(' ').toLowerCase().includes(term));
       th.replaceChildren(el('tr', {}, [['Site', ''], ['Where', ''], ['Stage', ''], ['Announced', 'num'], [inn ? 'Counted' : 'Not counted', 'num'], [inn ? 'Year' : 'Status', ''], ['Reason and source', '']].map(([x, c]) => el('th', { scope: 'col', class: c, text: x }))));
       const LIMIT = 30, show = all ? rows : rows.slice(0, LIMIT);
@@ -196,7 +196,7 @@
     const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
     const mix = rows.some((r) => r.assigned != null);
     $('#lk-tsub').textContent = caseNote + (mix
-      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers by accelerator shipments and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
+      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
       : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`);
     th.replaceChildren(head(lbl, mix ? ['On record', 'Allocated'] : ['All dates', 'Rows in']));
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
@@ -217,7 +217,7 @@
   function initCase() {
     if (!(D.range && D.range.cases && D.range.cases.lower && D.range.cases.upper)) return;
     const btn = $('#lk-case-btn'), menu = $('#lk-case-menu'), box = $('#lk-case');
-    const NOTE = { lower: 'Paper-stage sites slip past 2030', likely: 'Central case', upper: 'Spending cut less; sites on time' };
+    const NOTE = { lower: 'More sites late, fewer built', likely: 'Central case', upper: 'Fewer sites late, more built' };
     const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
     const pick = (k) => { CASE = k; close(); btn.focus(); $('#lk-case-v').textContent = caseName(); drawChart(); drawTable(); };
     const build = () => menu.replaceChildren(...CASES.map(([k, t]) => {
@@ -234,7 +234,7 @@
   function init(d) {
     D = d; F.rows = d.rows.map(R);
     $('#lk-sub').textContent = `What is likely to be energized each year, as opposed to everything announced. IT GW of all datacenter capacity, AI and conventional cloud, worldwide excluding China. Our estimate, updated ${d.generated}; figures may be revised.`;
-    $('#lk-note').replaceChildren('How it works: the yearly totals are this tracker’s Estimate of capacity likely to be energized, allowing for the slowdown in AI chip volumes reported in November 2026. Each year is then filled with named sites from the tracker in order of evidence: operating, then under construction, then permitted or announced sites, preferring those with a named buyer, then dated company plans for capacity with no site named yet. Whatever named sites and company-reported capacity cannot cover is allocated by shipments and company reports to sites not itemised (Estimate), kept separate from named sites. Every site is marked in, partly in or not in, with the reason. The Case menu switches the chart and summary to the lower or upper estimate: upper if spending is cut less and sites already under construction or permitted come in on their stated dates; lower if paper-stage sites and capacity at sites not itemised slip past 2030. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
+    $('#lk-note').replaceChildren('How it works: this is built from the sites up, with no yearly target. Every site and agreement in the tracker has its own chance of completion, first power year and ramp, set from its stage, whether a buyer is named, and the delivery record of whoever is building it; the largest sites and agreements are judged one by one. Each year is the sum of those sites. Capacity the tracker does not itemise (smaller datacenters, colocation halls and expansions inside existing campuses) is measured for 2025 and 2026 and held at that level, shown hatched as an Estimate. For 2030, where most sites are not announced yet, large buyers whose programmes run past 2030 are held at their own 2028 to 2029 pace. Every site is marked in, partly in or not in, with the reason. The Case menu switches the chart and summary to the lower or upper estimate: lower if more sites under construction run late and fewer sites not yet started are built; upper if the reverse. Not affected by the filters above. ', el('a', { href: 'data/likely-energized-by-site.xlsx', download: '', text: 'Download the workbook' }), ' to see and change every assumption.');
     $('#lk-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; tab = b.dataset.v; all = false; $('#lk-q').value = ''; for (const x of $('#lk-tabs').children) x.setAttribute('aria-checked', String(x === b)); drawTable(); });
     $('#lk-more').addEventListener('click', () => { all = !all; drawTable(); });
     let qt; $('#lk-q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(drawTable, 120); });
