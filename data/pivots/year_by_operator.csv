@@ -1,52 +1,61 @@
 Operator (GW facility),2019,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2036,2037,2040,2041,2047,Undated,Total
-Not disclosed,,,,,,2.799,5.875,4.533,14.605,11.575,10.865,4.105,3.574,2.2,,0.9,,,,,1.44,14.824,77.296
-Microsoft,,,,0.052,0.948,2.7,3.212,3.346,5.792,3.023,3.986,4.1,3.1,,,,,,,,,,30.259
+Microsoft,,,,0.052,0.888,2.7,3.412,3.346,5.792,3.023,3.786,4.1,3.1,,,,,,,,,0.06,30.259
 Amazon (AWS),,,0.09,,0.147,1.462,1.797,4.805,3.718,7.812,2.075,1.15,2.4,,,,,,0.055,,,4.748,30.258
-Google (Alphabet),,,,0.413,0.85,1.333,2.665,4.919,5.617,1.355,3.141,4.104,,,1.8,,0.14,,,,,1.943,28.28
+Google (Alphabet),,,,0.413,0.85,1.333,2.665,4.919,5.617,1.81,3.596,4.104,,,1.8,,0.14,,,,,1.943,29.19
 "SpaceX (including SpaceXAI, formerly xAI)",,,,,,0.3,2.37,11.035,3.4,2.2,2.3,,,,,,,,,,,0.295,21.9
+Alibaba Cloud (estimate),,,,,,2.799,2.355,2.355,2.355,2.355,2.355,2.355,2.374,,,,,,,,,,19.304
 Meta Platforms,,,,,0.234,0.569,2.72,0.95,4.019,3.488,1.938,1.55,1.5,,,,0.09,,,,,,17.059
+Tract (estimate),,,,,,,,,4.96,4.17,2.14,0.5,1.0,,,0.9,,,,,,,13.67
+OpenAI (estimate),,,,,,,,0.778,0.8,,,,,,,,,,,,,10.572,12.15
+Not disclosed,,,,,,,,0.3,3.5,2.96,3.64,0.4,0.2,1.0,,,,,,,,,12.0
 O'Leary Digital (estimate),,,,,,,,,9.0,,,,,,,,,,,,,,9.0
 QTS,,,,,0.122,0.396,0.816,1.286,0.4,1.29,,0.925,1.025,,,0.81,,,,,,0.32,7.391
 New Era Energy & Digital (estimate),,,,,,,,,2.0,,,,5.0,,,,,,,,,,7.0
 Amazon (AWS) (estimate),,,,,,,0.3,0.825,,1.8,,,,,,,3.7,,,,,,6.625
+Nscale (estimate),,,,,,,,0.03,0.06,2.0,2.0,2.0,,,,,,,,,,0.024,6.114
 Oracle (estimate),,,,,,,,0.28,5.493,,,,,,,,,,,,,,5.773
 China Mobile,,,,,0.052,,0.156,,3.0,2.0,,,,,,,,,,,,,5.208
 ByteDance (TikTok) (estimate),,,,,,,,0.05,5.0,0.03,,0.07,,,,,,,,,,,5.15
 Sailfish Digital Ventures (estimate),,,,,,,,0.6,2.6,,1.8,,,,,,,,,,,,5.0
-Lodha Developers (estimate),,,,,,,,,,5.0,,,,,,,,,,,,,5.0
 Nebius,,,,,0.005,0.15,0.17,3.355,0.3,0.55,0.35,,,,,,,,,,,0.12,5.0
 Energy Abundance Development Corp (estimate),,,,,,,,0.3,,,4.7,,,,,,,,,,,,5.0
+Lodha Developers (estimate),,,,,,,,,,5.0,,,,,,,,,,,,,5.0
 GridFree AI (estimate),,,,,,,,,1.5,,3.4,,,,,,,,,,,,4.9
 TransGas Development Systems (estimate),,,,,,,,,4.8,,,,,,,,,,,,,,4.8
 CoreWeave,,,,,,,0.3,0.4,0.15,,3.451,,,,,,,,,,,,4.301
 G42 + Khazna Data Centers (estimate),,,,,,,,,,4.0,,,,,,,,,,,,,4.0
-Joule Capital Partners (estimate),,,,,,,4.0,,,,,,,,,,,,,,,,4.0
-Oracle,,,0.03,,,0.343,1.291,0.46,0.4,0.86,0.33,,,,,,,,,,,,3.714
+Joule Capital Partners (estimate),,,,,,,,,1.0,1.0,1.0,1.0,,,,,,,,,,,4.0
+Oracle,,,0.03,,,0.343,1.291,0.66,0.4,0.86,0.33,,,,,,,,,,,,3.914
 Cipher Mining (estimate),,,,,,,,0.37,2.2,0.97,,,,,,,,,,,,,3.54
 CoreWeave (estimate),,,,,0.05,0.262,1.012,1.222,0.44,0.173,0.24,,,,,,,,,,,,3.399
-OpenAI,,,,,,,,,,,,,3.2,,,,,,,,,,3.2
+Prologis (estimate),,,,,,,,,1.89,,,,,,,,,,,,1.44,,3.33
+Anthropic (estimate),,,,,,,,0.645,1.808,,,,,,,,,,,,,0.777,3.23
 WBS Power (estimate),,,,,,,,,0.8,,0.8,,0.8,,0.8,,,,,,,,3.2
+OpenAI,,,,,,,,,,,,,3.2,,,,,,,,,,3.2
 Core Scientific (estimate),,,,,,,,0.268,0.58,,2.161,,,,,,,,,,,,3.009
+Fir Hills (Stock Farm Road) (estimate),,,,,,,,,3.0,,,,,,,,,,,,,,3.0
 STAK Energy Corporation (estimate),,,,,,,,,,,3.0,,,,,,,,,,,,3.0
 Brookfield Asset Management,,,,,,,,,,,,,3.0,,,,,,,,,,3.0
-Fir Hills (Stock Farm Road) (estimate),,,,,,,,,3.0,,,,,,,,,,,,,,3.0
 STACK Infrastructure (estimate),,,,,,,,,,,,,,,,,,,,3.0,,,3.0
+Google (Alphabet) (estimate),,,,,,,,,0.05,2.642,0.25,,,,,,,,,,,,2.942
 Nscale,,,,,,,0.456,0.991,1.329,0.1,,,,,,,,,,,,0.038,2.913
-Crusoe (estimate),,,,,0.033,,0.04,0.19,1.5,1.03,,,,,,,,,,,,,2.792
+Crusoe (estimate),,,,,0.033,,0.016,0.19,1.524,1.03,,,,,,,,,,,,,2.792
 Crusoe,,,,,,0.023,,0.45,1.0,1.23,,,,,,,,,,,,,2.703
 IREN (estimate),,,,,,,,,2.4,,,,,,,,,,,,,0.3,2.7
 IREN,,,,,,,0.185,0.785,,0.6,,,,,,,,,,,,1.1,2.67
 PowerHouse Data Centers (estimate),,,,,,0.15,,,,,,,,1.8,,,,,,,,0.65,2.6
-Sesterce,,,,,,,0.064,,0.5,0.7,0.25,1.0,,,,,,,,,,,2.514
+Sesterce,,,,,,,,,0.564,0.7,0.25,1.0,,,,,,,,,,,2.514
 Aligned Data Centers,,,,,,,0.2,0.072,2.192,,,,,,,,,,,,,,2.464
-Anthropic (estimate),,,,,,,,0.645,1.808,,,,,,,,,,,,,,2.453
 MARA Holdings (estimate),,,,,,,,,0.415,2.0,,,,,,,,,,,,,2.415
 TeraWulf (estimate),,,,,,,,,0.5,0.9,1.0,,,,,,,,,,,,2.4
 Fluidstack (estimate),,,,,,,0.491,0.811,,1.0,,,,,,,,,,,,,2.303
+SoftBank Group (estimate),,,,,,,,,,,,,,,,,,,,,,2.25,2.25
 Atlas Development (estimate),,,,,,,,,,,,0.432,0.6,,,,1.08,,,,,,2.112
 Amp Z (Amp Energy) (estimate),,,,,,,0.175,,0.925,1.0,,,,,,,,,,,,,2.1
+Arizona Land Consulting (estimate),,,,,,,,,2.0,,,,,,,,,,,,,,2.0
 TensorWave (estimate),,,,,,,0.086,1.914,,,,,,,,,,,,,,,2.0
 Rubix Data Centers (Submer) (estimate),,,,,,,,,,2.0,,,,,,,,,,,,,2.0
+Envision Group (estimate),,,,,,,0.12,,,,1.88,,,,,,,,,,,,2.0
 Lambda,,,,,,,0.024,0.458,,,,1.5,,,,,,,,,,,1.982
 ByteDance (TikTok),,,,,,,,0.313,0.45,0.16,1.05,,,,,,,,,,,,1.973
 Bitfarms (estimate),,,,,,,0.08,0.398,,1.45,,,,,,,,,,,,,1.928
@@ -54,6 +63,7 @@ SK Telecom,,,,,,,,,,,0.075,,,,,,,,,,,1.802,1.877
 MLP Ventures (estimate),,,,,,,,,,0.8,1.0,,,,,,,,,,,,1.8
 PowerHouse Data Centers + Provident Data Centers (estimate),,,,,,,,,0.5,,1.3,,,,,,,,,,,,1.8
 Poolside + Poolside Infrastructure Company (estimate),,,,,,,,,,,,,1.75,,,,,,,,,,1.75
+SoftBank Group + SB Energy (estimate),,,,,,,,,,0.4,,1.35,,,,,,,,,,,1.75
 Green Energy Partners (estimate),,,,,,,,,,,,,,,,,,1.71,,,,,1.71
 EdgeCore Digital Infrastructure (estimate),,,,,,,0.114,,1.532,,,,,,,,,,,,,,1.646
 T5 Data Centers,,,,,,,,0.078,,1.482,,,,,,,,,,,,,1.56
@@ -70,14 +80,16 @@ Applied Digital (estimate),,,,,,,0.065,0.975,0.273,,,,,,,,,,,,,,1.313
 Jinko Power Technology,,,,,,,,,0.52,0.39,0.39,,,,,,,,,,,,1.3
 PA Data Center Partners + PowerHouse Data Centers (estimate),,,,,,,,,,,,1.3,,,,,,,,,,,1.3
 YTL Power International (estimate),,,,,,,0.298,,,1.0,,,,,,,,,,,,,1.298
-Pioneer Development (estimate),,,,,,,,,,1.26,,,,,,,,,,,,,1.26
 Archbald Ventures (estimate),,,,,,,,,,1.26,,,,,,,,,,,,,1.26
+Pioneer Development (estimate),,,,,,,,,,1.26,,,,,,,,,,,,,1.26
 Zenith Volts Corp (estimate),,,,,,,,1.25,,,,,,,,,,,,,,,1.25
-Prometheus Hyperscale (estimate),,,,,,,,,,,,1.25,,,,,,,,,,,1.25
+Falls Ranch LP (estimate),,,,,,,,,,,1.25,,,,,,,,,,,,1.25
 Premier Data Center Development (estimate),,,,,,,,,,,,,,,1.25,,,,,,,,1.25
+Prometheus Hyperscale (estimate),,,,,,,,,,,,1.25,,,,,,,,,,,1.25
 DayOne Data Centers,,,,,0.065,0.351,0.747,0.05,,,,,,,,,,,,,,,1.214
-CloudBurst Data Centers (estimate),,,,,,,0.05,,1.15,,,,,,,,,,,,,,1.2
 Bell Canada (estimate),,,,,,,,0.3,,,,0.9,,,,,,,,,,,1.2
+Logistic Land Investments (estimate),,,,,,,,,,,,,,1.2,,,,,,,,,1.2
+CloudBurst Data Centers (estimate),,,,,,,0.05,,1.15,,,,,,,,,,,,,,1.2
 SB Energy,,,,,,,,,1.2,,,,,,,,,,,,,,1.2
 Beale Infrastructure (estimate),,,,,,,,,1.036,0.14,,,,,,,,,,,,,1.176
 CyrusOne,,,,,,,0.19,0.6,0.38,,,,,,,,,,,,,,1.17
@@ -86,21 +98,24 @@ QTS (estimate),,,,,,,,,1.07,,,,,,,,,,,,,,1.07
 Cloverleaf Infrastructure (estimate),,,,,,,,,1.05,,,,,,,,,,,,,,1.05
 GMI Cloud,,,,,,,0.016,,,,1.0,,,,,,,,,,,,1.016
 Huawei Cloud,,,,,0.286,0.093,0.279,,0.175,0.168,,,,,,,,,,,,,1.001
-AMD,,,,,,,,,,,1.0,,,,,,,,,,,,1.0
-Indosat Ooredoo Hutchison (estimate),,,,,,,,0.2,,0.8,,,,,,,,,,,,,1.0
-Treetop Companies (estimate),,,,,,,,,,,,1.0,,,,,,,,,,,1.0
-TAC Data Centers (Ardent Companies) (estimate),,,,,,,,,,0.5,,,0.5,,,,,,,,,,1.0
+Apricus Energy Partners (estimate),,,,,,,,,,,0.05,,,0.6,,0.35,,,,,,,1.0
 DeepSeek,,,,,,,,1.0,,,,,,,,,,,,,,,1.0
-Huntley LLC (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Related Digital (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Treetop Companies (estimate),,,,,,,,,,,,1.0,,,,,,,,,,,1.0
+Tachyon9 / Nixxy (estimate),,,,,,,,,0.1,,0.9,,,,,,,,,,,,1.0
+TAC Data Centers (Ardent Companies) (estimate),,,,,,,,,,0.5,,,0.5,,,,,,,,,,1.0
+Big Watt Digital + PowerHouse Data Centers (estimate),,,,,,,,,1.0,,,,,,,,,,,,,,1.0
+OpenAI + Oracle,,,,,,,0.2,,0.8,,,,,,,,,,,,,,1.0
+AMD,,,,,,,,,,,1.0,,,,,,,,,,,,1.0
 Copia Power (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
 du (EITC) (estimate),,,,,,,,,,,1.0,,,,,,,,,,,,1.0
-Apricus Energy Partners (estimate),,,,,,,,,,,0.05,,,0.6,,0.35,,,,,,,1.0
 Kanza Park Place LLC (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
-Related Digital (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
-Big Watt Digital + PowerHouse Data Centers (estimate),,,,,,,,,1.0,,,,,,,,,,,,,,1.0
-Tachyon9 / Nixxy (estimate),,,,,,,,,0.1,,0.9,,,,,,,,,,,,1.0
-OpenAI + Oracle,,,,,,,0.2,,0.8,,,,,,,,,,,,,,1.0
+Thinking Machines Lab (estimate),,,,,,,,,,,,,,,,,,,,,,1.0,1.0
+Z.ai (Zhipu AI) (estimate),,,,,,,1.0,,,,,,,,,,,,,,,,1.0
+Huntley LLC (estimate),,,,,,,,,,1.0,,,,,,,,,,,,,1.0
+Indosat Ooredoo Hutchison (estimate),,,,,,,,0.2,,0.8,,,,,,,,,,,,,1.0
 Infrakey DC Parks (estimate),,,,,,,0.15,0.15,,0.625,,,,,,,,,,,,,0.925
+International Electric Power (estimate),,,,,,,,,,0.91,,,,,,,,,,,,,0.91
 VNET Group,,,,,,,0.287,0.623,,,,,,,,,,,,,,,0.91
 AVAIO Digital Partners (estimate),,,,,,,,,,0.85,,,,,,,,,,,,,0.85
 Tencent Cloud + Huawei Cloud + China Telecom,,,,,,,,,0.83,,,,,,,,,,,,,,0.83
@@ -112,112 +127,115 @@ Meta Platforms (estimate),,,,,,,,,0.277,,0.118,,0.4,,,,,,,,,,0.795
 Penzance Management (estimate),,,,,,,,,,0.78,,,,,,,,,,,,,0.78
 Telia Company,,,,,,,,,,,,,,,,,,,0.75,,,,0.75
 Cerebras,,,,,,,,,0.75,,,,,,,,,,,,,,0.75
-Google (Alphabet) (estimate),,,,,,,,,0.05,0.442,0.25,,,,,,,,,,,,0.742
 Edged (Endeavour) (estimate),,,,,,,,,,0.725,,,,,,,,,,,,,0.725
-Yondr Group,,,,,,,,,0.715,,,,,,,,,,,,,,0.715
 Prime Data Centers (estimate),,,,,,,,,,0.208,,0.507,,,,,,,,,,,0.715
+Yondr Group,,,,,,,,,0.715,,,,,,,,,,,,,,0.715
 OpCore (Iliad / InfraVia) (estimate),,,,,,,,0.7,,,,,,,,,,,,,,,0.7
 Alibaba Cloud,,,,,,0.111,0.559,,,,,,,,,,,,,,,,0.67
 Nscale + Aker (estimate),,,,,,,,0.013,0.29,,,,,,,,,,,,,0.346,0.649
 Black Chamber (estimate),,,,,,,,,0.637,,,,,,,,,,,,,,0.637
 Skybox Datacenters (estimate),,,,,,,,,0.63,,,,,,,,,,,,,,0.63
 Firmus Technologies,,,,,,,0.046,,0.56,,,,,,,,,,,,,,0.606
-CleanArc Data Centers (estimate),,,,,,,,0.3,,,0.3,,,,,,,,,,,,0.6
 CRG (Clayco) (estimate),,,,,,,,,0.6,,,,,,,,,,,,,,0.6
 Balterra Development (estimate),,,,,,,,,,0.6,,,,,,,,,,,,,0.6
+CleanArc Data Centers (estimate),,,,,,,,0.3,,,0.3,,,,,,,,,,,,0.6
+RedNote (Xiaohongshu) (estimate),,,,,,,,0.6,,,,,,,,,,,,,,,0.6
 Vantage Data Centers,,,,,,,0.042,0.125,,0.375,,,,,,,,,,,,,0.541
 Rowan Digital Infrastructure (estimate),,,,,,,,,,0.54,,,,,,,,,,,,,0.54
+"SpaceX (including SpaceXAI, formerly xAI) (estimate)",,,,,,,,,,,,,,,,,,,,,,0.5,0.5
+Eni + Khazna Data Centers (estimate),,,,,,,,,0.5,,,,,,,,,,,,,,0.5
+Anchorstone Advisors (estimate),,,,,,,,0.5,,,,,,,,,,,,,,,0.5
 BLE Holdings (estimate),,,,,,,,,0.5,,,,,,,,,,,,,,0.5
+Quantica Infrastructure (estimate),,,,,,,,,,0.5,,,,,,,,,,,,,0.5
+Gemini Data Center SD LLC (estimate),,,,,,,,,0.5,,,,,,,,,,,,,,0.5
 Takanock (estimate),,,,,,,,,0.25,,0.25,,,,,,,,,,,,0.5
 Nexus Data Centers (estimate),,,,,,,0.5,,,,,,,,,,,,,,,,0.5
-Eni + Khazna Data Centers (estimate),,,,,,,,,0.5,,,,,,,,,,,,,,0.5
-"SpaceX (including SpaceXAI, formerly xAI) (estimate)",,,,,,,,,,,,,,,,,,,,,,0.5,0.5
-Quantica Infrastructure (estimate),,,,,,,,,,0.5,,,,,,,,,,,,,0.5
 Stream Data Centers (estimate),,,,,,,,,,0.5,,,,,,,,,,,,,0.5
-Gemini Data Center SD LLC (estimate),,,,,,,,,0.5,,,,,,,,,,,,,,0.5
 Hut 8 (estimate),,,,,,,,,0.458,,,,,,,,,,,,,,0.458
 Soluna Holdings + Metrobloks (estimate),,,,,,,,,0.13,0.325,,,,,,,,,,,,,0.455
 STACK Infrastructure,,,,,0.111,,,,0.342,,,,,,,,,,,,,,0.452
 Compass Datacenters,,,,,,,,,0.45,,,,,,,,,,,,,,0.45
 NTT DATA Group (estimate),,,,,,,0.039,0.05,,0.1,,0.26,,,,,,,,,,,0.449
 PowerHouse Data Centers + Poe Companies (estimate),,,,,,,0.13,,0.205,0.067,,,,,,,,,,,,,0.402
-PowerPlay AI (estimate),,,,,,,,,0.4,,,,,,,,,,,,,,0.4
-MARA Holdings,,,,,,,,,0.4,,,,,,,,,,,,,,0.4
-PointOne Data Centers (estimate),,,,,,,,,0.4,,,,,,,,,,,,,,0.4
 Gigaland (estimate),,,,,,,,0.4,,,,,,,,,,,,,,,0.4
-Riot Platforms (estimate),,,,,,,,,0.39,,,,,,,,,,,,,,0.39
+PowerPlay AI (estimate),,,,,,,,,0.4,,,,,,,,,,,,,,0.4
+PointOne Data Centers (estimate),,,,,,,,,0.4,,,,,,,,,,,,,,0.4
+MARA Holdings,,,,,,,,,0.4,,,,,,,,,,,,,,0.4
 HIVE Digital Technologies (BUZZ HPC),,,,,,,,0.39,,,,,,,,,,,,,,,0.39
+Riot Platforms (estimate),,,,,,,,,0.39,,,,,,,,,,,,,,0.39
 Switch,,,,,,,,,,0.38,,,,,,,,,,,,,0.38
 KT Corporation,,,,,,0.02,,,0.06,,0.29,,,,,,,,,,,,0.37
-Black Mountain Power (estimate),,,,,,,,,0.36,,,,,,,,,,,,,,0.36
 Monarch Energy (estimate),,,,,,,,,,,0.36,,,,,,,,,,,,0.36
+Black Mountain Power (estimate),,,,,,,,,0.36,,,,,,,,,,,,,,0.36
 Wright Brothers (Project River developers) (estimate),,,,,,,,,,0.34,,,,,,,,,,,,,0.34
 China Unicom,,,,,,0.06,,0.274,,,,,,,,,,,,,,,0.334
-Azora (estimate),,,,,,,,,0.3,,,,,,,,,,,,,,0.3
-Data4 (estimate),,,,,,,,0.3,,,,,,,,,,,,,,,0.3
 Provident Data Centers (estimate),,,,,,,,,,0.3,,,,,,,,,,,,,0.3
+Data4 (estimate),,,,,,,,0.3,,,,,,,,,,,,,,,0.3
+Azora (estimate),,,,,,,,,0.3,,,,,,,,,,,,,,0.3
 Stream Data Centers,,,,,,,0.083,,,,0.203,,,,,,,,,,,,0.286
 Bridge Data Centres,,,0.11,,,0.168,,,,,,,,,,,,,,,,,0.278
+DAMAC Group (Skyline Data Center) (estimate),,,,,,,,,,0.26,,,,,,,,,,,,,0.26
+Central Energy Group (CGE) (estimate),,,,,,,,,,0.26,,,,,,,,,,,,,0.26
 Omnia Data Centers (Patria Investimentos),,,,,,,,0.26,,,,,,,,,,,,,,,0.26
 DataVolt (estimate),,,,,,,,,,,0.26,,,,,,,,,,,,0.26
-Central Energy Group (CGE) (estimate),,,,,,,,,,0.26,,,,,,,,,,,,,0.26
-Yotta Data Services,,,,,,,0.06,0.2,,,,,,,,,,,,,,,0.26
-DAMAC Group (Skyline Data Center) (estimate),,,,,,,,,,0.26,,,,,,,,,,,,,0.26
-SoftBank Corp. + IDC Frontier (estimate),,,,,,,,,0.25,,,,,,,,,,,,,,0.25
+Yotta Data Services,,,,,,,,0.2,0.06,,,,,,,,,,,,,,0.26
 EcoDataCenter,,,,,,,,0.25,,,,,,,,,,,,,,,0.25
-Together AI (estimate),,,,,,,0.25,,,,,,,,,,,,,,,,0.25
-Grupo Samca (Green It Aragón) (estimate),,,,,,,,,0.24,,,,,,,,,,,,,,0.24
+Together AI (estimate),,,,,,,,,0.25,,,,,,,,,,,,,,0.25
+SoftBank Corp. + IDC Frontier (estimate),,,,,,,,,0.25,,,,,,,,,,,,,,0.25
 Convergent VA LLC (estimate),,,,,,,,0.24,,,,,,,,,,,,,,,0.24
+Grupo Samca (Green It Aragón) (estimate),,,,,,,,,0.24,,,,,,,,,,,,,,0.24
 US Department of Energy,,,,,,,0.02,,0.2,,,,,,,,,,,,,,0.22
+Poolside Infrastructure Company (estimate),,,,,,,,0.2,,,,,,,,,,,,,,,0.2
+Microsoft + G42,,,,,,,,,0.2,,,,,,,,,,,,,,0.2
+NAVER,,,,,,,,0.1,0.1,,,,,,,,,,,,,,0.2
 O-Green,,,,,,,,,0.2,,,,,,,,,,,,,,0.2
 Schwarz Digits,,,,,,,,0.2,,,,,,,,,,,,,,,0.2
-Microsoft + G42,,,,,,,0.2,,,,,,,,,,,,,,,,0.2
-Poolside Infrastructure Company (estimate),,,,,,,,0.2,,,,,,,,,,,,,,,0.2
 HUMAIN,,,,,,,0.2,,,,,,,,,,,,,,,,0.2
-NAVER,,,,,,,,0.1,0.1,,,,,,,,,,,,,,0.2
 Habitat Partners (estimate),,,,,,,,,,0.16,,,,,,,,,,,,,0.16
 "Northern Data (Ardent, Taiga)",,0.003,,,0.005,0.022,,0.12,,,,,,,,,,,,,,,0.15
-Falmouth Tech LLC (estimate),,,,,,,,,,0.15,,,,,,,,,,,,,0.15
 TenKey Landco (estimate),,,,,,,,,0.15,,,,,,,,,,,,,,0.15
-LG Uplus (estimate),,,,,,,,,0.15,,,,,,,,,,,,,,0.15
+Falmouth Tech LLC (estimate),,,,,,,,,,0.15,,,,,,,,,,,,,0.15
 AVAIO Digital Partners,,,,,,,,0.15,,,,,,,,,,,,,,,0.15
+LG Uplus (estimate),,,,,,,,,0.15,,,,,,,,,,,,,,0.15
 SoftBank Corp.,,,,,,,0.15,,,,,,,,,,,,,,,,0.15
 DataVolt,,,,,,,,0.044,0.1,,,,,,,,,,,,,,0.144
 EDGNEX Data Centers (DAMAC) (estimate),,,,,,,0.144,,,,,,,,,,,,,,,,0.144
 Noetra (national AI company consortium) (estimate),,,,,,,,,0.14,,,,,,,,,,,,,,0.14
+Samsung SDS (estimate),,,,,,,,,,,0.06,,,,,,,,,,,0.075,0.135
 Xinjiang state-owned operator (unnamed),,,,,,,0.134,,,,,,,,,,,,,,,,0.134
 Volta (estimate),,,,,,,0.067,0.067,,,,,,,,,,,,,,,0.133
 Reliance Industries,,,,,,,0.12,,,,,,,,,,,,,,,,0.12
 Yamna (estimate),,,,,,,,,,0.118,,,,,,,,,,,,,0.118
-evroc,,,,,,0.096,,0.019,,,,,,,,,,,,,,,0.115
+evroc,,,,,,,,0.019,0.096,,,,,,,,,,,,,,0.115
 RUM Group (Rumble),,,,,,,,0.11,,,,,,,,,,,,,,,0.11
 Potentia Development (estimate),,,,,,,,,0.11,,,,,,,,,,,,,,0.11
 NEXTDC,,,,,,,,0.11,,,,,,,,,,,,,,,0.11
-Khazaen Data Campus (KDC) promoters (estimate),,,,,,,,,0.045,,0.055,,,,,,,,,,,,0.1
-Nebius (estimate),,,,,,,,,0.1,,,,,,,,,,,,,,0.1
+Pacifico Energy (estimate),,,,,,,,,,,0.1,,,,,,,,,,,,0.1
 Tencent Cloud,,,,,,,0.05,0.05,,,,,,,,,,,,,,,0.1
 Tata Consultancy Services (HyperVault),,,,,,,,,,0.1,,,,,,,,,,,,,0.1
+Khazaen Data Campus (KDC) promoters (estimate),,,,,,,,,0.045,,0.055,,,,,,,,,,,,0.1
+Nebius (estimate),,,,,,,,,0.1,,,,,,,,,,,,,,0.1
+SK Group (estimate),,,,,,,,,,,,,,,,,,,,,,0.095,0.095
 Clearview Dynamics (estimate),,,,,,,,,,,0.094,,,,,,,,,,,,0.094
-Nscale (estimate),,,,,,,0.06,0.03,,,,,,,,,,,,,,,0.09
 Green Mountain,,,,,,0.09,,,,,,,,,,,,,,,,,0.09
 Samsung SDS,,,,,,,,,0.06,0.02,,,,,,,,,,,,,0.08
 Apple,,,,,0.03,,,0.05,,,,,,,,,,,,,,,0.08
 Core42 (estimate),,,,,,0.023,0.055,,,,,,,,,,,,,,,,0.078
-Vultr,,,,,,,0.05,,,,,,,,,,,,,,,0.02,0.07
+Vultr,,,,,,,,,0.052,,,,,,,,,,,,,0.02,0.072
 Accelerated Infrastructure Capital + Kinh Bac City Development (estimate),,,,,,,,0.065,,,,,,,,,,,,,,,0.065
 Riot Platforms,,,,,,,0.045,0.019,,,,,,,,,,,,,,,0.065
 Telekom Malaysia + Singtel / Nxera (estimate),,,,,,,0.064,,,,,,,,,,,,,,,,0.064
-Samsung SDS (estimate),,,,,,,,,,,0.06,,,,,,,,,,,,0.06
-ACS Group + Benbros (estimate),,,,,,,,,,0.06,,,,,,,,,,,,,0.06
 Baidu AI Cloud,,,,,,0.06,,,,,,,,,,,,,,,,,0.06
+Foxconn (Hon Hai),,,,,,,,0.04,0.02,,,,,,,,,,,,,,0.06
+ACS Group + Benbros (estimate),,,,,,,,,,0.06,,,,,,,,,,,,,0.06
 Khazna Data Centers,,,,,,,0.06,,,,,,,,,,,,,,,,0.06
-Foxconn (Hon Hai),,,,,,,0.02,0.04,,,,,,,,,,,,,,,0.06
-Fibernet MercuryDelta (estimate),,,,,,,,,0.05,,,,,,,,,,,,,,0.05
-Equinix,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
-LG Uplus,,,,,,,,0.05,,,,,,,,,,,,,,,0.05
+Government of South Korea (estimate),,,,,,,,,,,,,,,,,,,,,,0.055,0.055
 IDC Frontier,,,,,,,0.05,,,,,,,,,,,,,,,,0.05
-Digital Realty,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
 STT Global Data Centres,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
+Fibernet MercuryDelta (estimate),,,,,,,,,0.05,,,,,,,,,,,,,,0.05
+Digital Realty,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
+LG Uplus,,,,,,,,0.05,,,,,,,,,,,,,,,0.05
+Equinix,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
 Keppel Data Centres,,,,,,,,,,0.05,,,,,,,,,,,,,0.05
 Microsoft (estimate),,,,,,,,,0.049,,,,,,,,,,,,,,0.049
 KDDI,,,,,,,0.048,,,,,,,,,,,,,,,,0.048
@@ -225,27 +243,28 @@ Mistral AI,,,,,,,0.044,,,,,,,,,,,,,,,,0.044
 Korea AI Computing Center Co (KOACC),,,,,,,,,0.04,,,,,,,,,,,,,,0.04
 Voltage Park,,,,,0.034,0.003,,,,,,,,,,,,,,,,,0.037
 Sakura Internet,,,,,,,0.034,,,,,,,,,,,,,,,,0.034
-EdgeConneX,,,,,,,0.03,,,,,,,,,,,,,,,,0.03
+EdgeConneX,,,,,,,0.023,,0.007,,,,,,,,,,,,,,0.03
 Exaion,,,,,,,,0.03,,,,,,,,,,,,,,,0.03
-Visionbay.ai (Foxconn),,,,,,,0.027,,,,,,,,,,,,,,,,0.027
+Visionbay.ai (Foxconn),,,,,,,,,0.027,,,,,,,,,,,,,,0.027
 Syntys (Ooredoo),,,,,,0.006,,,0.02,,,,,,,,,,,,,,0.026
 China Telecom,,,,,,,0.026,,,,,,,,,,,,,,,,0.026
-Global AI (estimate),,,,,,,0.024,,,,,,,,,,,,,,,,0.024
+Global AI (estimate),,,,,,,,,0.024,,,,,,,,,,,,,,0.024
 NTT DATA Group,,,,,,,,0.024,,,,,,,,,,,,,,,0.024
-Ubitus,,,,,,,,0.02,,,,,,,,,,,,,,,0.02
-Jericho Energy Ventures (estimate),,,,,,,0.02,,,,,,,,,,,,,,,,0.02
 TECfusions,,,,,,,0.02,,,,,,,,,,,,,,,,0.02
-SK Telecom (estimate),,,,,,,,,,0.02,,,,,,,,,,,,,0.02
 YTL Power International,,,,,,0.02,,,,,,,,,,,,,,,,,0.02
+SK Telecom (estimate),,,,,,,,,,0.02,,,,,,,,,,,,,0.02
+Jericho Energy Ventures (estimate),,,,,,,,,0.02,,,,,,,,,,,,,,0.02
+Ubitus,,,,,,,,0.02,,,,,,,,,,,,,,,0.02
 Deutsche Telekom,,,,,,,0.019,,,,,,,,,,,,,,,,0.019
 National Center for High-performance Computing,,,,,,,,,0.015,,,,,,,,,,,,,,0.015
 TensorWave,,,,,,0.012,,,,,,,,,,,,,,,,,0.012
 NHN Cloud,,,,,,,0.012,,,,,,,,,,,,,,,,0.012
 Verda (formerly DataCrunch),,,,,,,,0.01,,,,,,,,,,,,,,,0.01
+National Center for High-performance Computing (estimate),,,,,,,,,,0.01,,,,,,,,,,,,,0.01
 Getworks (estimate),,,,,,,,,0.008,,,,,,,,,,,,,,0.008
 Highreso,0.002,,,,0.001,0.001,0.001,,,,,,,,,,,,,,,,0.005
 SURF,,,,,,,,,0.004,,,,,,,,,,,,,,0.004
 Cango (EcoHash),,,,,,,0.003,,,,,,,,,,,,,,,,0.003
 Getworks,,,,,,,0.002,,,,,,,,,,,,,,,,0.002
 Nebul,,,,,,,,0.002,,,,,,,,,,,,,,,0.002
-Total,0.002,0.003,0.23,0.465,2.972,11.624,34.393,58.193,120.212,83.351,57.492,24.153,27.989,4.6,3.85,5.08,5.01,1.71,0.805,3.0,1.44,27.835,474.41
+Total,0.002,0.003,0.23,0.465,2.912,11.528,27.387,58.393,123.016,88.236,61.247,27.653,27.989,4.6,3.85,5.08,5.01,1.71,0.805,3.0,1.44,27.919,482.476
