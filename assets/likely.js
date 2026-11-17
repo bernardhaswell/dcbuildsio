@@ -123,9 +123,9 @@
   const openSet = (title, kicker, pred, cellOf) => (i) => {
     const items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
     const rec = items.reduce((a, o) => a + (i == null ? o.counted : o.counted_by_year[i]), 0);
-    const cell = cellOf ? cellOf(i) : rec, extra = !cellOf ? null : cell - rec > -0.0005 ? { gw: Math.max(0, cell - rec), title: 'Allocated, sites not itemised (Estimate)', why: MIXWHY } : { gw: cell - rec, title: 'Moved to Anthropic (own chip) (Estimate)', why: 'Part of this capacity is assumed to run on Anthropic’s own chip instead. This is an assumption, not a company figure. See the By chip maker sheet in the workbook.' };
+    const cell = cellOf ? cellOf(i) : rec, extra = !cellOf ? null : cell - rec > -0.0005 ? { gw: Math.max(0, cell - rec), title: 'Allocated, sites not itemised (Estimate)', why: MIXWHY } : { gw: cell - rec, title: 'Taken to run on other chips (Estimate)', why: 'Part of the capacity on record for this chip maker is taken to run on custom chips and AMD instead, so that its yearly figure matches the tracker’s Estimate. See the By chip maker sheet in the workbook.' };
     openList({ kicker: `${kicker} · ${i == null ? '2025 to 2030' : D.years[i]}`, title, value: cell, items, yearIdx: i == null ? null : i, extra,
-      sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${extra && Math.abs(extra.gw) > 0.0005 ? (extra.gw > 0 ? ' The first line is allocated to sites not itemised and is an Estimate.' : ' The first line is capacity moved to Anthropic’s own chip, an assumption.') : ''}` });
+      sub: `${items.length} sites and agreements counted${i == null ? ' in 2025 to 2030' : ' in ' + D.years[i]}, largest first, each with the reason it is in.${extra && Math.abs(extra.gw) > 0.0005 ? (extra.gw > 0 ? ' The first line is allocated to sites not itemised and is an Estimate.' : ' The first line is capacity taken to run on other chips, an Estimate.') : ''}` });
   };
 
 
