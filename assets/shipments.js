@@ -100,6 +100,6 @@
     let tm; addEventListener('resize', () => { clearTimeout(tm); tm = setTimeout(draw, 150); });
   }
 
-  const go = () => fetch('data/accelerator-shipments.json?v=202611181830').then((r) => r.json()).then(init).catch(() => { const c = $('#shipments'); if (c) c.hidden = true; });
+  const go = () => fetch('data/accelerator-shipments.json?v=202611181845').then((r) => r.json()).then(init).catch(() => { const c = $('#shipments'); if (c) c.hidden = true; });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();
