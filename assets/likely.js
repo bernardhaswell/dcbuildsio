@@ -11,7 +11,7 @@
   };
   const sv = (tag, attrs = {}, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
   // Display names for chip makers; same labels as the rest of the page. Unknown keys are title-cased, never shown raw.
-  const CHIP = { nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA', openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq', huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', tesla: 'Tesla', other: 'Other', undisclosed: 'Not disclosed' };
+  const CHIP = { 'Conventional servers, no accelerator': 'Conventional servers, no accelerator', 'Anthropic (own chip)': 'Anthropic (own chip)', nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA', openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq', huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', tesla: 'Tesla', other: 'MetaX, Biren and Zhonghao Xinying', undisclosed: 'Not disclosed' };
   const chipName = (k) => CHIP[k] || String(k || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   const f1 = (v) => (v >= 0.05 ? v.toFixed(1) : v > 0 ? '<0.1' : '–');
   const f2 = (v) => (v >= 0.005 ? v.toFixed(2) : v > 0 ? '<0.01' : '–');
@@ -196,7 +196,7 @@
     const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
     const mix = rows.some((r) => r.assigned != null);
     $('#lk-tsub').textContent = caseNote + (mix
-      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by capital spending, with in-house chip capacity going to the company it runs for and companies held to the additions they report (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
+      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators together by capital spending, with in-house chip capacity going to the company it runs for, a cloud's capacity built for a lab going to the lab, and companies held to the additions they report (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' The forecast covers all datacenter capacity, so capacity above what accelerator shipments can fill is shown as conventional servers with no accelerator (Estimate).' : ''}`
       : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`);
     th.replaceChildren(head(lbl, mix ? ['On record', 'Allocated'] : ['All dates', 'Rows in']));
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
