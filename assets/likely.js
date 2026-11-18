@@ -119,7 +119,7 @@
     (() => { const v = vals.reduce((a, b) => a + b, 0), td = el('td', { class: 'num tot', text: f2(v) }); return onCell && v > 0.0005 ? clickable(td, () => onCell(null)) : td; })(),
     ...extra.map((v) => el('td', { class: 'num dim', text: typeof v === 'number' ? f2(v) : v }))]);
   const sep = (t) => el('tr', { class: 'lk-sep' }, el('td', { colspan: D.years.length + 4, text: t }));
-  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by the capital spending of the largest buyers. See the Allocation basis sheet in the workbook.';
+  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators as follows: named-site capacity with nothing on record goes to the largest buyers by capital spending, companies that report their own additions are held to them, and the rest of the capacity not itemised is shown as colocation, enterprises and smaller clouds. See the Allocation basis sheet in the workbook.';
   const openSet = (title, kicker, pred, cellOf) => (i) => {
     const items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
     const rec = items.reduce((a, o) => a + (i == null ? o.counted : o.counted_by_year[i]), 0);
@@ -196,7 +196,7 @@
     const src = D.by[tab], rows = src.filter((r) => !isSpecial(r.name)), specials = src.filter((r) => isSpecial(r.name));
     const mix = rows.some((r) => r.assigned != null);
     $('#lk-tsub').textContent = caseNote + (mix
-      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by capital spending (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
+      ? `IT GW by ${lbl.toLowerCase()}. Every GW is assigned: the part on record for each site, plus capacity at sites not itemised, allocated to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators by capital spending, with companies held to the additions they report and the rest shown as colocation, enterprises and smaller clouds (the "Allocated" column, an Estimate). Click a figure to see the sites.${tab === 'chip' ? ' Chip maker figures for 2025 and 2026 include some conventional (non-accelerator) capacity.' : ''}`
       : `IT GW by ${lbl.toLowerCase()}, counted at named sites. Capacity at sites not itemised (Estimate) is a separate line and is not given to any ${lbl.toLowerCase()}. Click a figure to see the sites.`);
     th.replaceChildren(head(lbl, mix ? ['On record', 'Allocated'] : ['All dates', 'Rows in']));
     const extraOf = (r) => (mix ? [r.on_record, r.assigned] : [r.all_dates, `${r.rows_in} of ${r.rows}`]);
