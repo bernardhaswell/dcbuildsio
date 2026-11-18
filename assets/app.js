@@ -22,7 +22,7 @@
     partially_live: 'Partially live', live: 'Live', delayed: 'Delayed', paused: 'Paused', cancelled: 'Cancelled',
     nvidia: 'Nvidia', amd: 'AMD', google: 'Google TPU', amazon: 'AWS Trainium', microsoft: 'Microsoft Maia', meta: 'Meta MTIA',
     openai: 'OpenAI', broadcom: 'Broadcom custom', intel: 'Intel', qualcomm: 'Qualcomm', cerebras: 'Cerebras', groq: 'Groq',
-    huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'Other', undisclosed: 'Not disclosed', unspecified: 'unspecified',
+    huawei: 'Huawei', alibaba: 'Alibaba T-Head', cambricon: 'Cambricon', hygon: 'Hygon', baidu: 'Baidu Kunlun', other: 'MetaX, Biren and Zhonghao Xinying', undisclosed: 'Not disclosed', unspecified: 'unspecified',
     verified: 'Verified', sourced: 'Sourced',
   };
   const lab = (k) => LABEL[k] || (typeof k === 'string' && /^[a-z0-9_]+$/.test(k) ? k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : k);
@@ -211,10 +211,9 @@
     const totals = new Map();
     rowsNow().forEach((d) => { if (d[m] == null) return; const k = keyFn(d); if (k == null) return; totals.set(k, (totals.get(k) || 0) + d[m]); });
     let items = [...totals.entries()].sort((a, b) => b[1] - a[1]);
-    if (items.length > limit) {
-      const tail = items.slice(limit - 1);
-      items = items.slice(0, limit - 1).concat([[`Other (${tail.length})`, tail.reduce((s, x) => s + x[1], 0)]]);
-    }
+    // every bar is shown; a long list scrolls inside the card instead of being folded into one bar
+    host.style.maxHeight = items.length > limit ? `${limit * 28 + 12}px` : '';
+    host.style.overflowY = items.length > limit ? 'auto' : '';
     host.replaceChildren();
     if (!items.length) { host.append(el('div', { class: 'empty', text: emptyText })); return; }
     const W = Math.max(host.clientWidth || 480, 280), rowH = 28, L = Math.min(190, W * 0.42), R = 56, H = items.length * rowH + 6;
