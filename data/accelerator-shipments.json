@@ -115,13 +115,7 @@
   15.6,
   14.3
  ],
- "likely_energized_ex_china": [
-  25.0,
-  32.18,
-  39.69,
-  41.64,
-  43.09
- ],
+ "likely_energized_ex_china":[25.0,30.98,37.04,38.72,40.69],
  "name": "Accelerator shipments",
  "notes": [
   "Estimate. Accelerators shipped each year, worldwide including China, and the IT power they represent (units times power per accelerator, counted one quarter after shipment, IT taken as 85% of all-in power).",
