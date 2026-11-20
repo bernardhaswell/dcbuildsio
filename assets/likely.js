@@ -119,7 +119,7 @@
     (() => { const v = vals.reduce((a, b) => a + b, 0), td = el('td', { class: 'num tot', text: f2(v) }); return onCell && v > 0.0005 ? clickable(td, () => onCell(null)) : td; })(),
     ...extra.map((v) => el('td', { class: 'num dim', text: typeof v === 'number' ? f2(v) : v }))]);
   const sep = (t) => el('tr', { class: 'lk-sep' }, el('td', { colspan: D.years.length + 4, text: t }));
-  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators as follows: capacity allocated to an in-house chip goes to the company it runs for, the rest goes to the largest buyers by capital spending, and companies that report their own additions are held to them. See the Allocation basis sheet in the workbook.';
+  const MIXWHY = 'Capacity with no value on record for this, plus capacity at sites not itemised, is allocated: to chip makers toward each one’s likely share of accelerator power switched on, and to end users and operators as follows: capacity allocated to an in-house chip goes to the company it runs for (Google TPU only to 2027; from 2028 TPU beyond Anthropic’s agreements is shared by spending), the rest goes to the largest buyers by capital spending, and companies that report their own additions are held to them. See the Allocation basis sheet in the workbook.';
   const openSet = (title, kicker, pred, cellOf) => (i) => {
     const items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
     const rec = items.reduce((a, o) => a + (i == null ? o.counted : o.counted_by_year[i]), 0);
