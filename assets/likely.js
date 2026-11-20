@@ -129,7 +129,7 @@
   };
 
 
-  const EWHY = 'Capacity at sites the tracker does not itemise (Estimate): smaller datacenters, colocation halls and expansions inside existing campuses. Measured for 2025 and 2026 and held near that level after, kept separate from named sites. Outside the US each region has its own line, built from utility, grid operator and industry figures for its countries and set to the measured 2025 and 2026 level, so a new named site raises its region. See table 2 of the Likely sheet in the workbook.';
+  const EWHY = 'Capacity at sites the tracker does not itemise (Estimate): smaller datacenters, colocation halls and expansions inside existing campuses. Measured for 2025 and 2026 and kept separate from named sites. In the US it is not counted from 2028, except where needed so the US does not fall, because named sites and company plans already cover what utilities have agreed to connect. Outside the US each region has its own line, built from utility, grid operator and industry figures for its countries and set to the measured 2025 and 2026 level, so a new named site raises its region. See table 2 of the Likely sheet in the workbook.';
   const inRegion = (g) => (g.name === 'Outside the US' ? (o) => o.region !== 'United States' : (o) => o.region === g.name);
   const openRegion = (g) => (i) => {
     const pred = inRegion(g), items = F.rows.filter((o) => (i == null ? o.counted : o.counted_by_year[i]) > 0.0005 && pred(o));
